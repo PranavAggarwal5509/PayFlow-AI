@@ -1,0 +1,328 @@
+[
+  {
+    "po_number": "PO-2026-0001",
+    "vendor_code": "V-1001",
+    "po_date": "2026-04-02",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Industrial fasteners and safety equipment",
+    "items": [
+      {
+        "description": "Hex bolts M12 (box of 100)",
+        "quantity": 400,
+        "unit_price": 450
+      },
+      {
+        "description": "Safety helmets",
+        "quantity": 300,
+        "unit_price": 650
+      },
+      {
+        "description": "Industrial gloves (pair)",
+        "quantity": 1000,
+        "unit_price": 120
+      }
+    ],
+    "total_amount": "584100.00"
+  },
+  {
+    "po_number": "PO-2026-0002",
+    "vendor_code": "V-1002",
+    "po_date": "2026-04-10",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Office furniture and consumables",
+    "items": [
+      {
+        "description": "Ergonomic office chair",
+        "quantity": 40,
+        "unit_price": 4800
+      },
+      {
+        "description": "Standing desk",
+        "quantity": 20,
+        "unit_price": 9500
+      },
+      {
+        "description": "A4 paper reams",
+        "quantity": 500,
+        "unit_price": 260
+      }
+    ],
+    "total_amount": "604160.00"
+  },
+  {
+    "po_number": "PO-2026-0003",
+    "vendor_code": "V-1003",
+    "po_date": "2026-05-05",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Quarterly freight services",
+    "items": [
+      {
+        "description": "Freight Mumbai-Delhi (per trip)",
+        "quantity": 24,
+        "unit_price": 5000
+      }
+    ],
+    "total_amount": "141600.00"
+  },
+  {
+    "po_number": "PO-2026-0004",
+    "vendor_code": "V-1004",
+    "po_date": "2026-05-12",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Branded packaging materials",
+    "items": [
+      {
+        "description": "Corrugated boxes 18x12x10",
+        "quantity": 2000,
+        "unit_price": 18
+      },
+      {
+        "description": "Printed brochures",
+        "quantity": 5000,
+        "unit_price": 6
+      }
+    ],
+    "total_amount": "77880.00"
+  },
+  {
+    "po_number": "PO-2026-0005",
+    "vendor_code": "V-1005",
+    "po_date": "2026-05-20",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Facility housekeeping services FY26",
+    "items": [
+      {
+        "description": "Monthly housekeeping service",
+        "quantity": 6,
+        "unit_price": 50000
+      }
+    ],
+    "total_amount": "354000.00"
+  },
+  {
+    "po_number": "PO-2026-0006",
+    "vendor_code": "V-1006",
+    "po_date": "2026-06-01",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Laptops and peripherals",
+    "items": [
+      {
+        "description": "Business laptop 14in",
+        "quantity": 8,
+        "unit_price": 62000
+      },
+      {
+        "description": "Docking station",
+        "quantity": 8,
+        "unit_price": 9500
+      },
+      {
+        "description": "27in monitor",
+        "quantity": 10,
+        "unit_price": 14000
+      }
+    ],
+    "total_amount": "840160.00"
+  },
+  {
+    "po_number": "PO-2026-0007",
+    "vendor_code": "V-1007",
+    "po_date": "2026-06-08",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Stationery supplies",
+    "items": [
+      {
+        "description": "Notebook A5 (pack of 12)",
+        "quantity": 200,
+        "unit_price": 480
+      },
+      {
+        "description": "Ball pens (box)",
+        "quantity": 300,
+        "unit_price": 90
+      }
+    ],
+    "total_amount": "145140.00"
+  },
+  {
+    "po_number": "PO-2026-0008",
+    "vendor_code": "V-1008",
+    "po_date": "2026-06-15",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Event catering - annual meet",
+    "items": [
+      {
+        "description": "Catering per head",
+        "quantity": 300,
+        "unit_price": 200
+      }
+    ],
+    "total_amount": "70800.00"
+  },
+  {
+    "po_number": "PO-2026-0009",
+    "vendor_code": "V-1009",
+    "po_date": "2026-06-22",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Electrical installation and fittings",
+    "items": [
+      {
+        "description": "LED panel light 40W",
+        "quantity": 250,
+        "unit_price": 850
+      },
+      {
+        "description": "Copper cable 2.5mm (100m)",
+        "quantity": 120,
+        "unit_price": 2400
+      },
+      {
+        "description": "MCB 32A",
+        "quantity": 150,
+        "unit_price": 380
+      }
+    ],
+    "total_amount": "657850.00"
+  },
+  {
+    "po_number": "PO-2026-0010",
+    "vendor_code": "V-1010",
+    "po_date": "2026-07-01",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Software development retainer",
+    "items": [
+      {
+        "description": "Developer hours",
+        "quantity": 1200,
+        "unit_price": 300
+      }
+    ],
+    "total_amount": "424800.00"
+  },
+  {
+    "po_number": "PO-2026-0011",
+    "vendor_code": "V-1011",
+    "po_date": "2026-07-10",
+    "currency": "USD",
+    "status": "ACTIVE",
+    "description": "Cloud infrastructure services",
+    "items": [
+      {
+        "description": "Compute credits",
+        "quantity": 100,
+        "unit_price": 80
+      },
+      {
+        "description": "Managed database (monthly)",
+        "quantity": 6,
+        "unit_price": 650
+      }
+    ],
+    "total_amount": "11900.00"
+  },
+  {
+    "po_number": "PO-2026-0012",
+    "vendor_code": "V-1012",
+    "po_date": "2026-07-18",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Reception and lounge furnishing",
+    "items": [
+      {
+        "description": "Lounge sofa 3-seater",
+        "quantity": 10,
+        "unit_price": 14500
+      },
+      {
+        "description": "Coffee table",
+        "quantity": 15,
+        "unit_price": 3200
+      },
+      {
+        "description": "Reception desk",
+        "quantity": 2,
+        "unit_price": 18000
+      }
+    ],
+    "total_amount": "270220.00"
+  },
+  {
+    "po_number": "PO-2026-0013",
+    "vendor_code": "V-1001",
+    "po_date": "2026-01-15",
+    "currency": "INR",
+    "status": "CLOSED",
+    "description": "FY25 safety stock (closed)",
+    "items": [
+      {
+        "description": "Fire extinguisher 6kg",
+        "quantity": 100,
+        "unit_price": 900
+      }
+    ],
+    "total_amount": "106200.00"
+  },
+  {
+    "po_number": "PO-2026-0014",
+    "vendor_code": "V-1002",
+    "po_date": "2026-03-01",
+    "currency": "INR",
+    "status": "CANCELLED",
+    "description": "Cancelled training room fit-out",
+    "items": [
+      {
+        "description": "Whiteboard 6x4",
+        "quantity": 10,
+        "unit_price": 3500
+      }
+    ],
+    "total_amount": "41300.00"
+  },
+  {
+    "po_number": "PO-2026-0015",
+    "vendor_code": "V-1003",
+    "po_date": "2026-08-01",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Warehouse handling services",
+    "items": [
+      {
+        "description": "Warehouse handling (per pallet)",
+        "quantity": 3000,
+        "unit_price": 50
+      }
+    ],
+    "total_amount": "177000.00"
+  },
+  {
+    "po_number": "PO-2026-0016",
+    "vendor_code": "V-1004",
+    "po_date": "2026-08-12",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Marketing collateral",
+    "items": [
+      {
+        "description": "Roll-up banner",
+        "quantity": 60,
+        "unit_price": 1200
+      },
+      {
+        "description": "Flyers A5",
+        "quantity": 20000,
+        "unit_price": 2
+      }
+    ],
+    "total_amount": "132160.00"
+  }
+]

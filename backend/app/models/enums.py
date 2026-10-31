@@ -1,0 +1,85 @@
+import enum
+
+
+class VendorStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    PENDING = "PENDING"
+
+
+class POStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    CLOSED = "CLOSED"
+    CANCELLED = "CANCELLED"
+
+
+class ProcessingStatus(str, enum.Enum):
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class DecisionStatus(str, enum.Enum):
+    APPROVED = "APPROVED"
+    NEEDS_REVIEW = "NEEDS_REVIEW"
+    REJECTED = "REJECTED"
+
+
+class RunStatus(str, enum.Enum):
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class Stage(str, enum.Enum):
+    UPLOAD_RECEIVED = "UPLOAD_RECEIVED"
+    DOCUMENT_EXTRACTION = "DOCUMENT_EXTRACTION"
+    AI_EXTRACTION = "AI_EXTRACTION"
+    DATA_VALIDATION = "DATA_VALIDATION"
+    VENDOR_VERIFICATION = "VENDOR_VERIFICATION"
+    PO_MATCHING = "PO_MATCHING"
+    DUPLICATE_CHECK = "DUPLICATE_CHECK"
+    FINANCIAL_VALIDATION = "FINANCIAL_VALIDATION"
+    DECISION = "DECISION"
+
+
+class StageStatus(str, enum.Enum):
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    NEEDS_ATTENTION = "NEEDS_ATTENTION"
+
+
+class CheckStatus(str, enum.Enum):
+    PASSED = "PASSED"
+    WARNING = "WARNING"
+    FAILED = "FAILED"
+    SKIPPED = "SKIPPED"
+
+
+class Impact(str, enum.Enum):
+    """How a non-passing check influences the decision engine."""
+
+    NONE = "NONE"
+    REVIEW = "REVIEW"
+    REJECT = "REJECT"
+
+
+class ReviewStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    CLARIFICATION_REQUESTED = "CLARIFICATION_REQUESTED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+class ReviewAction(str, enum.Enum):
+    APPROVE = "APPROVE"
+    REJECT = "REJECT"
+    REQUEST_CLARIFICATION = "REQUEST_CLARIFICATION"
+
+
+class AllocationStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    RELEASED = "RELEASED"
+

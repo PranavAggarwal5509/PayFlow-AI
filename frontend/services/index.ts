@@ -1,0 +1,70 @@
+import { get, getPage, send, uploadFile } from "@/lib/api";
+import type {
+  ActivityItem,
+  AppSettings,
+  DashboardStats,
+  InvoiceDetail,
+  InvoiceListItem,
+  Paginated,
+  PurchaseOrder,
+  PurchaseOrderDetail,
+  Review,
+  ReviewAction,
+  ReviewListItem,
+  RunDetail,
+  RunSummary,
+  UploadResult,
+  Vendor,
+} from "@/types/api";
+
+type Params = Record<string, string | number | undefined>;
+
+export const invoiceService = {
+  list: (params: Params): Promise<Paginated<InvoiceListItem>> => getPage("/invoices", params),
+  get: (id: string): Promise<InvoiceDetail> => get(`/invoices/${id}`),
+  upload: (file: File, onProgress: (percent: number) => void): Promise<UploadResult> =>
+    uploadFile("/invoices/upload", file, onProgress),
+  retry: (id: string): Promise<UploadResult> => send("POST", `/invoices/${id}/retry`),
+};
+
+export const runService = {
+  list: (params: Params): Promise<Paginated<RunSummary>> => getPage("/runs", params),
+  get: (id: string): Promise<RunDetail> => get(`/runs/${id}`),
+};
+
+export const dashboardService = {
+  stats: (): Promise<DashboardStats> => get("/dashboard/stats"),
+  activity: (limit = 8): Promise<ActivityItem[]> => get("/dashboard/recent-activity", { limit }),
+};
+
+export interface VendorInput {
+  vendor_name: string;
+  gstin?: string | null;
+  address?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  status: string;
+}
+
+export const vendorService = {
+  list: (params: Params): Promise<Paginated<Vendor>> => getPage("/vendors", params),
+  get: (id: string): Promise<Vendor> => get(`/vendors/${id}`),
+  create: (body: VendorInput): Promise<Vendor> => send("POST", "/vendors", body),
+  update: (id: string, body: Partial<VendorInput>): Promise<Vendor> => send("PATCH", `/vendors/${id}`, body),
+};
+
+export const purchaseOrderService = {
+  list: (params: Params): Promise<Paginated<PurchaseOrder>> => getPage("/purchase-orders", params),
+  get: (id: string): Promise<PurchaseOrderDetail> => get(`/purchase-orders/${id}`),
+};
+
+export const reviewService = {
+  list: (params: Params): Promise<Paginated<ReviewListItem>> => getPage("/reviews", params),
+  decide: (id: string, action: ReviewAction, comment: string): Promise<Review> =>
+    send("POST", `/reviews/${id}/decision`, { action, comment }),
+};
+
+export const settingsService = {
+  get: (): Promise<AppSettings> => get("/settings"),
+};
+

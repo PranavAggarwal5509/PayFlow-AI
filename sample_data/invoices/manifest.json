@@ -1,0 +1,189 @@
+[
+  {
+    "file": "01_valid_invoice.pdf",
+    "scenario": "Valid invoice, matching vendor and PO",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "ACM/2026/1042",
+    "vendor": "Acme Industrial Supplies Pvt Ltd",
+    "po_number": "PO-2026-0001",
+    "currency": "INR",
+    "total": "114460.00",
+    "layout": "classic"
+  },
+  {
+    "file": "02_valid_multi_line.pdf",
+    "scenario": "Valid invoice with multiple line items",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "BOS-9012",
+    "vendor": "Bharat Office Solutions Pvt Ltd",
+    "po_number": "PO-2026-0002",
+    "currency": "INR",
+    "total": "107944.00",
+    "layout": "modern"
+  },
+  {
+    "file": "03_exact_duplicate.pdf",
+    "scenario": "Exact duplicate PDF (upload after 01)",
+    "expected_outcome": "REJECTED",
+    "invoice_number": null,
+    "vendor": null,
+    "po_number": null,
+    "currency": "INR",
+    "total": null,
+    "layout": "copy_of"
+  },
+  {
+    "file": "04_duplicate_invoice_number.pdf",
+    "scenario": "Same vendor + invoice number, different PDF (upload after 01)",
+    "expected_outcome": "REJECTED",
+    "invoice_number": "ACM/2026/1042",
+    "vendor": "Acme Industrial Supplies Pvt Ltd",
+    "po_number": "PO-2026-0001",
+    "currency": "INR",
+    "total": "114460.00",
+    "layout": "compact"
+  },
+  {
+    "file": "05_exceeds_po_balance.pdf",
+    "scenario": "Invoice exceeds remaining PO balance",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "CL-2026-248",
+    "vendor": "Cobalt Logistics LLP",
+    "po_number": "PO-2026-0003",
+    "currency": "INR",
+    "total": "70800.00",
+    "layout": "classic"
+  },
+  {
+    "file": "06_missing_invoice_number.pdf",
+    "scenario": "Missing invoice number",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": null,
+    "vendor": "Deccan Print & Packaging Ltd",
+    "po_number": "PO-2026-0004",
+    "currency": "INR",
+    "total": "35400.00",
+    "layout": "modern"
+  },
+  {
+    "file": "07_inactive_vendor.pdf",
+    "scenario": "Inactive vendor",
+    "expected_outcome": "REJECTED",
+    "invoice_number": "GS-7802",
+    "vendor": "Gamma Stationers",
+    "po_number": "PO-2026-0007",
+    "currency": "INR",
+    "total": "28320.00",
+    "layout": "compact"
+  },
+  {
+    "file": "08_vendor_name_variation.pdf",
+    "scenario": "Vendor name variation, no GSTIN",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "FIT-5611",
+    "vendor": "Falcon I.T. Hardware Private Limited",
+    "po_number": "PO-2026-0006",
+    "currency": "INR",
+    "total": "66080.00",
+    "layout": "classic"
+  },
+  {
+    "file": "09_missing_po.pdf",
+    "scenario": "Missing PO reference",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "JSS/0082",
+    "vendor": "Jupiter Software Services Pvt Ltd",
+    "po_number": null,
+    "currency": "INR",
+    "total": "42480.00",
+    "layout": "modern"
+  },
+  {
+    "file": "10_arithmetic_mismatch.pdf",
+    "scenario": "Arithmetic mismatch (total printed wrong)",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "IE/26-27/0455",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "58400.00",
+    "layout": "compact"
+  },
+  {
+    "file": "11_currency_mismatch.pdf",
+    "scenario": "Currency mismatch (INR invoice on USD PO)",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "KCT-0107",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "INR",
+    "total": "63720.00",
+    "layout": "classic"
+  },
+  {
+    "file": "12_scanned_ocr.pdf",
+    "scenario": "Scanned PDF requiring OCR",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "IE/26-27/0470",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "60180.00",
+    "layout": "scanned"
+  },
+  {
+    "file": "13_corrupted.pdf",
+    "scenario": "Corrupted PDF (technical failure, not a rejection)",
+    "expected_outcome": "PROCESSING_FAILED",
+    "invoice_number": null,
+    "vendor": null,
+    "po_number": null,
+    "currency": "INR",
+    "total": null,
+    "layout": "corrupted"
+  },
+  {
+    "file": "14_potential_duplicate.pdf",
+    "scenario": "Potential duplicate (similar number, same amount)",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "EFS/2026/0118-A",
+    "vendor": "Evergreen Facility Services",
+    "po_number": "PO-2026-0005",
+    "currency": "INR",
+    "total": "59000.00",
+    "layout": "modern"
+  },
+  {
+    "file": "15_missing_gstin.pdf",
+    "scenario": "Vendor GSTIN missing on invoice",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "LFC-3391",
+    "vendor": "Lotus Furnishings Co",
+    "po_number": "PO-2026-0012",
+    "currency": "INR",
+    "total": "40120.00",
+    "layout": "compact"
+  },
+  {
+    "file": "16_valid_usd_invoice.pdf",
+    "scenario": "Valid foreign-currency invoice (USD)",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "KCT-USD-0112",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "USD",
+    "total": "3050.00",
+    "layout": "modern"
+  },
+  {
+    "file": "17_pending_vendor.pdf",
+    "scenario": "Vendor pending onboarding",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "HCS-0045",
+    "vendor": "Horizon Catering Services",
+    "po_number": "PO-2026-0008",
+    "currency": "INR",
+    "total": "25200.00",
+    "layout": "classic"
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "vendor_code": "V-1001",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "gstin": "27AABCA1001A1Z5",
+    "address": "Plot 14, MIDC Andheri East, Mumbai 400093",
+    "status": "ACTIVE",
+    "email": "accounts@v1001.example",
+    "phone": "+91-90000-1001"
+  },
+  {
+    "vendor_code": "V-1002",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "gstin": "29AABCB1002B1Z3",
+    "address": "88 Residency Road, Bengaluru 560025",
+    "status": "ACTIVE",
+    "email": "accounts@v1002.example",
+    "phone": "+91-90000-1002"
+  },
+  {
+    "vendor_code": "V-1003",
+    "vendor_name": "Cobalt Logistics LLP",
+    "gstin": "07AABCC1003C1Z1",
+    "address": "B-21 Okhla Phase II, New Delhi 110020",
+    "status": "ACTIVE",
+    "email": "accounts@v1003.example",
+    "phone": "+91-90000-1003"
+  },
+  {
+    "vendor_code": "V-1004",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "gstin": "36AABCD1004D1Z9",
+    "address": "Survey 42, Medchal Road, Hyderabad 500067",
+    "status": "ACTIVE",
+    "email": "accounts@v1004.example",
+    "phone": "+91-90000-1004"
+  },
+  {
+    "vendor_code": "V-1005",
+    "vendor_name": "Evergreen Facility Services",
+    "gstin": "33AABCE1005E1Z7",
+    "address": "12 Anna Salai, Chennai 600002",
+    "status": "ACTIVE",
+    "email": "accounts@v1005.example",
+    "phone": "+91-90000-1005"
+  },
+  {
+    "vendor_code": "V-1006",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "gstin": "24AABCF1006F1Z4",
+    "address": "7th Floor, Prahlad Nagar, Ahmedabad 380015",
+    "status": "ACTIVE",
+    "email": "accounts@v1006.example",
+    "phone": "+91-90000-1006"
+  },
+  {
+    "vendor_code": "V-1007",
+    "vendor_name": "Gamma Stationers",
+    "gstin": "19AABCG1007G1Z2",
+    "address": "45 Park Street, Kolkata 700016",
+    "status": "INACTIVE",
+    "email": "accounts@v1007.example",
+    "phone": "+91-90000-1007"
+  },
+  {
+    "vendor_code": "V-1008",
+    "vendor_name": "Horizon Catering Services",
+    "gstin": "32AABCH1008H1Z0",
+    "address": "Marine Drive, Kochi 682031",
+    "status": "PENDING",
+    "email": "accounts@v1008.example",
+    "phone": "+91-90000-1008"
+  },
+  {
+    "vendor_code": "V-1009",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "gstin": "09AABCI1009I1Z8",
+    "address": "C-9 Sector 62, Noida 201301",
+    "status": "ACTIVE",
+    "email": "accounts@v1009.example",
+    "phone": "+91-90000-1009"
+  },
+  {
+    "vendor_code": "V-1010",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "gstin": "27AABCJ1010J1Z6",
+    "address": "Hinjewadi Phase 1, Pune 411057",
+    "status": "ACTIVE",
+    "email": "accounts@v1010.example",
+    "phone": "+91-90000-1010"
+  },
+  {
+    "vendor_code": "V-1011",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "gstin": "29AABCK1011K1Z4",
+    "address": "Embassy Tech Village, Bengaluru 560103",
+    "status": "ACTIVE",
+    "email": "accounts@v1011.example",
+    "phone": "+91-90000-1011"
+  },
+  {
+    "vendor_code": "V-1012",
+    "vendor_name": "Lotus Furnishings Co",
+    "gstin": "08AABCL1012L1Z2",
+    "address": "Sitapura Industrial Area, Jaipur 302022",
+    "status": "ACTIVE",
+    "email": "accounts@v1012.example",
+    "phone": "+91-90000-1012"
+  }
+]

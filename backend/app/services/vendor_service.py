@@ -1,0 +1,176 @@
+"""Vendor lookup and verification. A fuzzy name match is only ever a *suggestion*."""
+
+import re
+from dataclasses import dataclass, field
+
+from rapidfuzz import fuzz
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.core.config import Settings
+from app.models.enums import CheckStatus, VendorStatus
+from app.models.invoice import Invoice
+from app.models.vendor_po import Vendor
+from app.services.checks import Check, CheckResult, passed, reject, review, skipped
+from app.utils.normalize import normalize_gstin, normalize_vendor_name
+
+GSTIN_PATTERN = re.compile(r"^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$")
+
+
+@dataclass
+class VendorMatch:
+    kind: str  # GSTIN | EXACT_NAME | FUZZY | AMBIGUOUS | NOT_FOUND
+    vendor: Vendor | None = None  # only set when the match is authoritative
+    candidates: list[Vendor] = field(default_factory=list)  # suggestions (fuzzy / ambiguous)
+
+
+def find_vendor(
+    db: Session, name: str | None, gstin: str | None, settings: Settings
+) -> VendorMatch:
+    clean_gstin = normalize_gstin(gstin)
+    if clean_gstin:
+        by_gstin = db.scalar(select(Vendor).where(Vendor.gstin == clean_gstin))
+        if by_gstin:
+            return VendorMatch("GSTIN", vendor=by_gstin)
+
+    normalized = normalize_vendor_name(name)
+    if not normalized:
+        return VendorMatch("NOT_FOUND")
+
+    exact = list(db.scalars(select(Vendor).where(Vendor.normalized_name == normalized)))
+    if len(exact) == 1:
+        return VendorMatch("EXACT_NAME", vendor=exact[0])
+    if len(exact) > 1:
+        return VendorMatch("AMBIGUOUS", candidates=exact)
+
+    fuzzy = [
+        v
+        for v in db.scalars(select(Vendor))
+        if fuzz.token_sort_ratio(normalized, v.normalized_name) >= settings.vendor_fuzzy_threshold
+    ]
+    if len(fuzzy) == 1:
+        return VendorMatch("FUZZY", candidates=fuzzy)
+    if len(fuzzy) > 1:
+        return VendorMatch("AMBIGUOUS", candidates=fuzzy)
+    return VendorMatch("NOT_FOUND")
+
+
+def verify_vendor(db: Session, invoice: Invoice, settings: Settings) -> list[CheckResult]:
+    """Resolve the vendor, link it to the invoice only if authoritative, and return checks."""
+    match = find_vendor(db, invoice.vendor_name_raw, invoice.vendor_gstin_raw, settings)
+    invoice.vendor_id = match.vendor.id if match.vendor else None
+    claimed = invoice.vendor_name_raw
+
+    if match.kind in ("GSTIN", "EXACT_NAME"):
+        vendor = match.vendor
+        assert vendor is not None
+        results = [_match_result(match, vendor, claimed)]
+        results.append(_status_result(vendor))
+        results.append(_gstin_result(vendor, invoice, settings))
+        return results
+
+    names = ", ".join(v.vendor_name for v in match.candidates)
+    if match.kind == "FUZZY":
+        match_result = review(
+            Check.VENDOR_MATCH,
+            f"'{claimed}' is not an exact vendor match. Possible vendor: {names}. "
+            "Manual confirmation required.",
+            actual=claimed,
+            expected=names,
+            status=CheckStatus.WARNING,
+        )
+    elif match.kind == "AMBIGUOUS":
+        match_result = review(
+            Check.VENDOR_MATCH,
+            f"Multiple vendors could match '{claimed}': {names}.",
+            actual=claimed,
+            expected=names,
+        )
+    else:
+        match_result = review(
+            Check.VENDOR_MATCH,
+            f"Vendor '{claimed or 'unknown'}' was not found in the vendor register.",
+            actual=claimed,
+        )
+    return [
+        match_result,
+        skipped(Check.VENDOR_STATUS, "Vendor not confirmed, status not checked."),
+        skipped(Check.VENDOR_GSTIN, "Vendor not confirmed, GSTIN not checked."),
+    ]
+
+
+def _match_result(match: VendorMatch, vendor: Vendor, claimed: str | None) -> CheckResult:
+    if match.kind == "GSTIN":
+        similarity = fuzz.token_sort_ratio(
+            normalize_vendor_name(claimed), vendor.normalized_name
+        )
+        if claimed and similarity < 70:
+            return review(
+                Check.VENDOR_MATCH,
+                f"Matched {vendor.vendor_name} by GSTIN, but the invoice names "
+                f"'{claimed}'. Please confirm.",
+                expected=vendor.vendor_name,
+                actual=claimed,
+                status=CheckStatus.WARNING,
+            )
+        return passed(
+            Check.VENDOR_MATCH,
+            f"Vendor matched by GSTIN: {vendor.vendor_name} ({vendor.vendor_code}).",
+            actual=vendor.vendor_name,
+        )
+    return passed(
+        Check.VENDOR_MATCH,
+        f"Vendor matched by name: {vendor.vendor_name} ({vendor.vendor_code}).",
+        actual=vendor.vendor_name,
+    )
+
+
+def _status_result(vendor: Vendor) -> CheckResult:
+    if vendor.status == VendorStatus.ACTIVE.value:
+        return passed(Check.VENDOR_STATUS, "Vendor is active.", actual=vendor.status)
+    if vendor.status == VendorStatus.INACTIVE.value:
+        return reject(
+            Check.VENDOR_STATUS,
+            f"Vendor {vendor.vendor_name} is inactive and cannot be paid.",
+            expected=VendorStatus.ACTIVE.value,
+            actual=vendor.status,
+        )
+    return review(
+        Check.VENDOR_STATUS,
+        f"Vendor {vendor.vendor_name} is pending onboarding approval.",
+        expected=VendorStatus.ACTIVE.value,
+        actual=vendor.status,
+    )
+
+
+def _gstin_result(vendor: Vendor, invoice: Invoice, settings: Settings) -> CheckResult:
+    invoice_gstin = normalize_gstin(invoice.vendor_gstin_raw)
+    if not invoice_gstin:
+        message = "Vendor GSTIN is not shown on the invoice, so it could not be verified."
+        if settings.require_gstin_for_approval:
+            return review(Check.VENDOR_GSTIN, message, status=CheckStatus.WARNING)
+        return passed(Check.VENDOR_GSTIN, message)
+    if not GSTIN_PATTERN.match(invoice_gstin):
+        return review(
+            Check.VENDOR_GSTIN,
+            "GSTIN on the invoice has an invalid format.",
+            actual=invoice_gstin,
+        )
+    if not vendor.gstin:
+        return review(
+            Check.VENDOR_GSTIN,
+            "No GSTIN is registered for this vendor, so the invoice GSTIN could not be verified.",
+            actual=invoice_gstin,
+            status=CheckStatus.WARNING,
+        )
+    if vendor.gstin != invoice_gstin:
+        return review(
+            Check.VENDOR_GSTIN,
+            "GSTIN on the invoice does not match the registered vendor GSTIN.",
+            expected=vendor.gstin,
+            actual=invoice_gstin,
+        )
+    return passed(
+        Check.VENDOR_GSTIN, "Vendor GSTIN matches the register.", expected=vendor.gstin,
+        actual=invoice_gstin,
+    )  # fmt: skip
