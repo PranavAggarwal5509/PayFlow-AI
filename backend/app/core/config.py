@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     database_url: str = Field(..., description="SQLAlchemy URL, e.g. postgresql+psycopg://...")
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-3.5-flash-lite"
     gemini_timeout_seconds: float = 45.0
     gemini_max_retries: int = 3
 

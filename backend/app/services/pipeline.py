@@ -315,7 +315,12 @@ def stage_decision(ctx: PipelineContext, run: ProcessingRun) -> DecisionOutcome:
 
         outcome = decide(load_run_results(db, run.id), ctx.settings)
         if outcome.status == DecisionStatus.APPROVED:
-            outcome = _allocate_or_downgrade(db, invoice, outcome)
+            tol = (
+                ctx.settings.inr_rounding_tolerance
+                if invoice.currency == "INR"
+                else ctx.settings.default_rounding_tolerance
+            )
+            outcome = _allocate_or_downgrade(db, invoice, outcome, tolerance=tol)
 
         db.add(
             Decision(
@@ -347,10 +352,12 @@ def stage_decision(ctx: PipelineContext, run: ProcessingRun) -> DecisionOutcome:
     return execute_stage(ctx, run, Stage.DECISION, action)
 
 
-def _allocate_or_downgrade(db: Session, invoice: Invoice, outcome: DecisionOutcome) -> DecisionOutcome:
+def _allocate_or_downgrade(
+    db: Session, invoice: Invoice, outcome: DecisionOutcome, tolerance: Decimal = Decimal("0")
+) -> DecisionOutcome:
     """Reserve PO balance under a row lock. If another invoice consumed it first → NEEDS_REVIEW."""
     try:
-        po_matcher.allocate_to_po(db, invoice, allocated_by="system")
+        po_matcher.allocate_to_po(db, invoice, allocated_by="system", tolerance=tolerance)
     except ValueError as exc:
         reasons = [DecisionReason(Check.PO_BALANCE, "BLOCKING", str(exc)), *outcome.reasons]
         return DecisionOutcome(DecisionStatus.NEEDS_REVIEW, reasons)

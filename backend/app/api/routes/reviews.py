@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.config import Settings, get_settings
 from app.core.errors import NotFoundError
 from app.core.security import CurrentUser, get_current_user
 from app.database.session import get_db
@@ -94,10 +95,11 @@ def get_review(review_id: UUID, db: Session = Depends(get_db), _: CurrentUser = 
 @router.post("/{review_id}/decision", response_model=ApiResponse[ReviewOut])
 def decide_review(
     review_id: UUID, body: ReviewDecisionIn, db: Session = Depends(get_db),
+    settings: Settings = Depends(get_settings),
     user: CurrentUser = Depends(get_current_user),
 ):  # fmt: skip
     review = review_service.apply_review_decision(
-        db, review_id, body.action, body.comment.strip(), user_id=user.id
+        db, review_id, body.action, body.comment.strip(), user_id=user.id, settings=settings
     )
     return ApiResponse(data=ReviewOut.model_validate(review))
 

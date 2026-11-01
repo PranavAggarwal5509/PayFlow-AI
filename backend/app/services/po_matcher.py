@@ -179,7 +179,7 @@ def _line_matches_po(description: str | None, unit_price: Decimal | None, po: Pu
 
 
 def allocate_to_po(
-    db: Session, invoice: Invoice, *, allocated_by: str
+    db: Session, invoice: Invoice, *, allocated_by: str, tolerance: Decimal = Decimal("0")
 ) -> POAllocation | None:
     """Reserve PO balance for an approved invoice. Must run inside the caller's transaction.
 
@@ -196,11 +196,14 @@ def allocate_to_po(
     po = db.scalar(
         select(PurchaseOrder).where(PurchaseOrder.id == invoice.purchase_order_id).with_for_update()
     )
-    assert po is not None
+    if po is None:
+        raise ValueError("Purchase order not found.")
     if invoice.currency != po.currency:
-        raise ValueError("Invoice currency does not match the PO currency.")
+        raise ValueError(
+            f"Invoice currency {invoice.currency} does not match PO currency {po.currency}."
+        )
     remaining = remaining_balance(db, po, exclude_invoice_id=invoice.id)
-    if invoice.total_amount > remaining:
+    if invoice.total_amount > (remaining + tolerance):
         raise ValueError(
             f"Invoice total exceeds the remaining PO balance of {money(remaining, po.currency)}."
         )

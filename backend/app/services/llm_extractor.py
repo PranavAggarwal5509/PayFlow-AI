@@ -54,7 +54,11 @@ class GeminiProvider:
             )
         body = {
             "contents": [{"parts": [{"text": EXTRACTION_PROMPT + document_text[:60000]}]}],
-            "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "thinkingConfig": {"thinkingLevel": "low"},
+                "maxOutputTokens": 4096,
+            },
         }
         url = f"{self.BASE_URL}/{self._settings.gemini_model}:generateContent"
         try:
@@ -70,9 +74,33 @@ class GeminiProvider:
             raise TransientError("AI service is unreachable.", category="LLM_NETWORK") from exc
 
         if response.status_code in (429, 500, 502, 503, 504):
+            err_msg = ""
+            try:
+                err_data = response.json()
+                err_msg = err_data.get("error", {}).get("message", "")
+            except Exception:
+                pass
+            if err_msg:
+                logger.warning(
+                    "Gemini transient service error: HTTP %s - %s", response.status_code, err_msg
+                )
+            else:
+                logger.warning("Gemini transient service error: HTTP %s", response.status_code)
             raise TransientError("AI service is temporarily unavailable.", category="LLM_HTTP")
+
         if response.status_code >= 400:
-            logger.error("Gemini rejected request: HTTP %s", response.status_code)
+            err_msg = ""
+            try:
+                err_data = response.json()
+                err_msg = err_data.get("error", {}).get("message", "")
+            except Exception:
+                pass
+            if err_msg:
+                logger.error(
+                    "Gemini rejected request: HTTP %s - %s", response.status_code, err_msg
+                )
+            else:
+                logger.error("Gemini rejected request: HTTP %s", response.status_code)
             raise ProcessingError("AI service rejected the request.", category="LLM_HTTP")
         try:
             raw_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]

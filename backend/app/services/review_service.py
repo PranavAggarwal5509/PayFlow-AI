@@ -1,10 +1,12 @@
 """Manual review actions."""
 
+from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings, get_settings
 from app.core.errors import ConflictError, NotFoundError
 from app.models.enums import DecisionStatus, ReviewAction, ReviewStatus
 from app.models.invoice import Invoice
@@ -16,9 +18,16 @@ OPEN_STATUSES = (ReviewStatus.PENDING.value, ReviewStatus.CLARIFICATION_REQUESTE
 
 
 def apply_review_decision(
-    db: Session, review_id: UUID, action: ReviewAction, comment: str, *, user_id: str
+    db: Session,
+    review_id: UUID,
+    action: ReviewAction,
+    comment: str,
+    *,
+    user_id: str,
+    settings: Settings | None = None,
 ) -> Review:
     """Record a human decision atomically: review row, invoice, PO allocation, audit log."""
+    app_settings = settings or get_settings()
     review = db.scalar(select(Review).where(Review.id == review_id).with_for_update())
     if review is None:
         raise NotFoundError("Review not found.")
@@ -29,10 +38,29 @@ def apply_review_decision(
     old_decision = invoice.decision_status
 
     if action == ReviewAction.APPROVE:
+        tolerance = (
+            app_settings.inr_rounding_tolerance
+            if invoice.currency == "INR"
+            else app_settings.default_rounding_tolerance
+        )
         try:
             # Allocation re-checks the balance under a row lock: a reviewer cannot overspend a PO.
-            po_matcher.allocate_to_po(db, invoice, allocated_by=user_id)
+            po_matcher.allocate_to_po(
+                db, invoice, allocated_by=user_id, tolerance=tolerance
+            )
         except ValueError as exc:
+            # Record failed manual approval attempt in audit log
+            record_audit(
+                db,
+                action="REVIEW_APPROVE_FAILED",
+                actor_type="USER",
+                actor_id=user_id,
+                invoice_id=invoice.id,
+                old_value=old_decision,
+                new_value=invoice.decision_status,
+                description=f"Manual approval rejected: {exc}",
+            )
+            db.commit()
             raise ConflictError(str(exc)) from exc
         invoice.decision_status = DecisionStatus.APPROVED.value
         review.review_status = ReviewStatus.APPROVED.value

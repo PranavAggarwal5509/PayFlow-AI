@@ -111,3 +111,78 @@ def test_extract_structured_invoice_with_mock():
     assert model.invoice_number == "BOS-9012"
     assert model.currency == "INR"
 
+
+def test_gemini_provider_request_payload_and_error_handling(monkeypatch):
+    import json
+    import httpx
+
+    captured_requests = []
+
+    def mock_post(url, json=None, headers=None, timeout=None):
+        captured_requests.append({"url": url, "json": json, "headers": headers, "timeout": timeout})
+        mock_response = httpx.Response(
+            status_code=200,
+            json={
+                "candidates": [
+                    {
+                        "content": {
+                            "parts": [
+                                {
+                                    "text": json_mod.dumps({
+                                        "vendor_name": "Test Vendor",
+                                        "vendor_address": None,
+                                        "vendor_gstin": "29ABCDE1234F1Z5",
+                                        "invoice_number": "INV-001",
+                                        "invoice_date": "2026-10-10",
+                                        "due_date": "2026-11-10",
+                                        "purchase_order_number": "PO-100",
+                                        "currency": "INR",
+                                        "subtotal": "100.00",
+                                        "tax_amount": "18.00",
+                                        "total_amount": "118.00",
+                                        "payment_terms": None,
+                                        "bank_account_details": None,
+                                        "payment_instructions": None,
+                                        "other_references": [],
+                                        "uncertain_fields": [],
+                                        "line_items": [
+                                            {
+                                                "description": "Widget",
+                                                "quantity": "1",
+                                                "unit_price": "100.00",
+                                                "tax_percentage": "18.00",
+                                                "total_amount": "100.00",
+                                            }
+                                        ],
+                                    })
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            request=httpx.Request("POST", url),
+        )
+        return mock_response
+
+    import json as json_mod
+    monkeypatch.setattr(httpx, "post", mock_post)
+
+    settings = Settings(
+        database_url="sqlite:///./test.db",
+        llm_provider="gemini",
+        gemini_api_key="test-api-key",
+        gemini_model="gemini-3.5-flash-lite",
+    )
+    provider = GeminiProvider(settings)
+    result = provider.extract_invoice("Test document text")
+
+    assert result["invoice_number"] == "INV-001"
+    assert len(captured_requests) == 1
+    req = captured_requests[0]
+    assert "gemini-3.5-flash-lite" in req["url"]
+    assert req["json"]["generationConfig"]["responseMimeType"] == "application/json"
+    assert req["json"]["generationConfig"]["thinkingConfig"] == {"thinkingLevel": "low"}
+    assert "temperature" not in req["json"]["generationConfig"]
+    assert req["json"]["generationConfig"]["maxOutputTokens"] >= 2048
+

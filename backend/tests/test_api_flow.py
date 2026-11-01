@@ -1,9 +1,12 @@
 """End-to-end API tests (upload → inline workflow → decision → review), Gemini mocked."""
 
+from decimal import Decimal
+from uuid import UUID
 import pytest
 
 from app.core.errors import TransientError
-from app.models import AuditLog, POAllocation
+from app.models import AuditLog, Invoice, POAllocation
+from app.services import po_matcher
 from tests.conftest import (
     add_po,
     add_vendor,
@@ -11,6 +14,7 @@ from tests.conftest import (
     invoice_payload,
     upload,
 )  # fmt: skip
+from tests.test_services_db import new_invoice
 from tests.pdf_factory import make_corrupted_pdf, make_image_only_pdf, make_pdf
 
 
@@ -277,7 +281,70 @@ def test_manual_approval_cannot_overspend_po(client, llm, db):
     r = client.post(f"/api/v1/reviews/{review_id}/decision",
                     json={"action": "APPROVE", "comment": "approve anyway please"})  # fmt: skip
     assert r.status_code == 409 and "remaining PO balance" in r.json()["error"]["message"]
-    assert invoice_detail(client, inv_id)["decision_status"] == "NEEDS_REVIEW"
+    d = invoice_detail(client, inv_id)
+    assert d["decision_status"] == "NEEDS_REVIEW"
+    # Verification that failed approval is recorded in audit log
+    entry = next((a for a in d["audit_trail"] if a["action"] == "REVIEW_APPROVE_FAILED"), None)
+    assert entry is not None
+    assert "Manual approval rejected" in entry["description"]
+    assert db.query(POAllocation).count() == 0
+
+
+def test_two_invoices_competing_for_insufficient_po_balance(client, llm, db):
+    vendor = add_vendor(db)
+    # PO total is 15000; invoice_payload has total 11800. Two invoices = 23600 (exceeds 15000)
+    add_po(db, vendor, total="15000.00")
+    inv_1 = UUID(upload(client, llm, invoice_payload(invoice_number="INV-A"), text="invoice a " * 20)["invoice_id"])
+    inv_2 = UUID(upload(client, llm, invoice_payload(invoice_number="INV-B"), text="invoice b " * 20)["invoice_id"])
+    
+    # First is auto-approved because 11800 <= 15000
+    d1 = invoice_detail(client, inv_1)
+    assert d1["decision_status"] == "APPROVED"
+    assert db.query(POAllocation).filter_by(invoice_id=inv_1, status="ACTIVE").count() == 1
+    
+    # Second needs review because remaining balance is now 15000 - 11800 = 3200 < 11800
+    d2 = invoice_detail(client, inv_2)
+    assert d2["decision_status"] == "NEEDS_REVIEW"
+    review_2 = d2["review"]["id"]
+    
+    # Reviewer attempts manual approval on second invoice -> must be rejected with 409 Conflict
+    r = client.post(f"/api/v1/reviews/{review_2}/decision",
+                    json={"action": "APPROVE", "comment": "Force approve second invoice"})
+    assert r.status_code == 409
+    assert "remaining PO balance" in r.json()["error"]["message"]
+    
+    # Verify invoice 2 remains in NEEDS_REVIEW, no second allocation, and failure audit logged
+    d2_after = invoice_detail(client, inv_2)
+    assert d2_after["decision_status"] == "NEEDS_REVIEW"
+    assert db.query(POAllocation).filter_by(invoice_id=inv_2).count() == 0
+    assert db.query(AuditLog).filter_by(invoice_id=inv_2, action="REVIEW_APPROVE_FAILED").count() == 1
+
+
+def test_manual_approval_with_balance_changed_and_rollback(client, llm, db):
+    vendor = add_vendor(db)
+    po = add_po(db, vendor, total="25000.00")
+    # Upload an invoice needing review (e.g. missing GSTIN) with total 11800
+    inv_id = UUID(upload(client, llm, invoice_payload(invoice_number="INV-REV", vendor_gstin=None), text="missing gstin " * 20)["invoice_id"])
+    d = invoice_detail(client, inv_id)
+    assert d["decision_status"] == "NEEDS_REVIEW", reasons(d)
+    review_id = d["review"]["id"]
+
+    # Now simulate another invoice consuming the balance in the meantime
+    other_inv = new_invoice(db, vendor_id=vendor.id, purchase_order_id=po.id, total_amount=Decimal("20000.00"), currency="INR")
+    po_matcher.allocate_to_po(db, other_inv, allocated_by="other_reviewer")
+    db.commit()
+    # Now remaining balance = 25000 - 20000 = 5000 < 11800
+
+    # Attempt manual approval on the first invoice (needs 11800)
+    res = client.post(f"/api/v1/reviews/{review_id}/decision", json={"action": "APPROVE", "comment": "Reviewer approves"})
+    assert res.status_code == 409
+    assert "remaining PO balance" in res.json()["error"]["message"]
+
+    # Verify rollback: status unchanged, no partial allocation created
+    d_final = invoice_detail(client, inv_id)
+    assert d_final["decision_status"] == "NEEDS_REVIEW"
+    assert db.query(POAllocation).filter_by(invoice_id=inv_id).count() == 0
+    assert db.query(AuditLog).filter_by(invoice_id=inv_id, action="REVIEW_APPROVE_FAILED").count() == 1
 
 
 def test_manual_reject_and_clarification(client, llm, world, db):
