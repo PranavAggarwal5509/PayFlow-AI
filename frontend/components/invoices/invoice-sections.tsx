@@ -1,31 +1,72 @@
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { formatDate, formatDateTime, formatMoney, titleCase } from "@/lib/format";
-import type { InvoiceDetail } from "@/types/api";
+import type { FieldEvidence, InvoiceDetail } from "@/types/api";
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({
+  label,
+  children,
+  evidence,
+  onSelectEvidence,
+}: {
+  label: string;
+  children: ReactNode;
+  evidence?: FieldEvidence | null;
+  onSelectEvidence?: (label: string, ev: FieldEvidence) => void;
+}) {
+  const hasEvidence = !!evidence && evidence.evidence_status !== "NOT_FOUND";
   return (
-    <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+    <div className="group relative">
+      <div className="flex items-center justify-between">
+        <dt className="text-xs text-muted-foreground">{label}</dt>
+        {hasEvidence && onSelectEvidence && (
+          <button
+            type="button"
+            onClick={() => onSelectEvidence(label, evidence)}
+            className="flex items-center gap-1 text-[11px] font-medium text-blue-600 opacity-80 hover:text-blue-800 hover:opacity-100"
+            title="Inspect visual evidence in original PDF"
+          >
+            <Eye className="h-3 w-3" /> View evidence
+          </button>
+        )}
+      </div>
       <dd className="mt-0.5 break-words text-sm font-medium">{children || <span className="text-slate-400">—</span>}</dd>
     </div>
   );
 }
 
-export function InvoiceInfoCard({ invoice }: { invoice: InvoiceDetail }) {
+export function InvoiceInfoCard({
+  invoice,
+  onSelectEvidence,
+}: {
+  invoice: InvoiceDetail;
+  onSelectEvidence?: (label: string, ev: FieldEvidence) => void;
+}) {
+  const ev = (invoice.visual_evidence || {}) as Record<string, FieldEvidence>;
   return (
     <Card>
       <CardHeader title="Invoice information" description={`Extracted using ${invoice.extraction_method === "OCR" ? "OCR" : "PDF text"} · ${invoice.page_count ?? "?"} page(s)`} />
       <CardBody>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <Field label="Invoice number">{invoice.invoice_number}</Field>
-          <Field label="Invoice date">{formatDate(invoice.invoice_date)}</Field>
-          <Field label="Due date">{formatDate(invoice.due_date)}</Field>
-          <Field label="Currency">{invoice.currency}</Field>
-          <Field label="PO number (on invoice)">{invoice.po_number}</Field>
+          <Field label="Invoice number" evidence={ev.invoice_number} onSelectEvidence={onSelectEvidence}>
+            {invoice.invoice_number}
+          </Field>
+          <Field label="Invoice date" evidence={ev.invoice_date} onSelectEvidence={onSelectEvidence}>
+            {formatDate(invoice.invoice_date)}
+          </Field>
+          <Field label="Due date" evidence={ev.due_date} onSelectEvidence={onSelectEvidence}>
+            {formatDate(invoice.due_date)}
+          </Field>
+          <Field label="Currency" evidence={ev.currency} onSelectEvidence={onSelectEvidence}>
+            {invoice.currency}
+          </Field>
+          <Field label="PO number (on invoice)" evidence={ev.purchase_order_number} onSelectEvidence={onSelectEvidence}>
+            {invoice.po_number}
+          </Field>
           <Field label="Uploaded">
             {formatDateTime(invoice.uploaded_at)} by {invoice.uploaded_by}
           </Field>
@@ -40,14 +81,26 @@ export function InvoiceInfoCard({ invoice }: { invoice: InvoiceDetail }) {
   );
 }
 
-export function VendorCard({ invoice }: { invoice: InvoiceDetail }) {
+export function VendorCard({
+  invoice,
+  onSelectEvidence,
+}: {
+  invoice: InvoiceDetail;
+  onSelectEvidence?: (label: string, ev: FieldEvidence) => void;
+}) {
   const vendor = invoice.vendor;
+  const ev = (invoice.visual_evidence || {}) as Record<string, FieldEvidence>;
   return (
     <Card>
       <CardHeader title="Vendor" description={vendor ? "Matched to the vendor register" : "Not confirmed in the vendor register"} />
       <CardBody>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <Field label="Name on invoice">{invoice.vendor_name_raw}</Field>
+          <Field label="Name on invoice" evidence={ev.vendor_name} onSelectEvidence={onSelectEvidence}>
+            {invoice.vendor_name_raw}
+          </Field>
+          <Field label="GSTIN on invoice" evidence={ev.vendor_gstin} onSelectEvidence={onSelectEvidence}>
+            {invoice.vendor_gstin_raw}
+          </Field>
           <Field label="GSTIN on invoice">{invoice.vendor_gstin_raw}</Field>
           {vendor && (
             <>
@@ -200,25 +253,73 @@ export function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
   );
 }
 
-export function FinancialSummaryCard({ invoice }: { invoice: InvoiceDetail }) {
+export function FinancialSummaryCard({
+  invoice,
+  onSelectEvidence,
+}: {
+  invoice: InvoiceDetail;
+  onSelectEvidence?: (label: string, ev: FieldEvidence) => void;
+}) {
+  const ev = (invoice.visual_evidence || {}) as Record<string, FieldEvidence>;
   return (
     <Card>
-      <CardHeader title="Financial summary" description="Values exactly as extracted — never auto-corrected" />
+      <CardHeader title="Financial summary" description="Values exactly as extracted — click to view document evidence" />
       <CardBody className="space-y-2 text-sm">
-        <SummaryRow label="Subtotal" value={formatMoney(invoice.subtotal, invoice.currency)} />
-        <SummaryRow label="Tax" value={formatMoney(invoice.tax_amount, invoice.currency)} />
+        <SummaryRow
+          label="Subtotal"
+          value={formatMoney(invoice.subtotal, invoice.currency)}
+          evidence={ev.subtotal}
+          onSelectEvidence={onSelectEvidence}
+        />
+        <SummaryRow
+          label="Tax"
+          value={formatMoney(invoice.tax_amount, invoice.currency)}
+          evidence={ev.tax_amount}
+          onSelectEvidence={onSelectEvidence}
+        />
         <div className="border-t pt-2">
-          <SummaryRow label="Total" value={formatMoney(invoice.total_amount, invoice.currency)} strong />
+          <SummaryRow
+            label="Total"
+            value={formatMoney(invoice.total_amount, invoice.currency)}
+            strong
+            evidence={ev.total_amount}
+            onSelectEvidence={onSelectEvidence}
+          />
         </div>
       </CardBody>
     </Card>
   );
 }
 
-function SummaryRow({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+function SummaryRow({
+  label,
+  value,
+  strong,
+  evidence,
+  onSelectEvidence,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  evidence?: FieldEvidence | null;
+  onSelectEvidence?: (label: string, ev: FieldEvidence) => void;
+}) {
+  const hasEvidence = !!evidence && evidence.evidence_status !== "NOT_FOUND";
   return (
-    <div className="flex justify-between">
-      <span className="text-muted-foreground">{label}</span>
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span className="text-muted-foreground">{label}</span>
+        {hasEvidence && onSelectEvidence && (
+          <button
+            type="button"
+            onClick={() => onSelectEvidence(label, evidence)}
+            className="flex items-center gap-0.5 text-[10px] font-medium text-blue-600 hover:text-blue-800"
+            title="Inspect visual evidence"
+          >
+            <Eye className="h-2.5 w-2.5" /> View
+          </button>
+        )}
+      </div>
       <span className={`tabular ${strong ? "text-base font-semibold" : "font-medium"}`}>{value}</span>
     </div>
   );

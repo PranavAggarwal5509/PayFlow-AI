@@ -105,8 +105,16 @@ def decide_review(
 
 
 @dashboard.get("/stats")
-def stats(db: Session = Depends(get_db), _: CurrentUser = Depends(get_current_user)):
-    return ApiResponse(data=dashboard_service.get_stats(db))
+def stats(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    _: CurrentUser = Depends(get_current_user),
+):
+    from app.services.analytics_service import get_operational_metrics
+
+    base_stats = dashboard_service.get_stats(db)
+    base_stats["analytics"] = get_operational_metrics(db, days=days)
+    return ApiResponse(data=base_stats)
 
 
 @dashboard.get("/recent-activity")

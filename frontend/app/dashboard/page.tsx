@@ -20,6 +20,7 @@ import { useState } from "react";
 
 import { DecisionChart, MonthlyValueChart, VolumeChart } from "@/components/dashboard/charts";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { OperationalMetricsSection } from "@/components/dashboard/operational-metrics";
 import { RecentInvoicesTable } from "@/components/invoices/invoice-columns";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -35,7 +36,8 @@ const REVIEW_ACTION_LABEL: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const stats = useAsync(() => dashboardService.stats(), []);
+  const [selectedDays, setSelectedDays] = useState(30);
+  const stats = useAsync(() => dashboardService.stats(selectedDays), [selectedDays]);
   const recent = useAsync(() => invoiceService.list({ page_size: 7, sort_by: "uploaded_at", sort_dir: "desc" }), []);
   const activity = useAsync(() => dashboardService.activity(30), []);
   const [refreshing, setRefreshing] = useState(false);
@@ -149,6 +151,13 @@ export default function DashboardPage() {
           <DecisionChart data={data?.decision_distribution ?? []} />
         </div>
       </section>
+
+      {/* Operational & AI Performance Analytics Section */}
+      <OperationalMetricsSection
+        metrics={data?.analytics}
+        selectedDays={selectedDays}
+        onSelectDays={setSelectedDays}
+      />
 
       {/* Secondary Analytics: Value Throughput & Operations Health */}
       <section className="grid gap-4 lg:grid-cols-3">

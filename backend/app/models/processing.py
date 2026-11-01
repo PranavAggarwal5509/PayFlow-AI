@@ -24,6 +24,12 @@ class ProcessingRun(IdMixin, Base):
     error_message: Mapped[str | None] = mapped_column(Text)  # user-friendly
     error_category: Mapped[str | None] = mapped_column(String(32))
     triggered_by: Mapped[str] = mapped_column(String(100), default="system")
+    # AI telemetry
+    llm_model: Mapped[str | None] = mapped_column(String(64))
+    prompt_tokens: Mapped[int | None] = mapped_column()
+    completion_tokens: Mapped[int | None] = mapped_column()
+    total_tokens: Mapped[int | None] = mapped_column()
+    extraction_duration_ms: Mapped[int | None] = mapped_column()
 
     invoice: Mapped[Invoice] = relationship(back_populates="runs")
     stage_events: Mapped[list["StageEvent"]] = relationship(

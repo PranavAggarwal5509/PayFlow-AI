@@ -256,5 +256,6 @@ def get_invoice_detail(db: Session, invoice_id: UUID) -> InvoiceDetail | None:
         review=ReviewOut.model_validate(review) if review else None,
         audit_trail=[AuditLogOut.model_validate(a) for a in audit],
         extra=extra,
+        visual_evidence=inv.visual_evidence,
         error_message=latest.error_message if latest else None,
     )

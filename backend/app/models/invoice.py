@@ -34,6 +34,7 @@ class Invoice(IdMixin, TimestampMixin, Base):
     vendor_gstin_raw: Mapped[str | None] = mapped_column(String(32))
     po_number_raw: Mapped[str | None] = mapped_column(String(60))
     extracted_data: Mapped[dict | None] = mapped_column(JSON)  # full validated LLM payload
+    visual_evidence: Mapped[dict | None] = mapped_column(JSON)  # visual bounding-box evidence for fields
 
     original_file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     stored_file_path: Mapped[str] = mapped_column(String(500), nullable=False)

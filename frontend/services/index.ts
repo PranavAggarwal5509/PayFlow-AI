@@ -33,7 +33,7 @@ export const runService = {
 };
 
 export const dashboardService = {
-  stats: (): Promise<DashboardStats> => get("/dashboard/stats"),
+  stats: (days = 30): Promise<DashboardStats> => get("/dashboard/stats", { days }),
   activity: (limit = 8): Promise<ActivityItem[]> => get("/dashboard/recent-activity", { limit }),
 };
 

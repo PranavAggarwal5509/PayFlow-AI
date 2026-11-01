@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -27,11 +28,24 @@ import { useAsync } from "@/hooks/use-async";
 import { ApiError } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { invoiceService } from "@/services";
+import type { FieldEvidence } from "@/types/api";
 
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: invoice, loading, error, reload } = useAsync(() => invoiceService.get(id), [id]);
+  const [activeEvidence, setActiveEvidence] = useState<FieldEvidence | null>(null);
+  const [activeLabel, setActiveLabel] = useState<string | null>(null);
+
+  const handleSelectEvidence = (label: string, ev: FieldEvidence) => {
+    setActiveLabel(label);
+    setActiveEvidence(ev);
+  };
+
+  const handleClearEvidence = () => {
+    setActiveLabel(null);
+    setActiveEvidence(null);
+  };
 
   if (error) return <ErrorState message={error} onRetry={reload} />;
   if (loading || !invoice)
@@ -84,7 +98,14 @@ export default function InvoiceDetailPage() {
 
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="xl:sticky xl:top-20 xl:h-[calc(100vh-7rem)]">
-          <PdfViewer invoiceId={invoice.id} pageCount={invoice.page_count} />
+          <PdfViewer
+            invoiceId={invoice.id}
+            pageCount={invoice.page_count}
+            visualEvidence={invoice.visual_evidence}
+            activeEvidence={activeEvidence}
+            activeFieldLabel={activeLabel}
+            onClearEvidence={handleClearEvidence}
+          />
         </div>
 
         <div className="space-y-4">
@@ -129,11 +150,11 @@ export default function InvoiceDetailPage() {
               <TabsTrigger value="history">History</TabsTrigger>
             </TabsList>
             <TabsContent value="details" className="mt-4 space-y-4">
-              <InvoiceInfoCard invoice={invoice} />
-              <VendorCard invoice={invoice} />
+              <InvoiceInfoCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
+              <VendorCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
               <PurchaseOrderCard invoice={invoice} />
               <LineItemsCard invoice={invoice} />
-              <FinancialSummaryCard invoice={invoice} />
+              <FinancialSummaryCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
             </TabsContent>
             <TabsContent value="validations" className="mt-4">
               <ValidationList validations={invoice.validations} />

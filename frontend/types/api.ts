@@ -217,6 +217,27 @@ export interface Review {
   updated_at: string;
 }
 
+export interface FieldEvidence {
+  page: number;
+  bbox: [number, number, number, number] | null;
+  norm_bbox: [number, number, number, number] | null;
+  source: "pdf_text" | "tesseract";
+  evidence_status: "VERIFIED" | "AMBIGUOUS" | "NOT_FOUND";
+  text?: string;
+  page_width?: number;
+  page_height?: number;
+}
+
+export interface LineItemEvidence {
+  line_index: number;
+  description?: FieldEvidence;
+  quantity?: FieldEvidence;
+  unit_price?: FieldEvidence;
+  total_amount?: FieldEvidence;
+}
+
+export type VisualEvidence = Record<string, FieldEvidence | LineItemEvidence[] | unknown>;
+
 export interface InvoiceDetail extends InvoiceListItem {
   due_date: string | null;
   subtotal: Money | null;
@@ -235,6 +256,7 @@ export interface InvoiceDetail extends InvoiceListItem {
   review: Review | null;
   audit_trail: AuditEntry[];
   extra: Record<string, string | string[]>;
+  visual_evidence?: VisualEvidence | null;
   error_message: string | null;
 }
 
@@ -264,6 +286,57 @@ export interface Kpi {
   last_30_days: number;
 }
 
+export interface OperationalMetrics {
+  period_days: number;
+  volume: {
+    total_invoices: number;
+    total_runs: number;
+    completed_runs: number;
+    failed_runs: number;
+    approved: number;
+    needs_review: number;
+    rejected: number;
+  };
+  speed: {
+    avg_end_to_end_seconds: number | null;
+    p50_end_to_end_seconds: number | null;
+    p95_end_to_end_seconds: number | null;
+    avg_ai_extraction_seconds: number | null;
+    avg_document_extraction_seconds: number | null;
+    stage_breakdown: {
+      stage: string;
+      avg_seconds: number;
+      p95_seconds: number;
+      count: number;
+    }[];
+  };
+  reliability: {
+    technical_success_rate: number;
+    technical_failure_rate: number;
+    manual_review_rate: number;
+    retry_count: number;
+    recovery_count: number;
+    ocr_count: number;
+    digital_count: number;
+  };
+  ai_usage: {
+    gemini_request_count: number;
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+    models: {
+      model: string;
+      requests: number;
+      prompt_tokens: number;
+      completion_tokens: number;
+      total_tokens: number;
+      avg_latency_ms: number | null;
+    }[];
+    cost_status: string;
+    cost_details: unknown;
+  };
+}
+
 export interface DashboardStats {
   kpis: { total: Kpi; approved: Kpi; needs_review: Kpi; rejected: Kpi; failed: Kpi };
   approval_rate: number | null;
@@ -281,6 +354,7 @@ export interface DashboardStats {
     message: string | null;
     started_at: string;
   }[];
+  analytics?: OperationalMetrics;
 }
 
 export interface ActivityItem {

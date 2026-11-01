@@ -9,6 +9,7 @@ Each function is one workflow stage. They are called by the internal API (n8n) â
 
 import hashlib
 import logging
+import time
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -196,12 +197,36 @@ def stage_ai_extraction(ctx: PipelineContext, run: ProcessingRun) -> dict:
             raise ProcessingError("No document text is available to extract from.", category="NO_TEXT")
         text_hash = hashlib.sha256(invoice.extracted_text.encode()).hexdigest()
         reused = invoice.extracted_data is not None and invoice.extraction_text_hash == text_hash
+        start_t = time.perf_counter()
         if not reused:  # avoid paying for the same extraction twice
             extracted = extract_structured_invoice(
                 ctx.llm, invoice.extracted_text, max_retries=ctx.settings.gemini_max_retries
             )
             apply_extraction(ctx.db, invoice, extracted)
             invoice.extraction_text_hash = text_hash
+
+        # Extract visual evidence locally from PDF/OCR layout
+        try:
+            pdf_bytes = ctx.storage.load(invoice.stored_file_path)
+            from app.services.document_layout import extract_ocr_layout, extract_pdf_layout
+            from app.services.evidence_service import build_invoice_visual_evidence
+
+            if invoice.extraction_method == "OCR":
+                layout = extract_ocr_layout(pdf_bytes)
+            else:
+                layout = extract_pdf_layout(pdf_bytes)
+            if invoice.extracted_data:
+                invoice.visual_evidence = build_invoice_visual_evidence(invoice.extracted_data, layout)
+        except Exception as e:
+            logger.warning("Could not extract visual layout coordinates: %s", e)
+
+        duration_ms = int((time.perf_counter() - start_t) * 1000)
+        run.extraction_duration_ms = duration_ms
+        if ctx.settings.llm_provider == "gemini":
+            run.llm_model = ctx.settings.gemini_model
+        else:
+            run.llm_model = "mock-catalog"
+
         run_service.finish_stage(
             ctx.db, run, Stage.AI_EXTRACTION, StageStatus.COMPLETED,
             "Reused previous extraction." if reused else "Structured data extracted.",

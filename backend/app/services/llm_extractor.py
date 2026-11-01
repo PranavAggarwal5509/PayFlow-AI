@@ -103,8 +103,19 @@ class GeminiProvider:
                 logger.error("Gemini rejected request: HTTP %s", response.status_code)
             raise ProcessingError("AI service rejected the request.", category="LLM_HTTP")
         try:
-            raw_text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-            return json.loads(raw_text)
+            resp_json = response.json()
+            raw_text = resp_json["candidates"][0]["content"]["parts"][0]["text"]
+            payload = json.loads(raw_text)
+            # Attach telemetry metadata if present
+            usage = resp_json.get("usageMetadata", {})
+            if usage:
+                payload["_telemetry"] = {
+                    "model": self._settings.gemini_model,
+                    "prompt_tokens": usage.get("promptTokenCount"),
+                    "completion_tokens": usage.get("candidatesTokenCount"),
+                    "total_tokens": usage.get("totalTokenCount"),
+                }
+            return payload
         except (KeyError, IndexError, ValueError, TypeError) as exc:
             raise ValueError("Gemini returned malformed JSON") from exc
 

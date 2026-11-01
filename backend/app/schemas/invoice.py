@@ -161,6 +161,7 @@ class InvoiceDetail(InvoiceListItem):
     review: ReviewOut | None
     audit_trail: list[AuditLogOut]
     extra: dict[str, Any]  # payment terms, bank details, address … shown as labelled fields
+    visual_evidence: dict[str, Any] | None = None
     error_message: str | None
 
 
