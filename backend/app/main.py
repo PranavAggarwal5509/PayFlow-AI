@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import logging
 import uuid
 from collections.abc import Awaitable, Callable
@@ -12,9 +13,26 @@ from app.api.routes import invoices, master_data, reviews, runs, system
 from app.core.config import get_settings
 from app.core.errors import PayFlowError, TransientError
 from app.core.logging import configure_logging, request_id_var
-from app.database.session import get_engine
+from app.database.session import get_engine, get_session_factory
+from app.services.recovery_service import recover_interrupted_runs
 
 logger = logging.getLogger("payflow")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup phase: recover interrupted runs from previous process
+    try:
+        with get_session_factory()() as db:
+            recovered = recover_interrupted_runs(db)
+            if recovered > 0:
+                logger.info("Startup recovery completed: recovered %d interrupted run(s)", recovered)
+            else:
+                logger.info("Startup recovery check: no interrupted runs found")
+    except Exception as exc:
+        logger.error("Startup recovery error (non-fatal, continuing startup): %s", exc)
+    yield
+    # Shutdown phase (if any cleanups needed)
 
 
 def _error(status: int, code: str, message: str, details: object | None = None) -> JSONResponse:
@@ -32,6 +50,7 @@ def create_app() -> FastAPI:
         title="PayFlow AI API",
         version="1.0.0",
         description="Invoice processing and decision support. Public API under /api/v1.",
+        lifespan=lifespan,
     )
     app.add_middleware(
         CORSMiddleware,
