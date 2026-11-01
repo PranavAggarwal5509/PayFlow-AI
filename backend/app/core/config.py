@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     inr_rounding_tolerance: Decimal = Decimal("1.00")
     default_rounding_tolerance: Decimal = Decimal("0.01")
+    po_line_price_tolerance_pct: Decimal = Decimal("0.05")  # 5% line unit price variance tolerance
     supported_currencies: str = "INR,USD,EUR,GBP,AED,SGD"
     require_gstin_for_approval: bool = True
 

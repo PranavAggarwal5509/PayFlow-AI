@@ -10,12 +10,34 @@ from app.schemas.common import ORMModel
 from app.schemas.master_data import VendorOut
 
 
+class LineItemReconciliationOut(ORMModel):
+    id: UUID
+    invoice_line_item_id: UUID
+    purchase_order_item_id: UUID | None
+    status: str
+    matching_method: str
+    matched_description: str | None
+    invoice_quantity: Decimal | None
+    ordered_quantity: Decimal | None
+    allocated_quantity: Decimal | None
+    remaining_quantity: Decimal | None
+    unit_of_measure: str | None
+    invoice_unit_price: Decimal | None
+    po_unit_price: Decimal | None
+    price_variance: Decimal | None
+    expected_line_amount: Decimal | None
+    actual_line_amount: Decimal | None
+    explanation: str | None
+
+
 class LineItemOut(ORMModel):
+    id: UUID
     description: str | None
     quantity: Decimal | None
     unit_price: Decimal | None
     tax_percentage: Decimal | None
     total_amount: Decimal | None
+    reconciliation: LineItemReconciliationOut | None = None
 
 
 class ValidationOut(ORMModel):

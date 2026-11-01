@@ -42,6 +42,7 @@ class PurchaseOrder(IdMixin, TimestampMixin, Base):
         back_populates="purchase_order", cascade="all, delete-orphan"
     )
     allocations: Mapped[list["POAllocation"]] = relationship(back_populates="purchase_order")
+    line_allocations: Mapped[list["POLineAllocation"]] = relationship(back_populates="purchase_order")
 
 
 class PurchaseOrderItem(IdMixin, Base):
@@ -56,6 +57,7 @@ class PurchaseOrderItem(IdMixin, Base):
     total_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
 
     purchase_order: Mapped[PurchaseOrder] = relationship(back_populates="items")
+    line_allocations: Mapped[list["POLineAllocation"]] = relationship(back_populates="purchase_order_item")
 
 
 class POAllocation(IdMixin, TimestampMixin, Base):
@@ -79,5 +81,28 @@ class POAllocation(IdMixin, TimestampMixin, Base):
     purchase_order: Mapped[PurchaseOrder] = relationship(back_populates="allocations")
 
 
-__all__ = ["POAllocation", "PurchaseOrder", "PurchaseOrderItem", "Uuid", "Vendor"]
+class POLineAllocation(IdMixin, TimestampMixin, Base):
+    """Granular quantity consumption per PO line item by approved invoices."""
+
+    __tablename__ = "po_line_allocations"
+    __table_args__ = (
+        UniqueConstraint("invoice_line_item_id", name="uq_po_line_alloc_invoice_line"),
+        Index("ix_po_line_alloc_item_status", "purchase_order_item_id", "status"),
+        Index("ix_po_line_alloc_invoice", "invoice_id"),
+    )
+
+    purchase_order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("purchase_orders.id"), index=True)
+    purchase_order_item_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("purchase_order_items.id"), index=True)
+    invoice_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("invoices.id"), index=True)
+    invoice_line_item_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("invoice_line_items.id"), index=True)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="ACTIVE")
+    allocated_by: Mapped[str] = mapped_column(String(100), default="system")
+
+    purchase_order: Mapped[PurchaseOrder] = relationship(back_populates="line_allocations")
+    purchase_order_item: Mapped[PurchaseOrderItem] = relationship(back_populates="line_allocations")
+
+
+__all__ = ["POAllocation", "POLineAllocation", "PurchaseOrder", "PurchaseOrderItem", "Uuid", "Vendor"]
 

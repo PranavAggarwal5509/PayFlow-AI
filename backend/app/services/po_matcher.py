@@ -70,7 +70,7 @@ def match_purchase_order(db: Session, invoice: Invoice) -> list[CheckResult]:
         _status_check(po),
         _currency_check(invoice, po),
         _balance_check(db, invoice, po),
-        _line_items_check(invoice, po),
+        _line_items_check(db, invoice, po),
     ]
     return results
 
@@ -147,22 +147,25 @@ def _balance_check(db: Session, invoice: Invoice, po: PurchaseOrder) -> CheckRes
     )
 
 
-def _line_items_check(invoice: Invoice, po: PurchaseOrder) -> CheckResult:
+def _line_items_check(db: Session, invoice: Invoice, po: PurchaseOrder) -> CheckResult:
     if not po.items:
         return skipped(Check.PO_LINE_ITEMS, "The PO has no line items to compare.")
     if not invoice.line_items:
         return skipped(Check.PO_LINE_ITEMS, "The invoice has no line items to compare.")
-    unmatched: list[str] = []
-    for line in invoice.line_items:
-        if not _line_matches_po(line.description, line.unit_price, po):
-            unmatched.append(line.description or "(no description)")
-    if unmatched:
-        return review(
-            Check.PO_LINE_ITEMS,
-            "Invoice line item(s) not found on the PO: " + "; ".join(unmatched) + ".",
-            status=CheckStatus.WARNING,
-        )
-    return passed(Check.PO_LINE_ITEMS, "Invoice line items approximately match the PO.")
+
+    # Ensure invoice line items are flushed so they have IDs before creating reconciliations
+    db.flush()
+
+    from app.services.line_item_reconciler import (
+        persist_line_reconciliations,
+        reconcile_invoice_line_items,
+    )
+
+    reconciliations, check_results = reconcile_invoice_line_items(db, invoice, po)
+    if reconciliations:
+        persist_line_reconciliations(db, reconciliations)
+
+    return check_results[0] if check_results else passed(Check.PO_LINE_ITEMS, "Line items verified.")
 
 
 def _line_matches_po(description: str | None, unit_price: Decimal | None, po: PurchaseOrder) -> bool:
@@ -213,5 +216,11 @@ def allocate_to_po(
     allocation.allocated_by = allocated_by
     db.add(allocation)
     db.flush()
+
+    # Also allocate granular PO line items
+    from app.services.line_item_reconciler import allocate_po_line_items
+
+    allocate_po_line_items(db, invoice, allocated_by=allocated_by)
+
     return allocation
 

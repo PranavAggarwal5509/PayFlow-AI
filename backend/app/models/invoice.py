@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import JSON, Date, DateTime, ForeignKey, Index, Numeric, String, Text
+from sqlalchemy import JSON, Date, DateTime, ForeignKey, Index, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base, IdMixin, TimestampMixin, utcnow
@@ -58,6 +58,9 @@ class Invoice(IdMixin, TimestampMixin, Base):
     line_items: Mapped[list["InvoiceLineItem"]] = relationship(
         back_populates="invoice", cascade="all, delete-orphan", order_by="InvoiceLineItem.position"
     )
+    line_reconciliations: Mapped[list["LineItemReconciliation"]] = relationship(
+        back_populates="invoice", cascade="all, delete-orphan"
+    )
     runs: Mapped[list["ProcessingRun"]] = relationship(  # noqa: F821
         back_populates="invoice", order_by="ProcessingRun.run_number"
     )
@@ -77,4 +80,44 @@ class InvoiceLineItem(IdMixin, Base):
     total_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
 
     invoice: Mapped[Invoice] = relationship(back_populates="line_items")
+    reconciliation: Mapped["LineItemReconciliation | None"] = relationship(
+        back_populates="invoice_line_item", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class LineItemReconciliation(IdMixin, TimestampMixin, Base):
+    """Structured line-item matching and reconciliation against a Purchase Order line item."""
+
+    __tablename__ = "line_item_reconciliations"
+    __table_args__ = (
+        UniqueConstraint("invoice_line_item_id", name="uq_line_item_recon_invoice_line"),
+        Index("ix_line_recon_invoice", "invoice_id"),
+        Index("ix_line_recon_po_item", "purchase_order_item_id"),
+    )
+
+    invoice_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("invoices.id", ondelete="CASCADE"), index=True)
+    invoice_line_item_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("invoice_line_items.id", ondelete="CASCADE"), index=True
+    )
+    purchase_order_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("purchase_order_items.id", ondelete="SET NULL"), index=True
+    )
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    matching_method: Mapped[str] = mapped_column(String(32), nullable=False)  # EXACT | FUZZY | MANUAL | NONE
+    matched_description: Mapped[str | None] = mapped_column(String(500))
+    invoice_quantity: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    ordered_quantity: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    allocated_quantity: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    remaining_quantity: Mapped[Decimal | None] = mapped_column(Numeric(14, 4))
+    unit_of_measure: Mapped[str | None] = mapped_column(String(32))
+    invoice_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
+    po_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
+    price_variance: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
+    expected_line_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    actual_line_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2))
+    explanation: Mapped[str | None] = mapped_column(Text)
+
+    invoice: Mapped[Invoice] = relationship(back_populates="line_reconciliations")
+    invoice_line_item: Mapped[InvoiceLineItem] = relationship(back_populates="reconciliation")
+    purchase_order_item: Mapped["PurchaseOrderItem | None"] = relationship()
 

@@ -103,12 +103,44 @@ export interface PurchaseOrderDetail extends PurchaseOrder {
   invoices: LinkedInvoice[];
 }
 
+export type LineMatchStatus =
+  | "MATCHED"
+  | "MATCHED_WITH_VARIANCE"
+  | "UNMATCHED"
+  | "AMBIGUOUS"
+  | "QUANTITY_EXCEEDED"
+  | "PRICE_MISMATCH"
+  | "UNIT_MISMATCH"
+  | "BUNDLED_REQUIRES_REVIEW";
+
+export interface LineItemReconciliation {
+  id: string;
+  invoice_line_item_id: string;
+  purchase_order_item_id: string | null;
+  status: LineMatchStatus;
+  matching_method: string;
+  matched_description: string | null;
+  invoice_quantity: string | null;
+  ordered_quantity: string | null;
+  allocated_quantity: string | null;
+  remaining_quantity: string | null;
+  unit_of_measure: string | null;
+  invoice_unit_price: Money | null;
+  po_unit_price: Money | null;
+  price_variance: Money | null;
+  expected_line_amount: Money | null;
+  actual_line_amount: Money | null;
+  explanation: string | null;
+}
+
 export interface LineItem {
+  id?: string;
   description: string | null;
   quantity: string | null;
   unit_price: Money | null;
   tax_percentage: string | null;
   total_amount: Money | null;
+  reconciliation?: LineItemReconciliation | null;
 }
 
 export interface ValidationResult {

@@ -8,7 +8,7 @@ from uuid import UUID
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.models.invoice import Invoice
+from app.models.invoice import Invoice, InvoiceLineItem
 from app.models.processing import AuditLog, Decision, ProcessingRun, Review, ValidationResult
 from app.models.vendor_po import PurchaseOrder, Vendor
 from app.repositories.vendor_repository import vendor_out
@@ -191,7 +191,7 @@ def get_invoice_detail(db: Session, invoice_id: UUID) -> InvoiceDetail | None:
         .where(Invoice.id == invoice_id)
         .options(
             selectinload(Invoice.vendor), selectinload(Invoice.purchase_order),
-            selectinload(Invoice.runs), selectinload(Invoice.line_items),
+            selectinload(Invoice.runs), selectinload(Invoice.line_items).selectinload(InvoiceLineItem.reconciliation),
         )  # fmt: skip
     )
     if inv is None:

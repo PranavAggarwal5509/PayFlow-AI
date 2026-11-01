@@ -104,7 +104,10 @@ export function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
   const items = invoice.line_items;
   return (
     <Card>
-      <CardHeader title="Line items" description={`${items.length} item(s)`} />
+      <CardHeader
+        title="Line items & PO reconciliation"
+        description={`${items.length} item(s) · Granular 3-way matching and PO quantity checks`}
+      />
       {items.length === 0 ? (
         <p className="p-5 text-sm text-muted-foreground">No line items were extracted.</p>
       ) : (
@@ -112,23 +115,83 @@ export function LineItemsCard({ invoice }: { invoice: InvoiceDetail }) {
           <table className="w-full text-left text-sm">
             <thead className="border-b bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-5 py-2 font-medium">Description</th>
-                <th className="px-3 py-2 text-right font-medium">Qty</th>
-                <th className="px-3 py-2 text-right font-medium">Unit price</th>
-                <th className="px-3 py-2 text-right font-medium">Tax</th>
+                <th className="px-5 py-2 font-medium">Invoice item</th>
+                <th className="px-3 py-2 text-right font-medium">Inv qty</th>
+                <th className="px-3 py-2 text-right font-medium">Inv price</th>
+                <th className="px-4 py-2 font-medium">Matched PO line</th>
+                <th className="px-3 py-2 text-right font-medium">PO price</th>
+                <th className="px-3 py-2 text-right font-medium">Variance</th>
+                <th className="px-3 py-2 text-right font-medium">PO rem qty</th>
+                <th className="px-3 py-2 text-center font-medium">Status</th>
                 <th className="px-5 py-2 text-right font-medium">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {items.map((item, i) => (
-                <tr key={i}>
-                  <td className="px-5 py-2.5">{item.description ?? "—"}</td>
-                  <td className="tabular px-3 py-2.5 text-right">{item.quantity ? Number(item.quantity) : "—"}</td>
-                  <td className="tabular px-3 py-2.5 text-right">{formatMoney(item.unit_price, invoice.currency)}</td>
-                  <td className="tabular px-3 py-2.5 text-right">{item.tax_percentage ? `${Number(item.tax_percentage)}%` : "—"}</td>
-                  <td className="tabular px-5 py-2.5 text-right font-medium">{formatMoney(item.total_amount, invoice.currency)}</td>
-                </tr>
-              ))}
+              {items.map((item, i) => {
+                const recon = item.reconciliation;
+                const statusColor =
+                  recon?.status === "MATCHED"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : recon?.status === "MATCHED_WITH_VARIANCE"
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-rose-50 text-rose-700 border-rose-200";
+
+                return (
+                  <tr key={i} className="hover:bg-slate-50/50">
+                    <td className="px-5 py-2.5">
+                      <div className="font-medium text-slate-900">{item.description ?? "—"}</div>
+                      {recon?.explanation && (
+                        <div className="text-[11px] text-slate-500 mt-0.5 max-w-[280px]">
+                          {recon.explanation}
+                        </div>
+                      )}
+                    </td>
+                    <td className="tabular px-3 py-2.5 text-right font-medium">
+                      {item.quantity ? Number(item.quantity) : "—"}
+                    </td>
+                    <td className="tabular px-3 py-2.5 text-right text-slate-600">
+                      {formatMoney(item.unit_price, invoice.currency)}
+                    </td>
+                    <td className="px-4 py-2.5 text-xs text-slate-700">
+                      {recon?.matched_description ? (
+                        <div>
+                          <span className="font-medium text-slate-900">{recon.matched_description}</span>
+                          <span className="ml-1 text-[10px] text-slate-400">({recon.matching_method})</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 italic">No PO match</span>
+                      )}
+                    </td>
+                    <td className="tabular px-3 py-2.5 text-right text-slate-600">
+                      {recon?.po_unit_price ? formatMoney(recon.po_unit_price, invoice.currency) : "—"}
+                    </td>
+                    <td className="tabular px-3 py-2.5 text-right text-xs">
+                      {recon?.price_variance != null && Number(recon.price_variance) !== 0 ? (
+                        <span className="font-medium text-amber-700">
+                          {formatMoney(recon.price_variance, invoice.currency)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">0.00</span>
+                      )}
+                    </td>
+                    <td className="tabular px-3 py-2.5 text-right font-medium text-slate-700">
+                      {recon?.remaining_quantity != null ? Number(recon.remaining_quantity) : "—"}
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {recon?.status ? (
+                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${statusColor}`}>
+                          {recon.status.replace(/_/g, " ")}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="tabular px-5 py-2.5 text-right font-semibold text-slate-900">
+                      {formatMoney(item.total_amount, invoice.currency)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

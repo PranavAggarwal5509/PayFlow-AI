@@ -292,8 +292,8 @@ def test_manual_approval_cannot_overspend_po(client, llm, db):
 
 def test_two_invoices_competing_for_insufficient_po_balance(client, llm, db):
     vendor = add_vendor(db)
-    # PO total is 15000; invoice_payload has total 11800. Two invoices = 23600 (exceeds 15000)
-    add_po(db, vendor, total="15000.00")
+    # PO total is 15000 with 15 chairs; invoice_payload has total 11800 (10 chairs)
+    add_po(db, vendor, total="15000.00", items=[("Office chairs", "15", "1000")])
     inv_1 = UUID(upload(client, llm, invoice_payload(invoice_number="INV-A"), text="invoice a " * 20)["invoice_id"])
     inv_2 = UUID(upload(client, llm, invoice_payload(invoice_number="INV-B"), text="invoice b " * 20)["invoice_id"])
     
