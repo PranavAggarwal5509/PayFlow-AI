@@ -5,6 +5,7 @@ import type {
   DashboardStats,
   InvoiceDetail,
   InvoiceListItem,
+  OperationalMetrics,
   Paginated,
   PurchaseOrder,
   PurchaseOrderDetail,
@@ -34,6 +35,8 @@ export const runService = {
 
 export const dashboardService = {
   stats: (days = 30): Promise<DashboardStats> => get("/dashboard/stats", { days }),
+  developerAnalytics: (days = 30): Promise<OperationalMetrics> =>
+    get("/dashboard/developer-analytics", { days }),
   activity: (limit = 8): Promise<ActivityItem[]> => get("/dashboard/recent-activity", { limit }),
 };
 

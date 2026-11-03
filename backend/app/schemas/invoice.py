@@ -141,6 +141,7 @@ class InvoiceListItem(BaseModel):
     latest_run_id: UUID | None
     current_stage: str | None
     issue: str | None = None
+    source_origin: str = "LIVE_UPLOAD"
 
 
 class InvoiceDetail(InvoiceListItem):

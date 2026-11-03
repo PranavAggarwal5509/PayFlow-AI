@@ -57,6 +57,8 @@ class ExtractedInvoice(BaseModel):
     line_items: list[ExtractedLineItem] = Field(default_factory=list)
     # Fields the model found but is not sure about — distinct from fields that are simply absent.
     uncertain_fields: list[str] = Field(default_factory=list)
+    # Telemetry captured from LLM provider (not part of invoice data)
+    _telemetry: dict | None = None
 
     @field_validator("currency")
     @classmethod

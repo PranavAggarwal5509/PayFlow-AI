@@ -115,80 +115,149 @@ export function VolumeChart({ data }: { data: DashboardStats["daily_volume"] }) 
   );
 }
 
-export function DecisionChart({ data }: { data: DashboardStats["decision_distribution"] }) {
-  const total = data.reduce((sum, item) => sum + item.count, 0);
+export function DecisionChart({
+  data,
+  detailed,
+}: {
+  data: DashboardStats["decision_distribution"];
+  detailed?: DashboardStats["decision_distribution_detailed"];
+}) {
+  const [activeTab, setActiveTab] = useState<"combined" | "live" | "historical">("combined");
+
+  const displayData = useMemo(() => {
+    if (!detailed) return data;
+    if (activeTab === "live") {
+      return [
+        { status: "APPROVED", count: detailed.live.approved },
+        { status: "NEEDS_REVIEW", count: detailed.live.needs_review },
+        { status: "REJECTED", count: detailed.live.rejected },
+        { status: "PROCESSING_FAILED", count: detailed.live.failed },
+      ].filter((x) => x.count > 0);
+    }
+    if (activeTab === "historical") {
+      return [
+        { status: "APPROVED", count: detailed.historical.approved },
+        { status: "NEEDS_REVIEW", count: detailed.historical.needs_review },
+        { status: "REJECTED", count: detailed.historical.rejected },
+      ].filter((x) => x.count > 0);
+    }
+    // Combined
+    return [
+      { status: "APPROVED", count: detailed.combined.approved },
+      { status: "NEEDS_REVIEW", count: detailed.combined.needs_review },
+      { status: "REJECTED", count: detailed.combined.rejected },
+      { status: "PROCESSING_FAILED", count: detailed.combined.failed },
+    ].filter((x) => x.count > 0);
+  }, [data, detailed, activeTab]);
+
+  const total = displayData.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <Card className="border-slate-200/90 shadow-card">
-      <CardHeader
-        title="Decision Distribution"
-        description="Outcomes assigned by deterministic rules"
-      />
-      <CardBody className="h-72 pt-0 flex flex-col justify-center">
-        {total === 0 ? (
-          <EmptyState title="No decision metrics recorded" />
-        ) : (
-          <div className="flex h-full items-center gap-4">
-            <div className="relative h-full w-1/2">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={data}
-                    dataKey="count"
-                    nameKey="status"
-                    innerRadius="65%"
-                    outerRadius="90%"
-                    paddingAngle={3}
-                    stroke="none"
-                  >
-                    {data.map((entry) => (
-                      <Cell key={entry.status} fill={COLORS[entry.status] ?? "#94a3b8"} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={tooltipStyle}
-                    formatter={(v, n) => [v, LABELS[String(n)] ?? n]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="tabular text-3xl font-bold tracking-tight text-slate-900">
-                  {total}
-                </span>
-                <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                  Invoices
-                </span>
-              </div>
-            </div>
-
-            <ul className="flex-1 space-y-2.5 text-xs pr-2">
-              {data.map((entry) => {
-                const pct = total > 0 ? Math.round((entry.count / total) * 100) : 0;
-                return (
-                  <li key={entry.status} className="flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-2 truncate">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ background: COLORS[entry.status] ?? "#94a3b8" }}
-                      />
-                      <span className="text-slate-700 font-medium truncate">
-                        {LABELS[entry.status] ?? entry.status}
-                      </span>
-                    </span>
-                    <span className="tabular font-semibold text-slate-900 flex items-center gap-1.5">
-                      <span>{entry.count}</span>
-                      <span className="text-[10px] text-muted-foreground font-normal">
-                        ({pct}%)
-                      </span>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+    <Card className="border-slate-200/90 shadow-card flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between border-b px-5 py-3">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-900">Decision Distribution</h3>
+            <p className="text-xs text-muted-foreground">Outcomes assigned by deterministic rules</p>
           </div>
-        )}
-      </CardBody>
+          {detailed && (
+            <div className="flex items-center rounded-lg bg-slate-100 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("combined")}
+                className={`rounded-md px-2 py-1 font-medium transition-colors ${
+                  activeTab === "combined" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Combined
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("live")}
+                className={`rounded-md px-2 py-1 font-medium transition-colors ${
+                  activeTab === "live" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Live
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("historical")}
+                className={`rounded-md px-2 py-1 font-medium transition-colors ${
+                  activeTab === "historical" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Historical
+              </button>
+            </div>
+          )}
+        </div>
+        <CardBody className="h-72 pt-2 flex flex-col justify-center">
+          {total === 0 ? (
+            <EmptyState title="No decision metrics recorded" />
+          ) : (
+            <div className="flex h-full items-center gap-4">
+              <div className="relative h-full w-1/2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={displayData}
+                      dataKey="count"
+                      nameKey="status"
+                      innerRadius="65%"
+                      outerRadius="90%"
+                      paddingAngle={3}
+                      stroke="none"
+                    >
+                      {displayData.map((entry) => (
+                        <Cell key={entry.status} fill={COLORS[entry.status] ?? "#94a3b8"} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(v, n) => [v, LABELS[String(n)] ?? n]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="tabular text-3xl font-bold tracking-tight text-slate-900">
+                    {total}
+                  </span>
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    {activeTab === "combined" ? "Total Invoices" : activeTab === "live" ? "Live Uploads" : "Historical"}
+                  </span>
+                </div>
+              </div>
+
+              <ul className="flex-1 space-y-2.5 text-xs pr-2">
+                {displayData.map((entry) => {
+                  const pct = total > 0 ? Math.round((entry.count / total) * 100) : 0;
+                  return (
+                    <li key={entry.status} className="flex items-center justify-between gap-2">
+                      <span className="flex items-center gap-2 truncate">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: COLORS[entry.status] ?? "#94a3b8" }}
+                        />
+                        <span className="text-slate-700 font-medium truncate">
+                          {LABELS[entry.status] ?? entry.status}
+                        </span>
+                      </span>
+                      <span className="tabular font-semibold text-slate-900 flex items-center gap-1.5">
+                        <span>{entry.count}</span>
+                        <span className="text-[10px] text-muted-foreground font-normal">
+                          ({pct}%)
+                        </span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </CardBody>
+      </div>
     </Card>
   );
 }

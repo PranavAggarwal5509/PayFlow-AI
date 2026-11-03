@@ -46,6 +46,7 @@ export interface InvoiceListItem {
   latest_run_id: string | null;
   current_stage: string | null;
   issue: string | null;
+  source_origin?: "LIVE_UPLOAD" | "SEED_HISTORY" | string;
 }
 
 export interface Vendor {
@@ -318,18 +319,26 @@ export interface OperationalMetrics {
     recovery_count: number;
     ocr_count: number;
     digital_count: number;
+    failed_before_extraction?: number;
+    total_attempts?: number;
+    technical_success_formula?: string;
+    technical_failure_formula?: string;
+    manual_review_formula?: string;
   };
   ai_usage: {
     gemini_request_count: number;
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
+    tokens_available?: boolean;
+    prompt_tokens: number | null;
+    completion_tokens: number | null;
+    total_tokens: number | null;
+    unavailable_message?: string | null;
     models: {
       model: string;
       requests: number;
-      prompt_tokens: number;
-      completion_tokens: number;
-      total_tokens: number;
+      prompt_tokens: number | null;
+      completion_tokens: number | null;
+      total_tokens: number | null;
+      tokens_available?: boolean;
       avg_latency_ms: number | null;
     }[];
     cost_status: string;
@@ -337,8 +346,21 @@ export interface OperationalMetrics {
   };
 }
 
+export interface PortfolioGroup {
+  total: number;
+  approved: number;
+  needs_review: number;
+  rejected: number;
+  failed: number;
+}
+
 export interface DashboardStats {
   kpis: { total: Kpi; approved: Kpi; needs_review: Kpi; rejected: Kpi; failed: Kpi };
+  portfolio?: {
+    all: PortfolioGroup;
+    live: PortfolioGroup;
+    historical: PortfolioGroup;
+  };
   approval_rate: number | null;
   pending_reviews: number;
   total_value_by_currency: Record<string, Money>;
@@ -346,6 +368,11 @@ export interface DashboardStats {
   monthly_volume: { month: string; count: number; value: Money }[];
   daily_volume: { date: string; count: number }[];
   decision_distribution: { status: string; count: number }[];
+  decision_distribution_detailed?: {
+    live: PortfolioGroup;
+    historical: PortfolioGroup;
+    combined: PortfolioGroup;
+  };
   recent_failed_runs: {
     run_id: string;
     invoice_id: string;

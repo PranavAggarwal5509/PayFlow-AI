@@ -205,9 +205,16 @@ def stage_ai_extraction(ctx: PipelineContext, run: ProcessingRun) -> dict:
             apply_extraction(ctx.db, invoice, extracted)
             invoice.extraction_text_hash = text_hash
 
+            # Record LLM token telemetry if provided by the model provider
+            telemetry = getattr(extracted, "_telemetry", None)
+            if telemetry and isinstance(telemetry, dict):
+                run.prompt_tokens = telemetry.get("prompt_tokens")
+                run.completion_tokens = telemetry.get("completion_tokens")
+                run.total_tokens = telemetry.get("total_tokens")
+
         # Extract visual evidence locally from PDF/OCR layout
         try:
-            pdf_bytes = ctx.storage.load(invoice.stored_file_path)
+            pdf_bytes = ctx.storage.read(invoice.stored_file_path)
             from app.services.document_layout import extract_ocr_layout, extract_pdf_layout
             from app.services.evidence_service import build_invoice_visual_evidence
 

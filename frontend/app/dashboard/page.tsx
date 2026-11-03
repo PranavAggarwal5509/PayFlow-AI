@@ -20,7 +20,6 @@ import { useState } from "react";
 
 import { DecisionChart, MonthlyValueChart, VolumeChart } from "@/components/dashboard/charts";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { OperationalMetricsSection } from "@/components/dashboard/operational-metrics";
 import { RecentInvoicesTable } from "@/components/invoices/invoice-columns";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -106,7 +105,7 @@ export default function DashboardPage() {
           kpi={data?.kpis.total}
           icon={<FileText className="h-4 w-4 text-slate-700" />}
           loading={stats.loading}
-          href="/invoices"
+          href="/invoices?source_origin=LIVE_UPLOAD"
         />
         <KpiCard
           label="Auto-Approved"
@@ -114,7 +113,7 @@ export default function DashboardPage() {
           accent="success"
           icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />}
           loading={stats.loading}
-          href="/invoices?decision_status=APPROVED"
+          href="/invoices?source_origin=LIVE_UPLOAD&decision_status=APPROVED"
         />
         <KpiCard
           label="Needs Review"
@@ -130,7 +129,7 @@ export default function DashboardPage() {
           accent="danger"
           icon={<XCircle className="h-4 w-4 text-rose-600" />}
           loading={stats.loading}
-          href="/invoices?decision_status=REJECTED"
+          href="/invoices?source_origin=LIVE_UPLOAD&decision_status=REJECTED"
         />
         <KpiCard
           label="Pipeline Failed"
@@ -138,9 +137,162 @@ export default function DashboardPage() {
           accent="danger"
           icon={<AlertOctagon className="h-4 w-4 text-red-600" />}
           loading={stats.loading}
-          href="/invoices?processing_status=FAILED"
+          href="/invoices?source_origin=LIVE_UPLOAD&processing_status=FAILED"
         />
       </section>
+
+      {/* Invoice Portfolio Breakdown (All 90 Records Reconciled) */}
+      {data?.portfolio && (
+        <section aria-label="Invoice Portfolio" className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b pb-4">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Invoice Portfolio Reconciled Dataset</h2>
+              <p className="text-xs text-muted-foreground">
+                Complete multi-source breakdown distinguishing AI-processed live invoices from seeded historical reference data.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 font-semibold text-slate-700">
+                <span className="h-2 w-2 rounded-full bg-slate-500" />
+                Total Portfolio: {data.portfolio.all.total}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 font-semibold text-blue-700">
+                <span className="h-2 w-2 rounded-full bg-blue-600" />
+                Live: {data.portfolio.live.total}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 font-semibold text-purple-700">
+                <span className="h-2 w-2 rounded-full bg-purple-600" />
+                Historical: {data.portfolio.historical.total}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            {/* All Invoices Card */}
+            <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-4">
+              <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">Combined Portfolio</span>
+                <Link
+                  href="/invoices?source_origin=ALL"
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  View all ({data.portfolio.all.total}) →
+                </Link>
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Approved</span>
+                  <span className="tabular font-semibold text-emerald-700">{data.portfolio.all.approved}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Needs Review</span>
+                  <span className="tabular font-semibold text-amber-600">{data.portfolio.all.needs_review}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Rejected</span>
+                  <span className="tabular font-semibold text-rose-600">{data.portfolio.all.rejected}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Technical Failures</span>
+                  <span className="tabular font-semibold text-slate-600">{data.portfolio.all.failed}</span>
+                </div>
+                <div className="mt-2 border-t pt-2 flex items-center justify-between font-semibold text-slate-900">
+                  <span>Reconciled Sum</span>
+                  <span className="tabular">
+                    {data.portfolio.all.approved +
+                      data.portfolio.all.needs_review +
+                      data.portfolio.all.rejected +
+                      data.portfolio.all.failed}{" "}
+                    / {data.portfolio.all.total}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Historical Reference Data Card */}
+            <div className="rounded-lg border border-purple-200/70 bg-purple-50/30 p-4">
+              <div className="flex items-center justify-between border-b border-purple-200/60 pb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-purple-900">Historical Reference</span>
+                <Link
+                  href="/invoices?source_origin=SEED_HISTORY"
+                  className="text-xs font-semibold text-purple-700 hover:underline"
+                >
+                  View historical ({data.portfolio.historical.total}) →
+                </Link>
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-700/80 font-medium">Historical Approved</span>
+                  <span className="tabular font-semibold text-emerald-700">{data.portfolio.historical.approved}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-700/80 font-medium">Historical Needs Review</span>
+                  <span className="tabular font-semibold text-amber-600">{data.portfolio.historical.needs_review}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-700/80 font-medium">Historical Rejected</span>
+                  <span className="tabular font-semibold text-rose-600">{data.portfolio.historical.rejected}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-700/80 font-medium">Technical Failures</span>
+                  <span className="tabular font-semibold text-slate-600">{data.portfolio.historical.failed}</span>
+                </div>
+                <div className="mt-2 border-t border-purple-200/60 pt-2 flex items-center justify-between font-semibold text-purple-950">
+                  <span>Reconciled Sum</span>
+                  <span className="tabular">
+                    {data.portfolio.historical.approved +
+                      data.portfolio.historical.needs_review +
+                      data.portfolio.historical.rejected +
+                      data.portfolio.historical.failed}{" "}
+                    / {data.portfolio.historical.total}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Live Operational Invoices Card */}
+            <div className="rounded-lg border border-blue-200/70 bg-blue-50/30 p-4">
+              <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-900">Live AI Processing</span>
+                <Link
+                  href="/invoices?source_origin=LIVE_UPLOAD"
+                  className="text-xs font-semibold text-blue-700 hover:underline"
+                >
+                  View live ({data.portfolio.live.total}) →
+                </Link>
+              </div>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-700/80 font-medium">Live Approved</span>
+                  <span className="tabular font-semibold text-emerald-700">{data.portfolio.live.approved}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-700/80 font-medium">Live Needs Review</span>
+                  <span className="tabular font-semibold text-amber-600">{data.portfolio.live.needs_review}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-700/80 font-medium">Live Rejected</span>
+                  <span className="tabular font-semibold text-rose-600">{data.portfolio.live.rejected}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-blue-700/80 font-medium">Technical Failures</span>
+                  <span className="tabular font-semibold text-red-600">{data.portfolio.live.failed}</span>
+                </div>
+                <div className="mt-2 border-t border-blue-200/60 pt-2 flex items-center justify-between font-semibold text-blue-950">
+                  <span>Reconciled Sum</span>
+                  <span className="tabular">
+                    {data.portfolio.live.approved +
+                      data.portfolio.live.needs_review +
+                      data.portfolio.live.rejected +
+                      data.portfolio.live.failed}{" "}
+                    / {data.portfolio.live.total}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Primary Analytics Grid: Volume Flow & Decision Distribution */}
       <section className="grid gap-4 lg:grid-cols-3">
@@ -148,16 +300,12 @@ export default function DashboardPage() {
           <VolumeChart data={data?.daily_volume ?? []} />
         </div>
         <div className="lg:col-span-1">
-          <DecisionChart data={data?.decision_distribution ?? []} />
+          <DecisionChart
+            data={data?.decision_distribution ?? []}
+            detailed={data?.decision_distribution_detailed}
+          />
         </div>
       </section>
-
-      {/* Operational & AI Performance Analytics Section */}
-      <OperationalMetricsSection
-        metrics={data?.analytics}
-        selectedDays={selectedDays}
-        onSelectDays={setSelectedDays}
-      />
 
       {/* Secondary Analytics: Value Throughput & Operations Health */}
       <section className="grid gap-4 lg:grid-cols-3">

@@ -18,41 +18,82 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
     now = utcnow()
     since = now - timedelta(days=days)
 
-    # 1. Volume & Runs
-    total_invoices = db.scalar(select(func.count(Invoice.id)).where(Invoice.uploaded_at >= since)) or 0
-    total_runs = db.scalar(select(func.count(ProcessingRun.id)).where(ProcessingRun.started_at >= since)) or 0
-    completed_runs = db.scalar(
-        select(func.count(ProcessingRun.id)).where(
-            ProcessingRun.started_at >= since, ProcessingRun.status == RunStatus.COMPLETED.value
+    # 1. Volume & Runs (Filtered strictly to genuine LIVE_UPLOAD invoices and genuine processing runs)
+    live_inv_filter = (Invoice.uploaded_at >= since, Invoice.source_origin == "LIVE_UPLOAD")
+    genuine_run_filter = (
+        ProcessingRun.started_at >= since,
+        ProcessingRun.triggered_by != "seed_historical_harness",
+    )
+
+    total_invoices = db.scalar(select(func.count(Invoice.id)).where(*live_inv_filter)) or 0
+    total_runs = (
+        db.scalar(
+            select(func.count(ProcessingRun.id))
+            .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+            .where(Invoice.source_origin == "LIVE_UPLOAD", *genuine_run_filter)
         )
-    ) or 0
-    failed_runs = db.scalar(
-        select(func.count(ProcessingRun.id)).where(
-            ProcessingRun.started_at >= since, ProcessingRun.status == RunStatus.FAILED.value
+        or 0
+    )
+    completed_runs = (
+        db.scalar(
+            select(func.count(ProcessingRun.id))
+            .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+            .where(
+                Invoice.source_origin == "LIVE_UPLOAD",
+                ProcessingRun.status == RunStatus.COMPLETED.value,
+                *genuine_run_filter,
+            )
         )
-    ) or 0
+        or 0
+    )
+    failed_runs = (
+        db.scalar(
+            select(func.count(ProcessingRun.id))
+            .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+            .where(
+                Invoice.source_origin == "LIVE_UPLOAD",
+                ProcessingRun.status == RunStatus.FAILED.value,
+                *genuine_run_filter,
+            )
+        )
+        or 0
+    )
 
     # Business decisions
-    approved_count = db.scalar(
-        select(func.count(Invoice.id)).where(
-            Invoice.uploaded_at >= since, Invoice.decision_status == DecisionStatus.APPROVED.value
+    approved_count = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter, Invoice.decision_status == DecisionStatus.APPROVED.value
+            )
         )
-    ) or 0
-    needs_review_count = db.scalar(
-        select(func.count(Invoice.id)).where(
-            Invoice.uploaded_at >= since, Invoice.decision_status == DecisionStatus.NEEDS_REVIEW.value
+        or 0
+    )
+    needs_review_count = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter, Invoice.decision_status == DecisionStatus.NEEDS_REVIEW.value
+            )
         )
-    ) or 0
-    rejected_count = db.scalar(
-        select(func.count(Invoice.id)).where(
-            Invoice.uploaded_at >= since, Invoice.decision_status == DecisionStatus.REJECTED.value
+        or 0
+    )
+    rejected_count = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter, Invoice.decision_status == DecisionStatus.REJECTED.value
+            )
         )
-    ) or 0
+        or 0
+    )
 
     # 2. Speed (Durations & Latencies)
     run_rows = db.execute(
         select(ProcessingRun.started_at, ProcessingRun.completed_at)
-        .where(ProcessingRun.started_at >= since, ProcessingRun.status == RunStatus.COMPLETED.value)
+        .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+        .where(
+            Invoice.source_origin == "LIVE_UPLOAD",
+            ProcessingRun.status == RunStatus.COMPLETED.value,
+            *genuine_run_filter,
+        )
     ).all()
 
     durations = [
@@ -68,7 +109,14 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
     # Stage durations breakdown
     stage_events = db.execute(
         select(StageEvent.stage, StageEvent.started_at, StageEvent.completed_at)
-        .where(StageEvent.started_at >= since, StageEvent.completed_at.is_not(None))
+        .join(ProcessingRun, ProcessingRun.id == StageEvent.run_id)
+        .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+        .where(
+            Invoice.source_origin == "LIVE_UPLOAD",
+            StageEvent.started_at >= since,
+            StageEvent.completed_at.is_not(None),
+            ProcessingRun.triggered_by != "seed_historical_harness",
+        )
     ).all()
 
     stage_durations: dict[str, list[float]] = {}
@@ -89,12 +137,32 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
     stage_breakdown.sort(key=lambda x: x["avg_seconds"], reverse=True)
 
     # 3. Reliability & Extraction Methods
-    ocr_invoices = db.scalar(
-        select(func.count(Invoice.id)).where(Invoice.uploaded_at >= since, Invoice.extraction_method == "OCR")
-    ) or 0
-    digital_invoices = db.scalar(
-        select(func.count(Invoice.id)).where(Invoice.uploaded_at >= since, Invoice.extraction_method == "TEXT")
-    ) or 0
+    ocr_invoices = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter, Invoice.extraction_method == "OCR"
+            )
+        )
+        or 0
+    )
+    digital_invoices = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter, Invoice.extraction_method == "TEXT"
+            )
+        )
+        or 0
+    )
+    failed_before_extraction = (
+        db.scalar(
+            select(func.count(Invoice.id)).where(
+                *live_inv_filter,
+                Invoice.processing_status == ProcessingStatus.FAILED.value,
+                Invoice.extraction_method.is_(None),
+            )
+        )
+        or 0
+    )
 
     retry_count = db.scalar(
         select(func.count(AuditLog.id)).where(AuditLog.created_at >= since, AuditLog.action == "RUN_RETRY")
@@ -107,7 +175,23 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
     tech_failure_rate = round((failed_runs / total_runs * 100), 1) if total_runs else 0.0
     manual_review_rate = round((needs_review_count / total_invoices * 100), 1) if total_invoices else 0.0
 
-    # 4. AI Telemetry & Tokens
+    # 4. AI Telemetry & Tokens (genuine live runs only)
+    # Check whether any run actually recorded tokens
+    recorded_token_runs_count = (
+        db.scalar(
+            select(func.count(ProcessingRun.id))
+            .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+            .where(
+                Invoice.source_origin == "LIVE_UPLOAD",
+                ProcessingRun.started_at >= since,
+                ProcessingRun.total_tokens.is_not(None),
+                ProcessingRun.triggered_by != "seed_historical_harness",
+            )
+        )
+        or 0
+    )
+    tokens_available = recorded_token_runs_count > 0
+
     ai_runs = db.execute(
         select(
             ProcessingRun.llm_model,
@@ -117,7 +201,13 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
             func.count(ProcessingRun.id),
             func.avg(ProcessingRun.extraction_duration_ms),
         )
-        .where(ProcessingRun.started_at >= since, ProcessingRun.llm_model.is_not(None))
+        .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+        .where(
+            Invoice.source_origin == "LIVE_UPLOAD",
+            ProcessingRun.started_at >= since,
+            ProcessingRun.llm_model.is_not(None),
+            ProcessingRun.triggered_by != "seed_historical_harness",
+        )
         .group_by(ProcessingRun.llm_model)
     ).all()
 
@@ -135,9 +225,10 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
         model_telemetry.append({
             "model": model,
             "requests": int(reqs),
-            "prompt_tokens": int(p_tok),
-            "completion_tokens": int(c_tok),
-            "total_tokens": int(tot_tok),
+            "prompt_tokens": int(p_tok) if tokens_available else None,
+            "completion_tokens": int(c_tok) if tokens_available else None,
+            "total_tokens": int(tot_tok) if tokens_available else None,
+            "tokens_available": tokens_available,
             "avg_latency_ms": round(float(avg_ms), 1) if avg_ms else None,
         })
 
@@ -175,12 +266,19 @@ def get_operational_metrics(db: Session, days: int = 30) -> dict:
             "recovery_count": recovery_count,
             "ocr_count": ocr_invoices,
             "digital_count": digital_invoices,
+            "failed_before_extraction": failed_before_extraction,
+            "total_attempts": total_invoices,
+            "technical_success_formula": "completed_runs / (completed_runs + failed_runs) * 100",
+            "technical_failure_formula": "failed_runs / (completed_runs + failed_runs) * 100",
+            "manual_review_formula": "needs_review_invoices / total_live_invoices * 100",
         },
         "ai_usage": {
             "gemini_request_count": gemini_requests,
-            "prompt_tokens": total_prompt_tokens,
-            "completion_tokens": total_completion_tokens,
-            "total_tokens": total_tokens_all,
+            "tokens_available": tokens_available,
+            "prompt_tokens": total_prompt_tokens if tokens_available else None,
+            "completion_tokens": total_completion_tokens if tokens_available else None,
+            "total_tokens": total_tokens_all if tokens_available else None,
+            "unavailable_message": "Usage data unavailable for previous requests" if not tokens_available else None,
             "models": model_telemetry,
             "cost_status": "Cost not configured",
             "cost_details": None,

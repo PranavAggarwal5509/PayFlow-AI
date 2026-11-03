@@ -8,6 +8,7 @@ import type { Vendor } from "@/types/api";
 
 export interface InvoiceFilterValues extends Record<string, string> {
   q: string;
+  source_origin: string;
   decision_status: string;
   processing_status: string;
   vendor_id: string;
@@ -20,6 +21,7 @@ export interface InvoiceFilterValues extends Record<string, string> {
 
 export const EMPTY_INVOICE_FILTERS: InvoiceFilterValues = {
   q: "",
+  source_origin: "LIVE_UPLOAD",
   decision_status: "",
   processing_status: "",
   vendor_id: "",
@@ -52,6 +54,16 @@ export function InvoiceFilters({
         aria-label="Search invoices"
         className="col-span-2"
       />
+      <Select
+        value={values.source_origin}
+        onChange={(e) => onChange("source_origin", e.target.value)}
+        aria-label="Dataset Source"
+        className="font-medium"
+      >
+        <option value="LIVE_UPLOAD">Live uploads</option>
+        <option value="SEED_HISTORY">Historical invoices</option>
+        <option value="ALL">All invoices</option>
+      </Select>
       <Select value={values.decision_status} onChange={(e) => onChange("decision_status", e.target.value)} aria-label="Decision">
         <option value="">All decisions</option>
         <option value="APPROVED">Approved</option>

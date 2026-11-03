@@ -234,7 +234,11 @@ def extract_structured_invoice(
             payload = provider.extract_invoice(document_text)
             if not isinstance(payload, dict):
                 raise ValueError("LLM payload is not a JSON object")
-            return ExtractedInvoice.model_validate(payload)
+            telemetry = payload.get("_telemetry")
+            parsed = ExtractedInvoice.model_validate(payload)
+            if telemetry:
+                parsed._telemetry = telemetry
+            return parsed
         except (TransientError, ValueError, ValidationError) as exc:
             # pydantic's ValidationError subclasses ValueError; both are retried.
             last_error = exc

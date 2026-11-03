@@ -49,9 +49,12 @@ class InvoiceFilters:
     min_amount: Decimal | None = None
     max_amount: Decimal | None = None
     po_number: str | None = None
+    source_origin: str | None = "LIVE_UPLOAD"
 
 
 def apply_filters(stmt: Select, f: InvoiceFilters) -> Select:
+    if f.source_origin and f.source_origin.upper() != "ALL":
+        stmt = stmt.where(Invoice.source_origin == f.source_origin)
     if f.q:
         like = f"%{f.q.strip()}%"
         stmt = stmt.outerjoin(Vendor, Invoice.vendor_id == Vendor.id).where(
@@ -142,6 +145,7 @@ def to_list_item(inv: Invoice, issue: str | None = None) -> InvoiceListItem:
         latest_run_id=latest.id if latest else None,
         current_stage=latest.current_stage if latest else None,
         issue=issue,
+        source_origin=getattr(inv, "source_origin", "LIVE_UPLOAD") or "LIVE_UPLOAD",
     )
 
 

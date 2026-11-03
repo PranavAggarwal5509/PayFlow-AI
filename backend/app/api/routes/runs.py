@@ -41,12 +41,18 @@ def build_run_detail(db: Session, run: ProcessingRun) -> RunDetail:
 def list_runs(
     status: str | None = None,
     invoice_id: UUID | None = None,
+    exclude_synthetic: bool = True,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     _: CurrentUser = Depends(get_current_user),
 ):
-    stmt = select(ProcessingRun)
+    stmt = select(ProcessingRun).join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+    if exclude_synthetic:
+        stmt = stmt.where(
+            Invoice.source_origin == "LIVE_UPLOAD",
+            ProcessingRun.triggered_by != "seed_historical_harness",
+        )
     if status:
         stmt = stmt.where(ProcessingRun.status == status)
     if invoice_id:

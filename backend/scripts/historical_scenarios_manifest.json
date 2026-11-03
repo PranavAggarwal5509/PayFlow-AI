@@ -1,0 +1,752 @@
+[
+  {
+    "invoice_number": "HIST-ACM-2501-001",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "743.40",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-01-15T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-ACM-2505-015",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "743.40",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-05-07T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-ACM-2508-029",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "743.40",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-08-27T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-ACM-2512-043",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "743.40",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-12-17T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-ACM-2604-057",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "743.40",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-04-08T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-ACM-2607-071",
+    "vendor_name": "Acme Industrial Supplies Pvt Ltd",
+    "vendor_code": "V-1001",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total_amount": "1486.80",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-07-29T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-APE-2504-012",
+    "vendor_name": "Apex Cloud Systems Ltd",
+    "vendor_code": "V-1013",
+    "po_number": "PO-2026-0028",
+    "currency": "EUR",
+    "total_amount": "1488.90",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-04-13T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-APE-2508-026",
+    "vendor_name": "Apex Cloud Systems Ltd",
+    "vendor_code": "V-1013",
+    "po_number": "PO-2026-0028",
+    "currency": "EUR",
+    "total_amount": "1488.90",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-08-03T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-APE-2511-040",
+    "vendor_name": "Apex Cloud Systems Ltd",
+    "vendor_code": "V-1013",
+    "po_number": "PO-2026-0028",
+    "currency": "EUR",
+    "total_amount": "1488.90",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-11-23T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-APE-2603-054",
+    "vendor_name": "Apex Cloud Systems Ltd",
+    "vendor_code": "V-1013",
+    "po_number": "PO-2026-0028",
+    "currency": "EUR",
+    "total_amount": "1488.90",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-03-15T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-APE-2607-068",
+    "vendor_name": "Apex Cloud Systems Ltd",
+    "vendor_code": "V-1013",
+    "po_number": "PO-2026-0028",
+    "currency": "EUR",
+    "total_amount": "2977.80",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-07-05T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2501-002",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "30680.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-01-23T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2505-016",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "30680.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-05-15T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2509-030",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "30680.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-09-04T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2512-044",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "30680.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-12-25T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2604-058",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "30680.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-04-16T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-BHA-2608-072",
+    "vendor_name": "Bharat Office Solutions Pvt Ltd",
+    "vendor_code": "V-1002",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total_amount": "61360.00",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-08-06T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2501-003",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "35990.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-01-31T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2505-017",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "35990.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-05-23T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2509-031",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "35990.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-09-12T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2601-045",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "35990.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-01-02T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2604-059",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "35990.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-04-24T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-COB-2608-073",
+    "vendor_name": "Cobalt Logistics LLP",
+    "vendor_code": "V-1003",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total_amount": "71980.00",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-08-14T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2502-004",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "3091.60",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-02-08T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2505-018",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "3091.60",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-05-31T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2509-032",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "3091.60",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-09-20T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2601-046",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "3091.60",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-01-10T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2605-060",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "3091.60",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-05-02T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-DEC-2608-074",
+    "vendor_name": "Deccan Print & Packaging Ltd",
+    "vendor_code": "V-1004",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total_amount": "6183.20",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-08-22T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2502-005",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "20886.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-02-16T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2506-019",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "20886.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-06-08T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2509-033",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "20886.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-09-28T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2601-047",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "20886.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-01-18T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2605-061",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "20886.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-05-10T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-EVE-2608-075",
+    "vendor_name": "Evergreen Facility Services",
+    "vendor_code": "V-1005",
+    "po_number": "PO-2026-0021",
+    "currency": "INR",
+    "total_amount": "41772.00",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-08-30T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-FAL-2502-006",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "vendor_code": "V-1006",
+    "po_number": "PO-2026-0022",
+    "currency": "INR",
+    "total_amount": "113870.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-02-24T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-FAL-2506-020",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "vendor_code": "V-1006",
+    "po_number": "PO-2026-0022",
+    "currency": "INR",
+    "total_amount": "113870.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-06-16T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-FAL-2510-034",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "vendor_code": "V-1006",
+    "po_number": "PO-2026-0022",
+    "currency": "INR",
+    "total_amount": "113870.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-10-06T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-FAL-2601-048",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "vendor_code": "V-1006",
+    "po_number": "PO-2026-0022",
+    "currency": "INR",
+    "total_amount": "113870.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-01-26T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-FAL-2605-062",
+    "vendor_name": "Falcon IT Hardware Pvt Ltd",
+    "vendor_code": "V-1006",
+    "po_number": "PO-2026-0022",
+    "currency": "INR",
+    "total_amount": "113870.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-05-18T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-GAM-2503-007",
+    "vendor_name": "Gamma Stationers",
+    "vendor_code": "V-1007",
+    "po_number": "PO-2026-0023",
+    "currency": "INR",
+    "total_amount": "2065.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-03-04T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-GAM-2506-021",
+    "vendor_name": "Gamma Stationers",
+    "vendor_code": "V-1007",
+    "po_number": "PO-2026-0023",
+    "currency": "INR",
+    "total_amount": "2065.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-06-24T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-GAM-2510-035",
+    "vendor_name": "Gamma Stationers",
+    "vendor_code": "V-1007",
+    "po_number": "PO-2026-0023",
+    "currency": "INR",
+    "total_amount": "2065.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-10-14T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-GAM-2602-049",
+    "vendor_name": "Gamma Stationers",
+    "vendor_code": "V-1007",
+    "po_number": "PO-2026-0023",
+    "currency": "INR",
+    "total_amount": "2065.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-02-03T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-GAM-2605-063",
+    "vendor_name": "Gamma Stationers",
+    "vendor_code": "V-1007",
+    "po_number": "PO-2026-0023",
+    "currency": "INR",
+    "total_amount": "2065.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-05-26T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-IND-2503-008",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "vendor_code": "V-1009",
+    "po_number": "PO-2026-0024",
+    "currency": "INR",
+    "total_amount": "21004.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-03-12T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-IND-2507-022",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "vendor_code": "V-1009",
+    "po_number": "PO-2026-0024",
+    "currency": "INR",
+    "total_amount": "21004.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-07-02T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-IND-2510-036",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "vendor_code": "V-1009",
+    "po_number": "PO-2026-0024",
+    "currency": "INR",
+    "total_amount": "21004.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-10-22T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-IND-2602-050",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "vendor_code": "V-1009",
+    "po_number": "PO-2026-0024",
+    "currency": "INR",
+    "total_amount": "21004.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-02-11T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-IND-2606-064",
+    "vendor_name": "Indus Electricals Pvt Ltd",
+    "vendor_code": "V-1009",
+    "po_number": "PO-2026-0024",
+    "currency": "INR",
+    "total_amount": "21004.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-06-03T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-JUP-2503-009",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "vendor_code": "V-1010",
+    "po_number": "PO-2026-0025",
+    "currency": "INR",
+    "total_amount": "104430.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-03-20T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-JUP-2507-023",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "vendor_code": "V-1010",
+    "po_number": "PO-2026-0025",
+    "currency": "INR",
+    "total_amount": "104430.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-07-10T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-JUP-2510-037",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "vendor_code": "V-1010",
+    "po_number": "PO-2026-0025",
+    "currency": "INR",
+    "total_amount": "104430.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-10-30T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-JUP-2602-051",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "vendor_code": "V-1010",
+    "po_number": "PO-2026-0025",
+    "currency": "INR",
+    "total_amount": "104430.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-02-19T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-JUP-2606-065",
+    "vendor_name": "Jupiter Software Services Pvt Ltd",
+    "vendor_code": "V-1010",
+    "po_number": "PO-2026-0025",
+    "currency": "INR",
+    "total_amount": "104430.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-06-11T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-KES-2503-010",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "vendor_code": "V-1011",
+    "po_number": "PO-2026-0026",
+    "currency": "USD",
+    "total_amount": "934.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-03-28T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-KES-2507-024",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "vendor_code": "V-1011",
+    "po_number": "PO-2026-0026",
+    "currency": "USD",
+    "total_amount": "934.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-07-18T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-KES-2511-038",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "vendor_code": "V-1011",
+    "po_number": "PO-2026-0026",
+    "currency": "USD",
+    "total_amount": "934.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-11-07T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-KES-2602-052",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "vendor_code": "V-1011",
+    "po_number": "PO-2026-0026",
+    "currency": "USD",
+    "total_amount": "934.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-02-27T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-KES-2606-066",
+    "vendor_name": "Kestrel Cloud Technologies Pvt Ltd",
+    "vendor_code": "V-1011",
+    "po_number": "PO-2026-0026",
+    "currency": "USD",
+    "total_amount": "934.50",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-06-19T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-LOT-2504-011",
+    "vendor_name": "Lotus Furnishings Co",
+    "vendor_code": "V-1012",
+    "po_number": "PO-2026-0027",
+    "currency": "INR",
+    "total_amount": "3599.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-04-05T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-LOT-2507-025",
+    "vendor_name": "Lotus Furnishings Co",
+    "vendor_code": "V-1012",
+    "po_number": "PO-2026-0027",
+    "currency": "INR",
+    "total_amount": "3599.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-07-26T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-LOT-2511-039",
+    "vendor_name": "Lotus Furnishings Co",
+    "vendor_code": "V-1012",
+    "po_number": "PO-2026-0027",
+    "currency": "INR",
+    "total_amount": "3599.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-11-15T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-LOT-2603-053",
+    "vendor_name": "Lotus Furnishings Co",
+    "vendor_code": "V-1012",
+    "po_number": "PO-2026-0027",
+    "currency": "INR",
+    "total_amount": "3599.00",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-03-07T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-LOT-2606-067",
+    "vendor_name": "Lotus Furnishings Co",
+    "vendor_code": "V-1012",
+    "po_number": "PO-2026-0027",
+    "currency": "INR",
+    "total_amount": "3599.00",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-06-27T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-NEX-2504-013",
+    "vendor_name": "Nexus Logistics & Supply Chain",
+    "vendor_code": "V-1014",
+    "po_number": "PO-2026-0029",
+    "currency": "AED",
+    "total_amount": "5302.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-04-21T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-NEX-2508-027",
+    "vendor_name": "Nexus Logistics & Supply Chain",
+    "vendor_code": "V-1014",
+    "po_number": "PO-2026-0029",
+    "currency": "AED",
+    "total_amount": "5302.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-08-11T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-NEX-2512-041",
+    "vendor_name": "Nexus Logistics & Supply Chain",
+    "vendor_code": "V-1014",
+    "po_number": "PO-2026-0029",
+    "currency": "AED",
+    "total_amount": "5302.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-12-01T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-NEX-2603-055",
+    "vendor_name": "Nexus Logistics & Supply Chain",
+    "vendor_code": "V-1014",
+    "po_number": "PO-2026-0029",
+    "currency": "AED",
+    "total_amount": "5302.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2026-03-23T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-NEX-2607-069",
+    "vendor_name": "Nexus Logistics & Supply Chain",
+    "vendor_code": "V-1014",
+    "po_number": "PO-2026-0029",
+    "currency": "AED",
+    "total_amount": "10605.00",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-07-13T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-STE-2504-014",
+    "vendor_name": "Sterling Facilities & Security",
+    "vendor_code": "V-1015",
+    "po_number": "PO-2026-0030",
+    "currency": "GBP",
+    "total_amount": "7717.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-04-29T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-STE-2508-028",
+    "vendor_name": "Sterling Facilities & Security",
+    "vendor_code": "V-1015",
+    "po_number": "PO-2026-0030",
+    "currency": "GBP",
+    "total_amount": "7717.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-08-19T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-STE-2512-042",
+    "vendor_name": "Sterling Facilities & Security",
+    "vendor_code": "V-1015",
+    "po_number": "PO-2026-0030",
+    "currency": "GBP",
+    "total_amount": "7717.50",
+    "decision": "APPROVED",
+    "uploaded_at": "2025-12-09T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-STE-2603-056",
+    "vendor_name": "Sterling Facilities & Security",
+    "vendor_code": "V-1015",
+    "po_number": "PO-2026-0030",
+    "currency": "GBP",
+    "total_amount": "7717.50",
+    "decision": "NEEDS_REVIEW",
+    "uploaded_at": "2026-03-31T00:00:00+00:00"
+  },
+  {
+    "invoice_number": "HIST-STE-2607-070",
+    "vendor_name": "Sterling Facilities & Security",
+    "vendor_code": "V-1015",
+    "po_number": "PO-2026-0030",
+    "currency": "GBP",
+    "total_amount": "15435.00",
+    "decision": "REJECTED",
+    "uploaded_at": "2026-07-21T00:00:00+00:00"
+  }
+]

@@ -19,18 +19,32 @@ export function useInvoiceColumns(options: { sortable?: boolean } = {}): ColumnD
         id: "invoice_number",
         header: "Invoice",
         enableSorting: sortable,
-        cell: ({ row }) => (
-          <div>
-            <Link
-              href={`/invoices/${row.original.id}`}
-              className="font-medium text-foreground hover:text-primary"
-              onClick={(event) => event.stopPropagation()}
-            >
-              {row.original.invoice_number ?? <span className="text-slate-400">No number</span>}
-            </Link>
-            <p className="max-w-[200px] truncate text-xs text-muted-foreground">{row.original.original_file_name}</p>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const isHistorical = row.original.source_origin === "SEED_HISTORY";
+          return (
+            <div>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={`/invoices/${row.original.id}`}
+                  className="font-medium text-foreground hover:text-primary"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  {row.original.invoice_number ?? <span className="text-slate-400">No number</span>}
+                </Link>
+                {isHistorical ? (
+                  <span className="inline-flex items-center rounded-sm bg-purple-50 px-1.5 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-inset ring-purple-600/20">
+                    HISTORICAL
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                    LIVE UPLOAD
+                  </span>
+                )}
+              </div>
+              <p className="max-w-[200px] truncate text-xs text-muted-foreground">{row.original.original_file_name}</p>
+            </div>
+          );
+        },
       },
       {
         id: "vendor",

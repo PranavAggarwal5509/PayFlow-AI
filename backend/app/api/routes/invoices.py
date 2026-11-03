@@ -86,6 +86,7 @@ def list_invoices(
     amount_min: Decimal | None = None,
     amount_max: Decimal | None = None,
     po_number: str | None = None,
+    source_origin: str | None = "LIVE_UPLOAD",
     sort_by: str = "uploaded_at",
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
     page: int = Query(1, ge=1),
@@ -107,6 +108,7 @@ def list_invoices(
         min_amount=effective_min_amount,
         max_amount=effective_max_amount,
         po_number=po_number,
+        source_origin=source_origin,
     )
     items, total = repo.list_invoices(db, filters, sort_by, sort_dir == "desc", page, page_size)
     return ApiResponse(data=items, meta=page_meta(page, page_size, total))

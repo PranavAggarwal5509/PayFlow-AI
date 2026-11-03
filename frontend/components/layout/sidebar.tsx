@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Settings,
   ShoppingCart,
+  Terminal,
   Upload,
   Workflow,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/vendors", label: "Vendors", icon: Building2 },
   { href: "/purchase-orders", label: "Purchase Orders", icon: ShoppingCart },
   { href: "/activity", label: "Processing Activity", icon: Activity },
+  { href: "/developer", label: "Developer", icon: Terminal },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

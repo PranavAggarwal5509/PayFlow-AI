@@ -136,6 +136,7 @@ def test_postgres_concurrent_line_allocations_protected():
 
         db_setup.commit()
 
+        vendor_id = vendor.id
         po_id = po.id
         poi_id = poi.id
         inv_a_id = inv_a.id
@@ -178,13 +179,27 @@ def test_postgres_concurrent_line_allocations_protected():
 
     # Verify final database state in fresh session
     with SessionLocal() as db_verify:
-        consumed = consumed_po_item_quantity(db_verify, poi_id)
-        # Consumed must be either 7 or 6, NEVER 13
-        assert consumed in (Decimal("7"), Decimal("6")), f"Consumed quantity violated PO: {consumed}"
-        allocs = list(
-            db_verify.scalars(
-                select(POLineAllocation).where(POLineAllocation.purchase_order_item_id == poi_id)
-            ).all()
-        )
-        assert len(allocs) == 1
-        assert allocs[0].status == "ACTIVE"
+        try:
+            consumed = consumed_po_item_quantity(db_verify, poi_id)
+            # Consumed must be either 7 or 6, NEVER 13
+            assert consumed in (Decimal("7"), Decimal("6")), f"Consumed quantity violated PO: {consumed}"
+            allocs = list(
+                db_verify.scalars(
+                    select(POLineAllocation).where(POLineAllocation.purchase_order_item_id == poi_id)
+                ).all()
+            )
+            assert len(allocs) == 1
+            assert allocs[0].status == "ACTIVE"
+        finally:
+            # Clean up the test fixtures so they do not pollute PostgreSQL master data
+            db_verify.rollback()
+            from app.models.processing import AuditLog
+            db_verify.query(POLineAllocation).filter(POLineAllocation.purchase_order_item_id == poi_id).delete(synchronize_session=False)
+            db_verify.query(LineItemReconciliation).filter(LineItemReconciliation.invoice_id.in_([inv_a_id, inv_b_id])).delete(synchronize_session=False)
+            db_verify.query(InvoiceLineItem).filter(InvoiceLineItem.invoice_id.in_([inv_a_id, inv_b_id])).delete(synchronize_session=False)
+            db_verify.query(AuditLog).filter(AuditLog.invoice_id.in_([inv_a_id, inv_b_id])).delete(synchronize_session=False)
+            db_verify.query(Invoice).filter(Invoice.id.in_([inv_a_id, inv_b_id])).delete(synchronize_session=False)
+            db_verify.query(PurchaseOrderItem).filter(PurchaseOrderItem.id == poi_id).delete(synchronize_session=False)
+            db_verify.query(PurchaseOrder).filter(PurchaseOrder.id == po_id).delete(synchronize_session=False)
+            db_verify.query(Vendor).filter(Vendor.id == vendor_id).delete(synchronize_session=False)
+            db_verify.commit()

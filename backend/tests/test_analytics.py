@@ -29,7 +29,8 @@ def test_empty_database_operational_metrics(db):
     assert metrics["speed"]["avg_end_to_end_seconds"] is None
     assert metrics["speed"]["p95_end_to_end_seconds"] is None
     assert metrics["reliability"]["technical_success_rate"] == 100.0
-    assert metrics["ai_usage"]["total_tokens"] == 0
+    assert metrics["ai_usage"]["tokens_available"] is False
+    assert metrics["ai_usage"]["total_tokens"] is None
     assert metrics["ai_usage"]["cost_status"] == "Cost not configured"
 
 
@@ -119,11 +120,13 @@ def test_operational_metrics_volume_and_durations(db):
     assert metrics["reliability"]["technical_failure_rate"] == 33.3
 
     # AI usage checks
+    assert metrics["ai_usage"]["tokens_available"] is True
     assert metrics["ai_usage"]["total_tokens"] == 1300
     assert metrics["ai_usage"]["prompt_tokens"] == 950
     assert metrics["ai_usage"]["completion_tokens"] == 350
     assert len(metrics["ai_usage"]["models"]) == 1
     assert metrics["ai_usage"]["models"][0]["model"] == "mock-catalog"
+    assert metrics["ai_usage"]["models"][0]["tokens_available"] is True
 
 
 def test_time_window_filtering(db):

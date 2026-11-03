@@ -14,8 +14,17 @@ from app.models.processing import AuditLog, ProcessingRun, Review
 PERIOD_DAYS = 30
 
 
+def _count_origin(db: Session, origin: str | None, *conditions) -> int:
+    stmt = select(func.count(Invoice.id))
+    if origin:
+        stmt = stmt.where(Invoice.source_origin == origin)
+    if conditions:
+        stmt = stmt.where(*conditions)
+    return db.scalar(stmt) or 0
+
+
 def _count(db: Session, *conditions) -> int:
-    return db.scalar(select(func.count(Invoice.id)).where(*conditions)) or 0
+    return _count_origin(db, "LIVE_UPLOAD", *conditions)
 
 
 def _delta(current: int, previous: int) -> float | None:
@@ -63,7 +72,7 @@ def get_stats(db: Session) -> dict:
         currency: Decimal(total)
         for currency, total in db.execute(
             select(Invoice.currency, func.coalesce(func.sum(Invoice.total_amount), 0))
-            .where(Invoice.currency.is_not(None))
+            .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.currency.is_not(None))
             .group_by(Invoice.currency)
         )
     }
@@ -79,8 +88,34 @@ def get_stats(db: Session) -> dict:
         or 0
     )
 
+    # Compute detailed Portfolio Breakdown
+    portfolio = {
+        "all": {
+            "total": _count_origin(db, None),
+            "approved": _count_origin(db, None, Invoice.decision_status == approved),
+            "needs_review": _count_origin(db, None, Invoice.decision_status == needs_review),
+            "rejected": _count_origin(db, None, Invoice.decision_status == rejected),
+            "failed": _count_origin(db, None, Invoice.processing_status == failed),
+        },
+        "live": {
+            "total": _count_origin(db, "LIVE_UPLOAD"),
+            "approved": _count_origin(db, "LIVE_UPLOAD", Invoice.decision_status == approved),
+            "needs_review": _count_origin(db, "LIVE_UPLOAD", Invoice.decision_status == needs_review),
+            "rejected": _count_origin(db, "LIVE_UPLOAD", Invoice.decision_status == rejected),
+            "failed": _count_origin(db, "LIVE_UPLOAD", Invoice.processing_status == failed),
+        },
+        "historical": {
+            "total": _count_origin(db, "SEED_HISTORY"),
+            "approved": _count_origin(db, "SEED_HISTORY", Invoice.decision_status == approved),
+            "needs_review": _count_origin(db, "SEED_HISTORY", Invoice.decision_status == needs_review),
+            "rejected": _count_origin(db, "SEED_HISTORY", Invoice.decision_status == rejected),
+            "failed": _count_origin(db, "SEED_HISTORY", Invoice.processing_status == failed),
+        },
+    }
+
     return {
         "kpis": kpis,
+        "portfolio": portfolio,
         "approval_rate": approval_rate,
         "pending_reviews": pending_reviews,
         "total_value_by_currency": value_by_currency,
@@ -88,6 +123,7 @@ def get_stats(db: Session) -> dict:
         "monthly_volume": _monthly(db),
         "daily_volume": _daily(db, now - timedelta(days=PERIOD_DAYS - 1)),
         "decision_distribution": _distribution(db),
+        "decision_distribution_detailed": _distribution_detailed(db),
         "recent_failed_runs": _recent_failed(db),
     }
 
@@ -110,6 +146,7 @@ def _monthly(db: Session) -> list[dict]:
             year.label("y"), month.label("m"), func.count(Invoice.id),
             func.coalesce(func.sum(Invoice.total_amount), 0),
         )  # fmt: skip
+        .where(Invoice.source_origin == "LIVE_UPLOAD")
         .group_by("y", "m")
         .order_by("y", "m")
     ).all()
@@ -125,7 +162,7 @@ def _daily(db: Session, since) -> list[dict]:
     day = extract("day", Invoice.uploaded_at)
     rows = db.execute(
         select(year.label("y"), month.label("m"), day.label("d"), func.count(Invoice.id))
-        .where(Invoice.uploaded_at >= since)
+        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.uploaded_at >= since)
         .group_by("y", "m", "d")
         .order_by("y", "m", "d")
     ).all()
@@ -135,17 +172,64 @@ def _daily(db: Session, since) -> list[dict]:
 def _distribution(db: Session) -> list[dict]:
     rows = db.execute(
         select(Invoice.decision_status, func.count(Invoice.id))
-        .where(Invoice.decision_status.is_not(None))
+        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.decision_status.is_not(None))
         .group_by(Invoice.decision_status)
     ).all()
     out = [{"status": status, "count": count} for status, count in rows]
-    failed = _count(db, Invoice.processing_status == ProcessingStatus.FAILED.value)
+    # For invoices that failed technical processing before a decision was reached
+    failed_undecided = db.scalar(
+        select(func.count(Invoice.id)).where(
+            Invoice.source_origin == "LIVE_UPLOAD",
+            Invoice.processing_status == ProcessingStatus.FAILED.value,
+            Invoice.decision_status.is_(None),
+        )
+    ) or 0
     processing = _count(db, Invoice.processing_status == ProcessingStatus.PROCESSING.value)
-    if failed:
-        out.append({"status": "PROCESSING_FAILED", "count": failed})
+    if failed_undecided:
+        out.append({"status": "PROCESSING_FAILED", "count": failed_undecided})
     if processing:
         out.append({"status": "PROCESSING", "count": processing})
     return out
+
+
+def _distribution_detailed(db: Session) -> dict:
+    """Detailed breakdown for stacked/segmented distribution charts."""
+    def get_counts(origin: str):
+        rows = dict(
+            db.execute(
+                select(Invoice.decision_status, func.count(Invoice.id))
+                .where(Invoice.source_origin == origin, Invoice.decision_status.is_not(None))
+                .group_by(Invoice.decision_status)
+            ).all()
+        )
+        failed_undecided = db.scalar(
+            select(func.count(Invoice.id)).where(
+                Invoice.source_origin == origin,
+                Invoice.processing_status == ProcessingStatus.FAILED.value,
+                Invoice.decision_status.is_(None),
+            )
+        ) or 0
+        return {
+            "approved": rows.get(DecisionStatus.APPROVED.value, 0),
+            "needs_review": rows.get(DecisionStatus.NEEDS_REVIEW.value, 0),
+            "rejected": rows.get(DecisionStatus.REJECTED.value, 0),
+            "failed": failed_undecided,
+            "total": sum(rows.values()) + failed_undecided,
+        }
+
+    live = get_counts("LIVE_UPLOAD")
+    hist = get_counts("SEED_HISTORY")
+    return {
+        "live": live,
+        "historical": hist,
+        "combined": {
+            "approved": live["approved"] + hist["approved"],
+            "needs_review": live["needs_review"] + hist["needs_review"],
+            "rejected": live["rejected"] + hist["rejected"],
+            "failed": live["failed"] + hist["failed"],
+            "total": live["total"] + hist["total"],
+        },
+    }
 
 
 def _recent_failed(db: Session, limit: int = 5) -> list[dict]:

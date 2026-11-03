@@ -37,11 +37,10 @@ dist/
 coverage/
 .turbo/
 
-# Local databases and logs
-*.db
-*.sqlite
-*.sqlite3
-*.log
+# Database backups and dumps
+backup*/
+*.sql
+*.dump
 
 # Runtime uploaded files
 /storage/*

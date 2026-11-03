@@ -25,6 +25,7 @@ function InvoicesContent() {
   const initial: InvoiceFilterValues = {
     ...EMPTY_INVOICE_FILTERS,
     q: search.get("q") ?? "",
+    source_origin: search.get("source_origin") ?? "LIVE_UPLOAD",
     decision_status: search.get("decision_status") ?? "",
     processing_status: search.get("processing_status") ?? "",
   };

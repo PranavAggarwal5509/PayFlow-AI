@@ -117,6 +117,18 @@ def stats(
     return ApiResponse(data=base_stats)
 
 
+@dashboard.get("/developer-analytics")
+def developer_analytics(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    _: CurrentUser = Depends(get_current_user),
+):
+    from app.services.analytics_service import get_operational_metrics
+
+    metrics = get_operational_metrics(db, days=days)
+    return ApiResponse(data=metrics)
+
+
 @dashboard.get("/recent-activity")
 def recent_activity(
     limit: int = Query(15, ge=1, le=50),

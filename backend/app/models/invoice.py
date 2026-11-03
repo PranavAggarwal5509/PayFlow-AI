@@ -50,6 +50,7 @@ class Invoice(IdMixin, TimestampMixin, Base):
     )
     decision_status: Mapped[str | None] = mapped_column(String(16), index=True)
     uploaded_by: Mapped[str] = mapped_column(String(100), default="system")
+    source_origin: Mapped[str] = mapped_column(String(32), default="LIVE_UPLOAD", index=True)
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, index=True
     )
