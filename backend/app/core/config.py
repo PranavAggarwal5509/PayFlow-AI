@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     upload_dir: Path = Path("../storage/uploads")
     max_upload_size_mb: int = 15
 
+    storage_backend: Literal["local", "supabase"] = "supabase"
+    supabase_url: str = "https://etrvyixknoxwfwnqrbws.supabase.co"
+    supabase_service_role_key: str = ""
+    supabase_bucket: str = "PayFlow"
+
     inr_rounding_tolerance: Decimal = Decimal("1.00")
     default_rounding_tolerance: Decimal = Decimal("0.01")
     po_line_price_tolerance_pct: Decimal = Decimal("0.05")  # 5% line unit price variance tolerance
