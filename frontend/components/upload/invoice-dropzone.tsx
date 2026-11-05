@@ -16,8 +16,10 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
+import { DemoPdfSelector } from "@/components/upload/demo-pdf-selector";
 import { ApiError } from "@/lib/api";
 import { formatBytes } from "@/lib/format";
+import type { SampleInvoiceMeta } from "@/lib/samples";
 import { cn } from "@/lib/utils";
 import { invoiceService } from "@/services";
 
@@ -43,6 +45,7 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
+  const [selectedDemoScenario, setSelectedDemoScenario] = useState<SampleInvoiceMeta | null>(null);
 
   const form = useForm<UploadForm>({
     resolver: zodResolver(buildUploadSchema(maxMb)),
@@ -53,8 +56,9 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
   const uploading = progress !== null;
 
   const choose = useCallback(
-    (selected: File | undefined) => {
+    (selected: File | undefined, demoMeta?: SampleInvoiceMeta) => {
       if (!selected) return;
+      setSelectedDemoScenario(demoMeta ?? null);
       form.setValue("file", selected, { shouldValidate: true });
     },
     [form],
@@ -68,6 +72,7 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
 
   const removeFile = () => {
     form.resetField("file");
+    setSelectedDemoScenario(null);
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -84,7 +89,13 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
   });
 
   return (
-    <form onSubmit={submit} noValidate className="w-full">
+    <form onSubmit={submit} noValidate className="w-full space-y-6">
+      {/* Interactive Demo PDF Selector */}
+      <DemoPdfSelector
+        disabled={uploading}
+        onSelectSample={(sampleFile, sampleMeta) => choose(sampleFile, sampleMeta)}
+      />
+
       <Card className="border-slate-200/80 bg-white shadow-card transition-all">
         <CardBody className="p-6 sm:p-10">
           {/* Large Drag-and-drop area */}
@@ -178,9 +189,17 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
                     <FileText className="h-6 w-6" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-900">{file.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-slate-900">{file.name}</p>
+                      {selectedDemoScenario && (
+                        <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
+                          {selectedDemoScenario.edge_case_category}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-xs text-slate-500">
                       {formatBytes(file.size)} · PDF document ready
+                      {selectedDemoScenario && ` · Expected: ${selectedDemoScenario.expected_outcome}`}
                     </p>
                   </div>
                 </div>
@@ -198,6 +217,13 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
                   </Button>
                 )}
               </div>
+
+              {selectedDemoScenario && (
+                <div className="mt-3 rounded-lg border border-indigo-100 bg-indigo-50/50 p-2.5 text-xs text-indigo-900">
+                  <span className="font-semibold text-indigo-950">Scenario: </span>
+                  {selectedDemoScenario.scenario} — {selectedDemoScenario.description}
+                </div>
+              )}
 
               {/* Upload Progress Indicator */}
               {uploading && (
