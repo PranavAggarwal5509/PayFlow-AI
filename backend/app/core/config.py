@@ -29,6 +29,7 @@ class Settings(BaseSettings):
 
     backend_base_url: str = "http://backend:8000"
     frontend_base_url: str = "http://localhost:3000"
+    cors_origins: str = "*"
 
     upload_dir: Path = Path("../storage/uploads")
     max_upload_size_mb: int = 15

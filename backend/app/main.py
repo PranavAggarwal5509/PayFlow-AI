@@ -52,9 +52,17 @@ def create_app() -> FastAPI:
         description="Invoice processing and decision support. Public API under /api/v1.",
         lifespan=lifespan,
     )
+    origins = [orig.strip() for orig in settings.cors_origins.split(",") if orig.strip()]
+    if "*" not in origins and settings.frontend_base_url not in origins:
+        origins.append(settings.frontend_base_url)
+    if "*" not in origins and "http://localhost:3000" not in origins:
+        origins.append("http://localhost:3000")
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_base_url, "http://localhost:3000"],
+        allow_origins=origins,
+        allow_origin_regex=r"https://.*\.vercel\.app" if "*" not in origins else None,
+        allow_credentials=True if "*" not in origins else False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
