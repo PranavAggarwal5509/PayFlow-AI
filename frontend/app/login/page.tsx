@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Check, ChevronDown, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck, Sparkles, UserCog } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -10,10 +10,9 @@ import { DecisionPreview } from "@/components/auth/decision-preview";
 import { Logo } from "@/components/layout/top-nav";
 import { useAsync } from "@/hooks/use-async";
 import { ApiError } from "@/lib/api";
-import { initialsOf, PERMISSION_LABELS, ROLE_STYLE } from "@/lib/permissions";
-import { forgetAccount, getSavedAccounts, type SavedAccount } from "@/lib/session";
+import { initialsOf, ROLE_STYLE } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { authService, type DemoAccount, type RoleInfo } from "@/services";
+import { authService } from "@/services";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,12 +25,13 @@ export default function LoginPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(0);
-  const [saved, setSaved] = useState<SavedAccount[]>([]);
   const [next, setNext] = useState("/dashboard");
   const [expired, setExpired] = useState(false);
+  // Fields stay read-only until the user focuses them, so the browser's saved-password manager
+  // cannot silently pre-fill an unrelated login when the page loads.
+  const [armed, setArmed] = useState(false);
 
   useEffect(() => {
-    setSaved(getSavedAccounts());
     const params = new URLSearchParams(window.location.search);
     const target = params.get("next");
     if (target && target.startsWith("/") && !target.startsWith("/login")) setNext(target);
@@ -41,6 +41,22 @@ export default function LoginPage() {
   const roles = catalogue.data?.roles ?? [];
   const demo = catalogue.data?.demo_accounts ?? [];
   const roleOf = (key: string) => roles.find((r) => r.role === key);
+  // The dropdown reflects the fields: editing the email or password by hand clears the selection.
+  const selectedDemo = demo.find((d) => d.email === email && d.password === password)?.email ?? "";
+
+  const pickDemo = (address: string) => {
+    const account = demo.find((d) => d.email === address);
+    setError(null);
+    if (!account) {
+      setEmail("");
+      setPassword("");
+      return;
+    }
+    setArmed(true);
+    setEmail(account.email);
+    setPassword(account.password);
+    setShow(true);
+  };
 
   const signIn = async (address: string, secret: string, key: string) => {
     setBusy(key);
@@ -64,16 +80,6 @@ export default function LoginPage() {
       return;
     }
     void signIn(email, password, "form");
-  };
-
-  const continueAs = (account: SavedAccount) => {
-    const match = demo.find((d) => d.email === account.email);
-    if (match) void signIn(match.email, match.password, account.email);
-    else {
-      setEmail(account.email);
-      setPassword("");
-      document.getElementById("password")?.focus();
-    }
   };
 
   return (
@@ -141,53 +147,6 @@ export default function LoginPage() {
                 </p>
               )}
 
-              {saved.length > 0 && (
-                <section className="mt-6 reveal" style={{ ["--d" as string]: "80ms" }} aria-label="Saved accounts">
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-slate-400">Continue as</p>
-                  <ul className="mt-2 space-y-2">
-                    {saved.slice(0, 3).map((account) => {
-                      const style = ROLE_STYLE[account.role] ?? ROLE_STYLE.AUDITOR;
-                      return (
-                        <li key={account.email} className="group relative">
-                          <button
-                            type="button"
-                            disabled={!!busy}
-                            onClick={() => continueAs(account)}
-                            className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 pr-10 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-lift disabled:opacity-60"
-                          >
-                            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[13px] font-semibold text-white", style.gradient)}>
-                              {initialsOf(account.name)}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-[14px] font-semibold text-slate-900">{account.name}</span>
-                              <span className="block truncate text-[12px] text-slate-500">
-                                {account.role_label} · {account.email}
-                              </span>
-                            </span>
-                            {busy === account.email ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-                            ) : (
-                              <ArrowRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-indigo-500" />
-                            )}
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Forget ${account.email}`}
-                            onClick={() => {
-                              forgetAccount(account.email);
-                              setSaved(getSavedAccounts());
-                            }}
-                            className="absolute right-2 top-2 rounded-md p-1 text-slate-300 opacity-0 transition-opacity hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </section>
-              )}
-
               <form
                 key={shake}
                 onSubmit={submit}
@@ -195,25 +154,57 @@ export default function LoginPage() {
                 className={cn("mt-6 space-y-4 reveal", shake > 0 && "animate-shake")}
                 style={{ ["--d" as string]: "120ms" }}
               >
+                {demo.length > 0 && (
+                  <div>
+                    <Field id="demo-role" label="Demo role" icon={UserCog}>
+                      <select
+                        id="demo-role"
+                        value={selectedDemo}
+                        onChange={(e) => pickDemo(e.target.value)}
+                        aria-describedby="demo-role-hint"
+                        className="h-11 w-full cursor-pointer appearance-none rounded-lg border border-indigo-200 bg-indigo-50/40 pl-10 pr-9 text-[14px] text-slate-900 outline-none transition-shadow focus:border-indigo-400 focus:shadow-glow"
+                      >
+                        <option value="">Select a role to fill in its login…</option>
+                        {demo.map((account) => (
+                          <option key={account.email} value={account.email}>
+                            {roleOf(account.role)?.label ?? account.role} — {account.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    </Field>
+                    <p id="demo-role-hint" className="mt-1.5 text-[12px] text-slate-500">
+                      {selectedDemo
+                        ? `Filled ${selectedDemo} / ${password}. Press "Sign in securely".`
+                        : "Demo workspace: pick a role and its email and password are filled in for you."}
+                    </p>
+                  </div>
+                )}
                 <Field id="email" label="Work email" icon={Mail}>
                   <input
                     id="email"
+                    name="payflow-email"
                     type="email"
-                    autoComplete="username"
+                    autoComplete="off"
+                    readOnly={!armed}
+                    onFocus={() => setArmed(true)}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@company.com"
+                    placeholder="e.g. finance@payflow.demo"
                     className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-[14px] outline-none transition-shadow placeholder:text-slate-400 focus:border-indigo-400 focus:shadow-glow"
                   />
                 </Field>
                 <Field id="password" label="Password" icon={Lock}>
                   <input
                     id="password"
+                    name="payflow-password"
+                    readOnly={!armed}
+                    onFocus={() => setArmed(true)}
                     type={show ? "text" : "password"}
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-10 text-[14px] outline-none transition-shadow placeholder:text-slate-400 focus:border-indigo-400 focus:shadow-glow"
                   />
                   <button
@@ -256,32 +247,6 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              {demo.length > 0 && (
-                <section className="mt-9 reveal" style={{ ["--d" as string]: "200ms" }} aria-label="Demo accounts">
-                  <div className="flex items-center gap-3">
-                    <span className="h-px flex-1 bg-slate-200" />
-                    <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-slate-400">or try a role</span>
-                    <span className="h-px flex-1 bg-slate-200" />
-                  </div>
-                  <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {demo.map((account, i) => (
-                      <RoleCard
-                        key={account.email}
-                        account={account}
-                        info={roleOf(account.role)}
-                        busy={busy === account.email}
-                        disabled={!!busy}
-                        delay={260 + i * 60}
-                        wide={i === 0}
-                        onPick={() => void signIn(account.email, account.password, account.email)}
-                      />
-                    ))}
-                  </ul>
-                  <p className="mt-3 text-center text-[11.5px] text-slate-400">
-                    Demo workspace with synthetic data. Each role sees only what it is allowed to.
-                  </p>
-                </section>
-              )}
             </>
           )}
         </div>
@@ -301,56 +266,6 @@ function Field({ id, label, icon: Icon, children }: { id: string; label: string;
         {children}
       </div>
     </div>
-  );
-}
-
-function RoleCard({
-  account,
-  info,
-  busy,
-  disabled,
-  delay,
-  wide,
-  onPick,
-}: {
-  account: DemoAccount;
-  info: RoleInfo | undefined;
-  busy: boolean;
-  disabled: boolean;
-  delay: number;
-  wide: boolean;
-  onPick: () => void;
-}) {
-  const style = ROLE_STYLE[account.role] ?? ROLE_STYLE.AUDITOR;
-  return (
-    <li className={cn("reveal", wide && "sm:col-span-2")} style={{ ["--d" as string]: `${delay}ms` }}>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={onPick}
-        aria-label={`Sign in as ${info?.label ?? account.role} (${account.name})`}
-        title={`Can: ${info?.permissions.map((p) => PERMISSION_LABELS[p] ?? p).join(", ") ?? ""}`}
-        className="group relative flex h-full w-full items-start gap-3 overflow-hidden rounded-xl border border-slate-200 bg-white p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-transparent hover:shadow-lift disabled:opacity-60"
-      >
-        <span className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-[0.07]", style.gradient)} />
-        <span className={cn("relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-[12px] font-semibold text-white shadow-sm", style.gradient)}>
-          {initialsOf(account.name)}
-        </span>
-        <span className="relative min-w-0 flex-1">
-          <span className="flex items-center gap-2">
-            <span className="truncate text-[13.5px] font-semibold text-slate-900">{info?.label ?? account.role}</span>
-            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500" />}
-          </span>
-          <span className="block truncate text-[12px] text-slate-500">{account.name}</span>
-          {wide && info && <span className="mt-1 block text-[12px] leading-snug text-slate-500">{info.summary}</span>}
-          {info && (
-            <span className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
-              <ShieldCheck className="h-3 w-3" /> {info.permissions.length} permissions
-            </span>
-          )}
-        </span>
-      </button>
-    </li>
   );
 }
 
