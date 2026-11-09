@@ -12,7 +12,14 @@ from app.models.enums import CheckStatus, VendorStatus
 from app.models.invoice import Invoice
 from app.models.vendor_po import Vendor
 from app.services.checks import Check, CheckResult, passed, reject, review, skipped
-from app.utils.normalize import normalize_gstin, normalize_vendor_name
+from app.utils.normalize import (
+    gstin_check_digit,
+    gstin_checksum_valid,
+    normalize_gstin,
+    normalize_vendor_name,
+    parse_bank_details,
+    repair_gstin,
+)
 
 GSTIN_PATTERN = re.compile(r"^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$")
 
@@ -27,7 +34,7 @@ class VendorMatch:
 def find_vendor(
     db: Session, name: str | None, gstin: str | None, settings: Settings
 ) -> VendorMatch:
-    clean_gstin = normalize_gstin(gstin)
+    clean_gstin = repair_gstin(normalize_gstin(gstin))
     if clean_gstin:
         by_gstin = db.scalar(select(Vendor).where(Vendor.gstin == clean_gstin))
         if by_gstin:
@@ -67,6 +74,7 @@ def verify_vendor(db: Session, invoice: Invoice, settings: Settings) -> list[Che
         results = [_match_result(match, vendor, claimed)]
         results.append(_status_result(vendor))
         results.append(_gstin_result(vendor, invoice, settings))
+        results.append(_bank_result(vendor, invoice))
         return results
 
     names = ", ".join(v.vendor_name for v in match.candidates)
@@ -96,6 +104,7 @@ def verify_vendor(db: Session, invoice: Invoice, settings: Settings) -> list[Che
         match_result,
         skipped(Check.VENDOR_STATUS, "Vendor not confirmed, status not checked."),
         skipped(Check.VENDOR_GSTIN, "Vendor not confirmed, GSTIN not checked."),
+        skipped(Check.VENDOR_BANK, "Vendor not confirmed, bank details not checked."),
     ]
 
 
@@ -144,7 +153,9 @@ def _status_result(vendor: Vendor) -> CheckResult:
 
 
 def _gstin_result(vendor: Vendor, invoice: Invoice, settings: Settings) -> CheckResult:
-    invoice_gstin = normalize_gstin(invoice.vendor_gstin_raw)
+    printed = normalize_gstin(invoice.vendor_gstin_raw)
+    invoice_gstin = repair_gstin(printed)
+    repaired = f" (OCR misread {printed} corrected using the GSTIN layout and check digit)" if invoice_gstin != printed else ""
     if not invoice_gstin:
         message = "Vendor GSTIN is not shown on the invoice, so it could not be verified."
         if settings.require_gstin_for_approval:
@@ -154,6 +165,14 @@ def _gstin_result(vendor: Vendor, invoice: Invoice, settings: Settings) -> Check
         return review(
             Check.VENDOR_GSTIN,
             "GSTIN on the invoice has an invalid format.",
+            actual=invoice_gstin,
+        )
+    if not gstin_checksum_valid(invoice_gstin):
+        return review(
+            Check.VENDOR_GSTIN,
+            "GSTIN on the invoice fails the GSTN check-digit validation — likely a typo, "
+            "a scanning error or a fabricated registration.",
+            expected=f"check digit {gstin_check_digit(invoice_gstin)}",
             actual=invoice_gstin,
         )
     if not vendor.gstin:
@@ -171,6 +190,55 @@ def _gstin_result(vendor: Vendor, invoice: Invoice, settings: Settings) -> Check
             actual=invoice_gstin,
         )
     return passed(
-        Check.VENDOR_GSTIN, "Vendor GSTIN matches the register.", expected=vendor.gstin,
+        Check.VENDOR_GSTIN, f"Vendor GSTIN matches the register{repaired}.", expected=vendor.gstin,
         actual=invoice_gstin,
     )  # fmt: skip
+
+
+def _bank_result(vendor: Vendor, invoice: Invoice) -> CheckResult:
+    """Bank-account change fraud control (the most common B2B payment-diversion scheme).
+
+    Remittance details printed on an invoice are never trusted on their own: they must match the
+    verified vendor master. A mismatch holds payment until the change is confirmed out-of-band.
+    """
+    printed = (invoice.extracted_data or {}).get("bank_account_details")
+    account, ifsc = parse_bank_details(printed)
+    if not account and not ifsc:
+        return passed(
+            Check.VENDOR_BANK,
+            "No remittance details printed on the invoice; payment will use the verified vendor master.",
+        )
+    if not vendor.bank_account_number:
+        return review(
+            Check.VENDOR_BANK,
+            "The invoice carries bank details but no verified account is on file for this vendor. "
+            "Verify the account before first payment.",
+            actual=_mask(account) if account else ifsc,
+            status=CheckStatus.WARNING,
+        )
+    mismatches = []
+    if account and account != vendor.bank_account_number:
+        mismatches.append("account number")
+    if ifsc and vendor.bank_ifsc and ifsc != vendor.bank_ifsc:
+        mismatches.append("IFSC")
+    if mismatches:
+        return review(
+            Check.VENDOR_BANK,
+            f"Bank {' and '.join(mismatches)} on the invoice differ from the verified vendor master. "
+            "Possible payment-diversion fraud: hold payment and confirm with the vendor by phone "
+            "using contact details already on file.",
+            expected=f"{_mask(vendor.bank_account_number)} / {vendor.bank_ifsc or '—'}",
+            actual=f"{_mask(account) if account else '—'} / {ifsc or '—'}",
+        )
+    return passed(
+        Check.VENDOR_BANK,
+        "Bank details on the invoice match the verified vendor master.",
+        expected=_mask(vendor.bank_account_number),
+        actual=_mask(account) if account else ifsc,
+    )
+
+
+def _mask(account: str | None) -> str:
+    if not account:
+        return "—"
+    return f"XXXX{account[-4:]}"

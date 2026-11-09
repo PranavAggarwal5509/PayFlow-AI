@@ -22,6 +22,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
 from app.api.dependencies.providers import get_llm  # noqa: E402
+from app.core.security import ROLE_PERMISSIONS, CurrentUser, Role, get_current_user  # noqa: E402
 from app.core.config import get_settings  # noqa: E402
 from app.database.base import Base  # noqa: E402
 from app.database.session import get_engine, get_session_factory  # noqa: E402
@@ -29,6 +30,12 @@ from app.main import app  # noqa: E402
 from app.models import PurchaseOrder, PurchaseOrderItem, Vendor  # noqa: E402
 from app.utils.normalize import normalize_vendor_name  # noqa: E402
 from tests.pdf_factory import make_pdf  # noqa: E402
+
+
+TEST_ADMIN = CurrentUser(
+    id="admin@test.local", name="Test Admin", role=Role.ADMIN.value, user_id=None,
+    permissions=frozenset(ROLE_PERMISSIONS[Role.ADMIN]),
+)  # fmt: skip
 
 
 class FakeLLM:
@@ -73,12 +80,13 @@ def llm() -> FakeLLM:
 @pytest.fixture
 def client(llm: FakeLLM) -> TestClient:
     app.dependency_overrides[get_llm] = lambda: llm
+    app.dependency_overrides[get_current_user] = lambda: TEST_ADMIN
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
 
 
-GSTIN_ACME = "27AABCA1234A1Z5"
+GSTIN_ACME = "27AABCA1234A1ZJ"
 
 
 def add_vendor(db: Session, name="Acme Supplies Pvt Ltd", gstin=GSTIN_ACME, status="ACTIVE", code=None):

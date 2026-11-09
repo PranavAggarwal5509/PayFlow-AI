@@ -60,6 +60,20 @@ class ExtractedInvoice(BaseModel):
     # Telemetry captured from LLM provider (not part of invoice data)
     _telemetry: dict | None = None
 
+    @field_validator(
+        "vendor_name", "vendor_address", "vendor_gstin", "invoice_number", "invoice_date", "due_date",
+        "purchase_order_number", "currency", "payment_terms", "bank_account_details", "payment_instructions",
+        mode="before",
+    )
+    @classmethod
+    def _flatten_text(cls, value: object) -> object:
+        """Models sometimes return structured text fields ({"bank_name": .., "ifsc": ..}); keep the facts as one string."""
+        if isinstance(value, dict):
+            return ", ".join(f"{k.replace('_', ' ')}: {v}" for k, v in value.items() if v not in (None, ""))
+        if isinstance(value, list):
+            return ", ".join(str(v) for v in value if v not in (None, ""))
+        return value
+
     @field_validator("currency")
     @classmethod
     def _upper_currency(cls, value: str | None) -> str | None:

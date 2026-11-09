@@ -24,6 +24,19 @@ EXTRACTION_PROMPT = """You extract structured data from invoice text. Rules:
 3. Dates: output ISO YYYY-MM-DD if unambiguous, otherwise copy the original text.
 4. currency: 3-letter ISO code (INR, USD, ...). Infer from symbols like ₹ / Rs only if explicit.
 5. List in "uncertain_fields" the names of fields you found but are not confident about.
+Indian GST tax invoices:
+- vendor_* = the SUPPLIER who issued the invoice (letterhead / "for <name> Authorised Signatory"),
+  never the "Bill To" / "Buyer" / "Consignee" / "Ship To" party. vendor_gstin = the supplier's GSTIN.
+- invoice_number is the "Invoice No." - never the IRN, Ack No., e-way bill, delivery note or LR number.
+- purchase_order_number comes from "PO Number", "Client PO No." or "Buyer's Order No."; null if blank.
+- Dates such as 05/11/2026 or 05-Nov-2026 are day-first (DD/MM/YYYY).
+- subtotal = total taxable value before GST. tax_amount = total GST charged (CGST + SGST + IGST + cess).
+  total_amount = the final invoice total / grand total payable, after any round-off.
+- line_items: tax_percentage = the combined GST rate for the line (CGST 9% + SGST 9% = 18; IGST 18% = 18);
+  total_amount = the line amount exactly as printed (normally the taxable value); never output the
+  CGST/SGST/IGST/round-off rows as line items.
+- bank_account_details: ONE plain string, e.g. "HDFC Bank, A/c No. 50200010017037, IFSC HDFC0001001".
+- quantity, unit_price and all amounts: numbers only (no units such as NOS / BOX, no currency).
 6. Respond with ONLY a JSON object with these keys:
 vendor_name, vendor_address, vendor_gstin, invoice_number, invoice_date, due_date,
 purchase_order_number, currency, subtotal, tax_amount, total_amount, payment_terms,
@@ -181,6 +194,7 @@ class MockLLMProvider:
                                 "tax_amount": str(tax),
                                 "total_amount": str(tot),
                                 "line_items": items,
+                                "bank_account_details": s.bank_text() if hasattr(s, "bank_text") else None,
                                 "other_references": ["MOCK_EXTRACTION_SOURCE=sample_catalog"],
                                 "uncertain_fields": [],
                             }
@@ -191,10 +205,18 @@ class MockLLMProvider:
     def extract_invoice(self, document_text: str) -> dict:
         norm_text = document_text.replace("\r", " ").replace("\n", " ")
 
-        # 1. First attempt exact match by invoice number
+        # 1. First attempt exact match by invoice number (also tolerant of OCR look-alikes: O/0, I/l/1)
+        def _ocr_fold(value: str) -> str:
+            return value.upper().translate(str.maketrans({"O": "0", "I": "1", "L": "1"}))
+
+        folded_text = _ocr_fold(norm_text)
         for item in self._catalog:
             inv_num = item["number"]
             if inv_num and inv_num in norm_text:
+                return dict(item["data"])
+        for item in self._catalog:
+            inv_num = item["number"]
+            if inv_num and _ocr_fold(inv_num) in folded_text:
                 return dict(item["data"])
 
         # 2. Second attempt by PO number and Vendor name (for missing invoice number scenario)

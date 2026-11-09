@@ -27,7 +27,7 @@ const COLORS: Record<string, string> = {
   NEEDS_REVIEW: "#f59e0b", // Amber 500
   REJECTED: "#ef4444", // Rose 500
   PROCESSING_FAILED: "#64748b", // Slate 500
-  PROCESSING: "#3b82f6", // Blue 500
+  PROCESSING: "#6366f1", // Blue 500
 };
 
 const LABELS: Record<string, string> = {
@@ -70,8 +70,8 @@ export function VolumeChart({ data }: { data: DashboardStats["daily_volume"] }) 
             <AreaChart data={data} margin={{ left: -18, right: 12, top: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2563eb" stopOpacity={0.22} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.22} />
+                  <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -102,7 +102,7 @@ export function VolumeChart({ data }: { data: DashboardStats["daily_volume"] }) 
                 type="monotone"
                 dataKey="count"
                 name="Invoices"
-                stroke="#2563eb"
+                stroke="#4f46e5"
                 strokeWidth={2.5}
                 fill="url(#volGrad)"
                 activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
@@ -307,7 +307,7 @@ export function MonthlyValueChart({ data }: { data: DashboardStats["monthly_volu
               />
               <Bar
                 dataKey="value"
-                fill="#2563eb"
+                fill="#4f46e5"
                 radius={[4, 4, 0, 0]}
                 maxBarSize={40}
                 className="hover:opacity-90 transition-opacity"

@@ -15,7 +15,7 @@ describe("PageHeader Component", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Purchase Orders");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Purchase Orders");
     expect(screen.getByText("Manage purchase orders and balances.")).toBeInTheDocument();
     expect(screen.getByTestId("action-btn")).toHaveTextContent("New Order");
   });

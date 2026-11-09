@@ -6,6 +6,8 @@ uploads of the same document therefore always yield the same answer: the earlies
 original and every later copy is the duplicate.
 """
 
+from datetime import timedelta
+
 from rapidfuzz import fuzz
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
@@ -86,6 +88,7 @@ def _potential_duplicate(db: Session, invoice: Invoice, settings: Settings) -> C
     if invoice.vendor_id is None or invoice.total_amount is None:
         return skipped(Check.DUP_POTENTIAL, "Vendor or amount unavailable.")
     tolerance = settings.tolerance_for(invoice.currency)
+    window = timedelta(days=settings.duplicate_window_days)
     candidates = db.scalars(
         select(Invoice)
         .where(Invoice.vendor_id == invoice.vendor_id, Invoice.id != invoice.id)
@@ -97,6 +100,9 @@ def _potential_duplicate(db: Session, invoice: Invoice, settings: Settings) -> C
     )
     wanted = normalize_invoice_number(invoice.invoice_number)
     for other in candidates:
+        # Recurring invoices (rent, retainers) legitimately repeat amounts; only nearby dates count.
+        if invoice.invoice_date and other.invoice_date and abs(invoice.invoice_date - other.invoice_date) > window:
+            continue
         same_number = normalize_invoice_number(other.invoice_number) == wanted and wanted
         if same_number:
             continue  # handled as a business duplicate

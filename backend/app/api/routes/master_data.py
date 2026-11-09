@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.errors import NotFoundError
-from app.core.security import CurrentUser, get_current_user
+from app.core.security import CurrentUser, Permission, require
 from app.database.session import get_db
 from app.models.vendor_po import PurchaseOrder, Vendor
 from app.repositories import vendor_repository as repo
@@ -33,14 +33,14 @@ def list_vendors(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.MASTERDATA_VIEW)),
 ):
     items, total = repo.list_vendors(db, q, status, sort_by, sort_dir == "desc", page, page_size)
     return ApiResponse(data=items, meta=page_meta(page, page_size, total))
 
 
 @vendors.get("/{vendor_id}", response_model=ApiResponse[VendorOut])
-def get_vendor(vendor_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(get_current_user)):
+def get_vendor(vendor_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(require(Permission.MASTERDATA_VIEW))):
     vendor = db.get(Vendor, vendor_id)
     if vendor is None:
         raise NotFoundError("Vendor not found.")
@@ -49,7 +49,7 @@ def get_vendor(vendor_id: UUID, db: Session = Depends(get_db), _: CurrentUser = 
 
 @vendors.post("", response_model=ApiResponse[VendorOut], status_code=201)
 def create_vendor(
-    body: VendorCreate, db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)
+    body: VendorCreate, db: Session = Depends(get_db), user: CurrentUser = Depends(require(Permission.MASTERDATA_EDIT))
 ):
     vendor = service.create_vendor(db, body, user_id=user.id)
     return ApiResponse(data=repo.vendor_out(db, vendor))
@@ -58,7 +58,7 @@ def create_vendor(
 @vendors.patch("/{vendor_id}", response_model=ApiResponse[VendorOut])
 def update_vendor(
     vendor_id: UUID, body: VendorUpdate, db: Session = Depends(get_db),
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(require(Permission.MASTERDATA_EDIT)),
 ):  # fmt: skip
     vendor = service.update_vendor(db, vendor_id, body, user_id=user.id)
     return ApiResponse(data=repo.vendor_out(db, vendor))
@@ -74,7 +74,7 @@ def list_purchase_orders(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.MASTERDATA_VIEW)),
 ):
     items, total = repo.list_purchase_orders(
         db, q, status, vendor_id, sort_by, sort_dir == "desc", page, page_size
@@ -83,7 +83,7 @@ def list_purchase_orders(
 
 
 @purchase_orders.get("/{po_id}", response_model=ApiResponse[PODetail])
-def get_purchase_order(po_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(get_current_user)):
+def get_purchase_order(po_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(require(Permission.MASTERDATA_VIEW))):
     detail = repo.po_detail(db, po_id)
     if detail is None:
         raise NotFoundError("Purchase order not found.")
@@ -92,7 +92,7 @@ def get_purchase_order(po_id: UUID, db: Session = Depends(get_db), _: CurrentUse
 
 @purchase_orders.post("", response_model=ApiResponse[POOut], status_code=201)
 def create_purchase_order(
-    body: POCreate, db: Session = Depends(get_db), user: CurrentUser = Depends(get_current_user)
+    body: POCreate, db: Session = Depends(get_db), user: CurrentUser = Depends(require(Permission.MASTERDATA_EDIT))
 ):
     po = service.create_purchase_order(db, body, user_id=user.id)
     return ApiResponse(data=repo.po_out(db, po))
@@ -101,7 +101,7 @@ def create_purchase_order(
 @purchase_orders.patch("/{po_id}", response_model=ApiResponse[POOut])
 def update_purchase_order(
     po_id: UUID, body: POUpdate, db: Session = Depends(get_db),
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(require(Permission.MASTERDATA_EDIT)),
 ):  # fmt: skip
     po = service.update_purchase_order(db, po_id, body, user_id=user.id)
     return ApiResponse(data=repo.po_out(db, po))

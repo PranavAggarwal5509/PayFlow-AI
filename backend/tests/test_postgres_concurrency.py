@@ -31,6 +31,15 @@ from app.services.line_item_reconciler import allocate_po_line_items, consumed_p
 PG_URL = os.environ.get("REAL_PG_URL") or "postgresql+psycopg://payflow:payflow@postgres:5432/payflow"
 
 
+def _postgres_available() -> bool:
+    try:
+        with create_engine(PG_URL, connect_args={"connect_timeout": 3}).connect():
+            return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(not _postgres_available(), reason="PostgreSQL not reachable (set REAL_PG_URL)")
 def test_postgres_concurrent_line_allocations_protected():
     engine = create_engine(PG_URL)
     SessionLocal = sessionmaker(bind=engine)

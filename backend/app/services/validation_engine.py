@@ -38,6 +38,8 @@ def validate_financials(invoice: Invoice, settings: Settings) -> list[CheckResul
         _total_arithmetic(invoice, tolerance),
         _line_item_math(invoice, tolerance),
         _line_items_sum(invoice, tolerance),
+        _tax_rates(invoice, settings, tolerance),
+        _approval_limit(invoice, settings),
     ]
 
 
@@ -228,3 +230,74 @@ def _line_items_sum(invoice: Invoice, tolerance: Decimal) -> CheckResult:
         status=CheckStatus.WARNING,
     )
 
+
+
+def _tax_rates(invoice: Invoice, settings: Settings, tolerance: Decimal) -> CheckResult:
+    """GST sanity: every line uses a notified GST slab, and the stated tax equals the line tax."""
+    rated = [i for i in invoice.line_items if i.tax_percentage is not None]
+    if not rated:
+        return skipped(Check.TAX_RATES, "No per-line tax rates were printed on the invoice.")
+    if invoice.currency == "INR":
+        invalid = sorted(
+            {f"{i.tax_percentage.normalize():f}%" for i in rated if i.tax_percentage not in settings.gst_rate_set}
+        )
+        if invalid:
+            return review(
+                Check.TAX_RATES,
+                f"Tax rate(s) {', '.join(invalid)} are not valid GST slabs.",
+                expected=", ".join(f"{r.normalize():f}%" for r in sorted(settings.gst_rate_set)),
+                actual=", ".join(invalid),
+            )
+    if invoice.tax_amount is None or any(None in (i.quantity, i.unit_price) for i in rated):
+        return passed(Check.TAX_RATES, "All line tax rates are valid GST slabs.")
+    computed = sum(
+        (i.quantity * i.unit_price * i.tax_percentage / 100 for i in rated), Decimal("0")
+    ).quantize(Decimal("0.01"))
+    allowed = tolerance * max(len(rated), 1)
+    if abs(computed - invoice.tax_amount) > allowed:
+        return review(
+            Check.TAX_RATES,
+            "Stated tax does not equal the tax implied by the line-item rates "
+            f"(difference {money(abs(computed - invoice.tax_amount), invoice.currency)}).",
+            expected=money(computed, invoice.currency),
+            actual=money(invoice.tax_amount, invoice.currency),
+            status=CheckStatus.WARNING,
+        )
+    return passed(
+        Check.TAX_RATES,
+        "Tax rates are valid and the stated tax matches the line-item rates.",
+        expected=money(computed, invoice.currency),
+        actual=money(invoice.tax_amount, invoice.currency),
+    )
+
+
+def _approval_limit(invoice: Invoice, settings: Settings) -> CheckResult:
+    """Delegation of authority: high-value invoices always get a named human approver."""
+    if invoice.total_amount is None or not invoice.currency:
+        return skipped(Check.APPROVAL_LIMIT, "Total or currency unavailable.")
+    rate = settings.fx_table.get(invoice.currency)
+    if rate is None:
+        return review(
+            Check.APPROVAL_LIMIT,
+            f"No reference FX rate for {invoice.currency}; cannot evaluate the approval limit.",
+            actual=invoice.currency,
+            status=CheckStatus.WARNING,
+        )
+    inr_value = (invoice.total_amount * rate).quantize(Decimal("0.01"))
+    limit = settings.auto_approval_limit_inr
+    shown = money(inr_value, "INR") + ("" if invoice.currency == "INR" else f" (at {rate} INR/{invoice.currency})")
+    if inr_value > limit:
+        return review(
+            Check.APPROVAL_LIMIT,
+            f"Invoice value {shown} exceeds the {money(limit, 'INR')} auto-approval limit. "
+            "A finance approver must sign off.",
+            expected=f"<= {money(limit, 'INR')}",
+            actual=money(inr_value, "INR"),
+            status=CheckStatus.WARNING,
+        )
+    return passed(
+        Check.APPROVAL_LIMIT,
+        f"Invoice value {shown} is within the {money(limit, 'INR')} auto-approval limit.",
+        expected=f"<= {money(limit, 'INR')}",
+        actual=money(inr_value, "INR"),
+    )

@@ -1,22 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AlertCircle,
-  FileText,
-  Loader2,
-  Upload,
-  X,
-} from "lucide-react";
+import { AlertCircle, FileText, Library, Loader2, Lock, ShieldCheck, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState, type DragEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type DragEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
-import { DemoPdfSelector } from "@/components/upload/demo-pdf-selector";
+import { loadSample, ScenarioLibrary } from "@/components/upload/scenario-library";
+import { SAMPLE_INVOICES } from "@/lib/samples";
 import { ApiError } from "@/lib/api";
 import { formatBytes } from "@/lib/format";
 import type { SampleInvoiceMeta } from "@/lib/samples";
@@ -64,6 +59,13 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
     [form],
   );
 
+  // Deep link from the command palette: /upload?scenario=<file> preloads that scenario.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("scenario");
+    const sample = SAMPLE_INVOICES.find((s) => s.file === wanted);
+    if (sample) loadSample(sample).then((f) => choose(f, sample)).catch(() => undefined);
+  }, [choose]);
+
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
     setDragging(false);
@@ -76,28 +78,34 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const submit = form.handleSubmit(async ({ file: chosen }) => {
+  const send = async (chosen: File) => {
     setProgress(0);
     try {
       const result = await invoiceService.upload(chosen, setProgress);
-      toast.success("Invoice uploaded. Verification pipeline started.");
+      toast.success("Invoice received. Verification pipeline started.");
       router.push(`/processing/${result.run_id}`);
     } catch (err) {
       setProgress(null);
       toast.error(err instanceof ApiError ? err.message : "Upload failed. Please try again.");
     }
-  });
+  };
+
+  const submit = form.handleSubmit(async ({ file: chosen }) => send(chosen));
 
   return (
-    <form onSubmit={submit} noValidate className="w-full space-y-6">
-      {/* Interactive Demo PDF Selector */}
-      <DemoPdfSelector
-        disabled={uploading}
-        onSelectSample={(sampleFile, sampleMeta) => choose(sampleFile, sampleMeta)}
-      />
-
-      <Card className="border-slate-200/80 bg-white shadow-card transition-all">
-        <CardBody className="p-6 sm:p-10">
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,460px)]">
+    <form onSubmit={submit} noValidate className="w-full space-y-5">
+      <Card className="bg-white shadow-card transition-all">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-4">
+          <div>
+            <p className="eyebrow">Intake</p>
+            <h3 className="mt-0.5 text-[15px] font-semibold">Submit a vendor invoice</h3>
+          </div>
+          <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-500">
+            <Lock className="h-3.5 w-3.5" /> Stored privately · SHA-256 fingerprinted
+          </span>
+        </div>
+        <CardBody className="p-6">
           {/* Large Drag-and-drop area */}
           <div
             onDragOver={(e) => {
@@ -108,9 +116,9 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
             onDrop={onDrop}
             onClick={() => !uploading && inputRef.current?.click()}
             className={cn(
-              "group relative flex min-h-[290px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200 ease-in-out sm:p-12",
+              "group relative flex min-h-[260px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all duration-200 ease-in-out sm:p-12",
               dragging
-                ? "border-blue-600 bg-blue-50/70 ring-4 ring-blue-500/10"
+                ? "drop-glow border-transparent bg-blue-50/70 ring-4 ring-blue-500/10"
                 : "border-slate-200 bg-slate-50/50 hover:border-blue-400 hover:bg-slate-50/80",
               error && "border-rose-400 bg-rose-50/40 ring-4 ring-rose-500/10",
               file && "border-blue-200 bg-blue-50/20",
@@ -127,9 +135,10 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
               <Upload className="h-8 w-8 stroke-[1.8]" />
             </div>
 
-            <h3 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-              Drag and drop your invoice here
+            <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+              Drop an invoice PDF here
             </h3>
+            <p className="mt-1 text-[13px] text-slate-500">Digital or scanned — the pipeline handles both.</p>
 
             <p className="my-2.5 text-xs font-medium uppercase tracking-wider text-slate-400">
               or
@@ -146,7 +155,7 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
               }}
               className="border-slate-200 bg-white px-4 py-2 font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:bg-slate-50"
             >
-              Browse Files
+              Browse files
             </Button>
 
             <input
@@ -249,7 +258,7 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
               type="submit"
               disabled={!file || !!error || uploading}
               size="lg"
-              className="w-full bg-blue-600 py-6 text-sm font-semibold tracking-wide text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-50 sm:text-base"
+              className="h-11 w-full text-sm font-semibold shadow-sm"
             >
               {uploading ? (
                 <>
@@ -257,12 +266,59 @@ export function InvoiceDropzone({ maxMb = MAX_UPLOAD_MB }: { maxMb?: number }) {
                   Uploading & Processing…
                 </>
               ) : (
-                "Upload and Process"
+                <>
+                  <ShieldCheck className="h-4 w-4" /> Upload and Process
+                </>
               )}
             </Button>
           </div>
         </CardBody>
       </Card>
+      <HowItWorks />
     </form>
+    <Card className="overflow-hidden xl:sticky xl:top-24 xl:self-start">
+      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-inset ring-indigo-100">
+          <Library className="h-4 w-4" />
+        </span>
+        <div>
+          <h3 className="text-[15px] font-semibold">Scenario library</h3>
+          <p className="text-[12.5px] text-slate-500">Real PDFs through the real pipeline — one click to run.</p>
+        </div>
+      </div>
+      <ScenarioLibrary
+        disabled={uploading}
+        onLoad={(sampleFile, meta) => choose(sampleFile, meta)}
+        onRun={async (sampleFile, meta) => {
+          choose(sampleFile, meta);
+          await send(sampleFile);
+        }}
+      />
+    </Card>
+    </div>
+  );
+}
+
+const STEPS = [
+  { title: "Read", body: "Text layer or OCR, then AI extracts fields into a strict schema." },
+  { title: "Verify", body: "24 deterministic controls: vendor, bank, GST, PO, duplicates, maths, authority." },
+  { title: "Decide", body: "Approve, route to a reviewer, or reject — with every reason shown." },
+];
+
+function HowItWorks() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {STEPS.map((step, index) => (
+        <div key={step.title} className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-navy-900 text-[11px] font-semibold text-white">
+              {index + 1}
+            </span>
+            <span className="text-[13.5px] font-semibold">{step.title}</span>
+          </div>
+          <p className="mt-2 text-[12.5px] leading-relaxed text-slate-500">{step.body}</p>
+        </div>
+      ))}
+    </div>
   );
 }

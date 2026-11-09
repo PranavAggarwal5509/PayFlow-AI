@@ -57,3 +57,13 @@ class TransientError(PayFlowError):
         super().__init__(message)
         self.category = category
 
+
+
+class UnauthorizedError(PayFlowError):
+    status_code = 401
+    code = "unauthorized"
+
+
+class ForbiddenError(PayFlowError):
+    status_code = 403
+    code = "forbidden"

@@ -82,6 +82,10 @@ def execute_stage(ctx: PipelineContext, run: ProcessingRun, stage: Stage, action
     db = ctx.db
     try:
         run_service.begin_stage(db, run, stage)
+        # Publish "in progress" immediately so the live run view shows the stage executing.
+        db.commit()
+        if ctx.settings.stage_pacing_ms > 0:
+            time.sleep(ctx.settings.stage_pacing_ms / 1000)
         result = action()
         db.commit()
         return result
@@ -302,7 +306,7 @@ def stage_vendor_check(ctx: PipelineContext, run: ProcessingRun) -> list[CheckRe
 def stage_po_match(ctx: PipelineContext, run: ProcessingRun) -> list[CheckResult]:
     def action() -> list[CheckResult]:
         invoice = _invoice(ctx.db, run)
-        results = po_matcher.match_purchase_order(ctx.db, invoice)
+        results = po_matcher.match_purchase_order(ctx.db, invoice, ctx.settings)
         _save_results(ctx.db, run, results, Stage.PO_MATCHING)
         return results
 

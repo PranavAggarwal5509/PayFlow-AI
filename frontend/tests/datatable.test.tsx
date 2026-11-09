@@ -49,7 +49,7 @@ describe("DataTable Component", () => {
       />,
     );
 
-    const skeletons = container.querySelectorAll(".animate-pulse");
+    const skeletons = container.querySelectorAll(".shimmer");
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

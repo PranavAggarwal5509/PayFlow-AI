@@ -71,28 +71,27 @@ def test_mock_provider_extracts_known_synthetic_invoice():
 def test_mock_provider_extracts_different_synthetic_invoices():
     provider = MockLLMProvider()
     
-    # 02_valid_multi_line: BOS-9012
-    text_bos = "Bharat Office Solutions Pvt Ltd Invoice BOS-9012 PO-2026-0002"
+    # 02_interstate_multi_line: BOS/26-27/0571
+    text_bos = "Bharat Office Solutions Pvt Ltd Invoice BOS/26-27/0571 PO-2026-0002"
     data_bos = provider.extract_invoice(text_bos)
     
-    # 05_exceeds_po_balance: CL-2026-248
-    text_cl = "Cobalt Logistics LLP Invoice No: CL-2026-248 PO-2026-0003"
+    # 05_exceeds_po_balance: CL/DEL/26-27/284
+    text_cl = "Cobalt Logistics LLP Invoice No: CL/DEL/26-27/284 PO-2026-0003"
     data_cl = provider.extract_invoice(text_cl)
 
-    assert data_bos["invoice_number"] == "BOS-9012"
-    assert data_cl["invoice_number"] == "CL-2026-248"
+    assert data_bos["invoice_number"] == "BOS/26-27/0571"
+    assert data_cl["invoice_number"] == "CL/DEL/26-27/284"
     assert data_bos["vendor_name"] != data_cl["vendor_name"]
     assert data_bos["total_amount"] != data_cl["total_amount"]
 
 
-def test_mock_provider_missing_invoice_number_scenario():
+def test_mock_provider_falls_back_to_po_and_vendor_when_number_unreadable():
     provider = MockLLMProvider()
-    # Scenario 06 has no invoice number printed, but matches PO-2026-0004 & Deccan Print
-    text_06 = "Deccan Print & Packaging Ltd PO Number: PO-2026-0004 Total: 35,400"
-    data_06 = provider.extract_invoice(text_06)
-    assert data_06["invoice_number"] is None
-    assert data_06["purchase_order_number"] == "PO-2026-0004"
-    assert data_06["vendor_name"] == "Deccan Print & Packaging Ltd"
+    # No recognisable invoice number: the mock falls back to PO number + vendor name.
+    text = "Deccan Print & Packaging Ltd PO Number: PO-2026-0004 Total: 70,800"
+    data = provider.extract_invoice(text)
+    assert data["purchase_order_number"] == "PO-2026-0004"
+    assert data["vendor_name"] == "Deccan Print & Packaging Ltd"
 
 
 def test_mock_provider_unknown_invoice_raises_processing_error():
@@ -105,10 +104,10 @@ def test_mock_provider_unknown_invoice_raises_processing_error():
 
 def test_extract_structured_invoice_with_mock():
     provider = MockLLMProvider()
-    text = "Bharat Office Solutions Pvt Ltd BOS-9012 PO-2026-0002"
+    text = "Bharat Office Solutions Pvt Ltd BOS/26-27/0571 PO-2026-0002"
     model = extract_structured_invoice(provider, text, max_retries=1)
     assert isinstance(model, ExtractedInvoice)
-    assert model.invoice_number == "BOS-9012"
+    assert model.invoice_number == "BOS/26-27/0571"
     assert model.currency == "INR"
 
 
@@ -131,7 +130,7 @@ def test_gemini_provider_request_payload_and_error_handling(monkeypatch):
                                     "text": json_mod.dumps({
                                         "vendor_name": "Test Vendor",
                                         "vendor_address": None,
-                                        "vendor_gstin": "29ABCDE1234F1Z5",
+                                        "vendor_gstin": "29ABCDE1234F1ZW",
                                         "invoice_number": "INV-001",
                                         "invoice_date": "2026-10-10",
                                         "due_date": "2026-11-10",

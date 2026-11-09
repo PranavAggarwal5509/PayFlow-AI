@@ -1,11 +1,14 @@
 import "@/styles/globals.css";
 
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
+import { AppShell } from "@/components/auth/app-shell";
+import { AuthProvider } from "@/components/auth/auth-provider";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: "PayFlow AI — Intelligent Invoice Processing & Decision System",
@@ -14,18 +17,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased bg-slate-50 text-foreground selection:bg-blue-100 selection:text-blue-900">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Topbar />
-            <main className="mx-auto w-full max-w-[1440px] flex-1 p-6 lg:p-8">{children}</main>
-          </div>
-        </div>
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen overflow-x-clip bg-canvas font-sans text-foreground antialiased selection:bg-indigo-100 selection:text-indigo-900">
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
         <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );
 }
-

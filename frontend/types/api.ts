@@ -190,9 +190,35 @@ export interface StageEvent {
   completed_at: string | null;
 }
 
+export interface RunCheck {
+  validation_type: string;
+  label: string;
+  stage: string;
+  status: CheckStatus;
+  impact: "NONE" | "REVIEW" | "REJECT";
+  message: string;
+  expected_value: string | null;
+  actual_value: string | null;
+}
+
+export interface RunInvoiceSnapshot {
+  vendor_name: string | null;
+  vendor_matched: boolean;
+  total_amount: string | null;
+  currency: string | null;
+  po_number: string | null;
+  invoice_date: string | null;
+  extraction_method: string | null;
+  page_count: number | null;
+  line_item_count: number;
+}
+
 export interface RunDetail extends RunSummary {
   stages: StageEvent[];
   can_retry: boolean;
+  checks: RunCheck[];
+  decision: { status: DecisionStatus; reasons: DecisionReason[] } | null;
+  invoice: RunInvoiceSnapshot | null;
 }
 
 export interface AuditEntry {
@@ -272,6 +298,7 @@ export interface ReviewListItem {
   issue_type: string | null;
   uploaded_at: string;
   review_status: ReviewStatus;
+  review_run_id: string | null;
 }
 
 export interface UploadResult {
@@ -373,6 +400,12 @@ export interface DashboardStats {
     historical: PortfolioGroup;
     combined: PortfolioGroup;
   };
+  exceptions_by_control?: { code: string; count: number }[];
+  value_at_risk?: {
+    held: Record<string, string | number>;
+    blocked: Record<string, string | number>;
+    approved: Record<string, string | number>;
+  };
   recent_failed_runs: {
     run_id: string;
     invoice_id: string;
@@ -406,6 +439,12 @@ export interface AppSettings {
   inr_rounding_tolerance: string;
   default_rounding_tolerance: string;
   require_gstin_for_approval: boolean;
+  duplicate_window_days?: number;
+  auto_approval_limit_inr?: string;
+  fx_rates_to_inr?: Record<string, string>;
+  valid_gst_rates?: string[];
+  auto_approve_inferred_po?: boolean;
+  po_line_price_tolerance_pct?: string;
   vendor_fuzzy_threshold: number;
   duplicate_number_similarity: number;
 }

@@ -4,6 +4,7 @@ import logging
 import uuid
 from collections.abc import Iterator
 from pathlib import Path
+
 import httpx
 
 logger = logging.getLogger(__name__)
@@ -105,6 +106,16 @@ class SupabaseStorage:
             return res.content
 
         raise ValueError(f"Document not found in Supabase storage: {key} (status: {res.status_code})")
+
+    def delete(self, key: str) -> None:
+        """Remove the object from the bucket and the local cache (best effort)."""
+        self._validate_key(key)
+        res = self.client.request(
+            "DELETE", f"{self.supabase_url}/storage/v1/object/{self.bucket}", json={"prefixes": [key]}
+        )
+        if res.status_code not in (200, 204):
+            logger.warning("Supabase delete failed for %s: %s", key, res.status_code)
+        (self.cache_dir / key).unlink(missing_ok=True)
 
     def iter_chunks(self, key: str, size: int = 65536) -> Iterator[bytes]:
         data = self.read(key)

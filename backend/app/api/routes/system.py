@@ -26,5 +26,11 @@ def read_settings(
             "require_gstin_for_approval": settings.require_gstin_for_approval,
             "vendor_fuzzy_threshold": settings.vendor_fuzzy_threshold,
             "duplicate_number_similarity": settings.duplicate_number_similarity,
+            "duplicate_window_days": settings.duplicate_window_days,
+            "auto_approval_limit_inr": str(settings.auto_approval_limit_inr),
+            "fx_rates_to_inr": {k: str(v) for k, v in settings.fx_table.items() if k != "INR"},
+            "valid_gst_rates": [f"{r.normalize():f}" for r in sorted(settings.gst_rate_set)],
+            "auto_approve_inferred_po": settings.auto_approve_inferred_po,
+            "po_line_price_tolerance_pct": str(settings.po_line_price_tolerance_pct),
         }
     )

@@ -19,6 +19,9 @@ class Vendor(IdMixin, TimestampMixin, Base):
     address: Mapped[str | None] = mapped_column(String(500))
     email: Mapped[str | None] = mapped_column(String(255))
     phone: Mapped[str | None] = mapped_column(String(32))
+    # Verified remittance details (changed only through the vendor master, never from an invoice).
+    bank_account_number: Mapped[str | None] = mapped_column(String(34))
+    bank_ifsc: Mapped[str | None] = mapped_column(String(11))
     status: Mapped[str] = mapped_column(String(16), default=VendorStatus.ACTIVE.value, index=True)
     is_demo: Mapped[bool] = mapped_column(default=False)
 

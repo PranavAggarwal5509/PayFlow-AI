@@ -26,22 +26,18 @@ export function useInvoiceColumns(options: { sortable?: boolean } = {}): ColumnD
               <div className="flex items-center gap-1.5">
                 <Link
                   href={`/invoices/${row.original.id}`}
-                  className="font-medium text-foreground hover:text-primary"
+                  className="font-semibold text-slate-900 hover:text-indigo-600"
                   onClick={(event) => event.stopPropagation()}
                 >
                   {row.original.invoice_number ?? <span className="text-slate-400">No number</span>}
                 </Link>
-                {isHistorical ? (
-                  <span className="inline-flex items-center rounded-sm bg-purple-50 px-1.5 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-inset ring-purple-600/20">
-                    HISTORICAL
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/20">
-                    LIVE UPLOAD
+                {isHistorical && (
+                  <span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-px text-[10px] font-medium text-slate-500 ring-1 ring-inset ring-slate-200">
+                    History
                   </span>
                 )}
               </div>
-              <p className="max-w-[200px] truncate text-xs text-muted-foreground">{row.original.original_file_name}</p>
+              <p className="max-w-[220px] truncate font-mono text-[11px] text-slate-400">{row.original.original_file_name}</p>
             </div>
           );
         },
@@ -50,14 +46,16 @@ export function useInvoiceColumns(options: { sortable?: boolean } = {}): ColumnD
         id: "vendor",
         header: "Vendor",
         enableSorting: false,
-        cell: ({ row }) => <span>{row.original.vendor_name ?? <span className="text-slate-400">Unknown</span>}</span>,
+        cell: ({ row }) => <VendorCell name={row.original.vendor_name} />,
       },
       {
         id: "total_amount",
-        header: "Amount",
+        header: () => <span className="block text-right">Amount</span>,
         enableSorting: sortable,
         cell: ({ row }) => (
-          <span className="tabular font-medium">{formatMoney(row.original.total_amount, row.original.currency)}</span>
+          <span className="tabular block text-right font-semibold text-slate-900">
+            {formatMoney(row.original.total_amount, row.original.currency)}
+          </span>
         ),
       },
       {
@@ -65,16 +63,6 @@ export function useInvoiceColumns(options: { sortable?: boolean } = {}): ColumnD
         header: "Uploaded",
         enableSorting: sortable,
         cell: ({ row }) => <span className="text-slate-600">{formatDate(row.original.uploaded_at)}</span>,
-      },
-      {
-        id: "processing_status",
-        header: "Processing",
-        enableSorting: sortable,
-        cell: ({ row }) => (
-          <span className="text-[13px] text-slate-600">
-            {row.original.processing_status === "COMPLETED" ? "Completed" : row.original.processing_status === "FAILED" ? "Failed" : "In progress"}
-          </span>
-        ),
       },
       {
         id: "decision_status",
@@ -118,3 +106,31 @@ export function RecentInvoicesTable({
   );
 }
 
+
+const AVATAR_TONES = [
+  "bg-indigo-100 text-indigo-700",
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-800",
+  "bg-sky-100 text-sky-700",
+  "bg-violet-100 text-violet-700",
+  "bg-rose-100 text-rose-700",
+];
+
+export function VendorCell({ name }: { name: string | null }) {
+  if (!name) return <span className="text-slate-400">Unknown vendor</span>;
+  const initials = name
+    .replace(/[^A-Za-z ]/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+  const tone = AVATAR_TONES[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_TONES.length];
+  return (
+    <span className="flex items-center gap-2.5">
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold ${tone}`}>{initials}</span>
+      <span className="max-w-[240px] truncate text-slate-700">{name}</span>
+    </span>
+  );
+}

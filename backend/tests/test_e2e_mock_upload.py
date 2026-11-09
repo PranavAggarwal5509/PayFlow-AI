@@ -8,7 +8,8 @@ from app.database.base import Base
 from app.main import app
 from app.api.dependencies.providers import get_llm
 from app.services.llm_extractor import MockLLMProvider
-from tests.conftest import add_vendor
+from app.core.security import get_current_user
+from tests.conftest import TEST_ADMIN, add_vendor
 from app.models import PurchaseOrder, PurchaseOrderItem
 from decimal import Decimal
 from datetime import date
@@ -20,7 +21,9 @@ def test_end_to_end_upload_with_mock_provider(tmp_path):
     Base.metadata.create_all(get_engine())
 
     with get_session_factory()() as db:
-        vendor = add_vendor(db, name="Acme Industrial Supplies Pvt Ltd", gstin="27AABCA1001A1Z5", code="V-1001")
+        vendor = add_vendor(db, name="Acme Industrial Supplies Pvt Ltd", gstin="27AABCA1001A1ZU", code="V-1001")
+        # Verified remittance details on file (the sample PDF prints the same account).
+        vendor.bank_account_number, vendor.bank_ifsc = "50200010017037", "YESB0001001"
         po = PurchaseOrder(
             po_number="PO-2026-0001",
             vendor_id=vendor.id,
@@ -42,6 +45,7 @@ def test_end_to_end_upload_with_mock_provider(tmp_path):
     # Configure app to use MockLLMProvider
     mock_llm = MockLLMProvider()
     app.dependency_overrides[get_llm] = lambda: mock_llm
+    app.dependency_overrides[get_current_user] = lambda: TEST_ADMIN
 
     pdf_path = Path(__file__).resolve().parent.parent.parent / "sample_data" / "invoices" / "01_valid_invoice.pdf"
     assert pdf_path.exists(), "01_valid_invoice.pdf must exist"

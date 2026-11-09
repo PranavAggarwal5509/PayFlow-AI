@@ -30,6 +30,9 @@ class Check:
     DUP_FILE = "DUP_FILE"
     DUP_BUSINESS = "DUP_BUSINESS"
     DUP_POTENTIAL = "DUP_POTENTIAL"
+    VENDOR_BANK = "VENDOR_BANK"
+    TAX_RATES = "TAX_RATES"
+    APPROVAL_LIMIT = "APPROVAL_LIMIT"
 
 
 LABELS = {
@@ -54,6 +57,9 @@ LABELS = {
     Check.DUP_FILE: "Exact file duplicate",
     Check.DUP_BUSINESS: "Duplicate invoice number",
     Check.DUP_POTENTIAL: "Potential duplicate",
+    Check.VENDOR_BANK: "Bank account verification",
+    Check.TAX_RATES: "GST rate validity",
+    Check.APPROVAL_LIMIT: "Approval authority limit",
 }
 
 
@@ -98,8 +104,27 @@ def _s(value: object) -> str | None:
     return str(value)
 
 
+def _indian_grouping(amount: Decimal) -> str:
+    """1234567.5 -> '12,34,567.50' (lakh / crore grouping used on Indian invoices)."""
+    sign = "-" if amount < 0 else ""
+    whole, frac = f"{abs(amount):.2f}".split(".")
+    head, tail = whole[:-3], whole[-3:]
+    groups = []
+    while len(head) > 2:
+        groups.insert(0, head[-2:])
+        head = head[:-2]
+    if head:
+        groups.insert(0, head)
+    return sign + ",".join([*groups, tail]) + "." + frac
+
+
 def money(amount: Decimal | None, currency: str | None) -> str:
+    if amount is None:
+        return "—"
     symbol = {"INR": "₹", "USD": "$", "EUR": "€", "GBP": "£"}.get(currency or "", "")
     suffix = "" if symbol else f" {currency}" if currency else ""
-    return f"{symbol}{amount:,.2f}{suffix}" if amount is not None else "—"
+    value = Decimal(amount)
+    sign = "-" if value < 0 else ""
+    body = _indian_grouping(abs(value)) if currency == "INR" else f"{abs(value):,.2f}"
+    return f"{sign}{symbol}{body}{suffix}"
 

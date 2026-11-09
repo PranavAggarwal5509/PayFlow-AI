@@ -1,8 +1,9 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, PlayCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import { ReviewBadge } from "@/components/invoices/status-badges";
@@ -23,7 +24,12 @@ import type { ReviewListItem } from "@/types/api";
 
 const INITIAL = { q: "", review_status: "OPEN", issue_type: "", vendor_id: "", date_from: "", date_to: "" };
 
+/** Where a review row leads: the processing run whose decision opened the review. */
+const runHref = (row: ReviewListItem): string =>
+  row.review_run_id ? `/processing/${row.review_run_id}` : `/invoices/${row.invoice_id}`;
+
 export default function ReviewQueuePage() {
+  const router = useRouter();
   const list = useListState(INITIAL, []);
   const query = useDebounce(list.filters.q);
   const vendors = useAsync(() => vendorService.list({ page_size: 100 }), []);
@@ -37,9 +43,18 @@ export default function ReviewQueuePage() {
         header: "Invoice",
         enableSorting: false,
         cell: ({ row }) => (
-          <Link href={`/invoices/${row.original.invoice_id}`} className="font-medium hover:text-primary">
-            {row.original.invoice_number ?? <span className="text-slate-400">No number</span>}
-          </Link>
+          <div>
+            <Link
+              href={runHref(row.original)}
+              onClick={(e) => e.stopPropagation()}
+              className="font-semibold text-slate-900 hover:text-indigo-600"
+            >
+              {row.original.invoice_number ?? <span className="text-slate-400">No number</span>}
+            </Link>
+            <span className="mt-0.5 flex items-center gap-1 text-[11.5px] font-medium text-indigo-600 opacity-0 transition-opacity group-hover:opacity-100">
+              <PlayCircle className="h-3 w-3" /> View the run that flagged it
+            </span>
+          </div>
         ),
       },
       { id: "vendor", header: "Vendor", enableSorting: false, cell: ({ row }) => row.original.vendor_name ?? "Unknown" },
@@ -54,11 +69,15 @@ export default function ReviewQueuePage() {
         header: "Issue",
         enableSorting: false,
         cell: ({ row }) => (
-          <div className="max-w-[320px]">
+          <div className="min-w-[220px] max-w-[380px]">
             {row.original.issue_type && (
-              <p className="text-xs font-medium text-amber-700">{ISSUE_LABELS[row.original.issue_type] ?? row.original.issue_type}</p>
+              <span className="inline-flex rounded bg-amber-50 px-1.5 py-px text-[11px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-200">
+                {ISSUE_LABELS[row.original.issue_type] ?? row.original.issue_type}
+              </span>
             )}
-            <p className="text-[13px] text-slate-600">{row.original.issue ?? "—"}</p>
+            <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-slate-600" title={row.original.issue ?? undefined}>
+              {row.original.issue ?? "—"}
+            </p>
           </div>
         ),
       },
@@ -71,11 +90,8 @@ export default function ReviewQueuePage() {
         cell: ({ row }) => {
           const open = row.original.review_status === "PENDING" || row.original.review_status === "CLARIFICATION_REQUESTED";
           return (
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/invoices/${row.original.invoice_id}`}>Open</Link>
-              </Button>
-              <Button asChild variant="ghost" size="icon" aria-label="View original PDF">
+            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+              <Button asChild variant="ghost" size="icon" aria-label="View original PDF" title="View original PDF">
                 <a href={documentUrl(row.original.invoice_id)} target="_blank" rel="noreferrer">
                   <ExternalLink className="h-4 w-4" />
                 </a>
@@ -94,7 +110,7 @@ export default function ReviewQueuePage() {
 
   return (
     <>
-      <PageHeader title="Review queue" description="Invoices that need a human decision. Every action is audited." />
+      <PageHeader eyebrow="Accounts payable" title="Review queue" description="Invoices the rules engine could not clear on its own. Every action you take is audited." />
       <Card>
         <div className="grid grid-cols-2 gap-3 border-b p-4 md:grid-cols-3 xl:grid-cols-6">
           <Input value={list.filters.q} onChange={(e) => list.setFilter("q", e.target.value)} placeholder="Search…" aria-label="Search reviews" />
@@ -138,6 +154,7 @@ export default function ReviewQueuePage() {
           meta={reviews.data?.meta}
           onPageChange={list.setPage}
           filtered={list.active}
+          onRowClick={(row) => router.push(runHref(row))}
           emptyTitle="Nothing to review"
           emptyDescription="Invoices that need manual attention will show up here."
         />

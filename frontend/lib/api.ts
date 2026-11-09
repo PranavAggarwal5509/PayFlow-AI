@@ -1,3 +1,4 @@
+import { getToken, handleUnauthorized } from "@/lib/session";
 import type { ApiEnvelope, Paginated } from "@/types/api";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
@@ -31,6 +32,7 @@ async function parse<T>(response: Response): Promise<ApiEnvelope<T>> {
   } catch {
     // non-JSON error (proxy, network) — fall through to the generic message
   }
+  if (response.status === 401 && !response.url.includes("/auth/login")) handleUnauthorized();
   if (!response.ok || body?.error) {
     throw new ApiError(
       body?.error?.message ?? "The server could not complete this request.",
@@ -41,11 +43,16 @@ async function parse<T>(response: Response): Promise<ApiEnvelope<T>> {
   return body as ApiEnvelope<T>;
 }
 
+function authHeader(): Record<string, string> {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<ApiEnvelope<T>> {
   try {
     const response = await fetch(`${API_BASE}/api/v1${path}`, {
       ...init,
-      headers: { Accept: "application/json", ...(init?.headers ?? {}) },
+      headers: { Accept: "application/json", ...authHeader(), ...(init?.headers ?? {}) },
       cache: "no-store",
     });
     return await parse<T>(response);
@@ -90,12 +97,15 @@ export function uploadFile<T>(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${API_BASE}/api/v1${path}`);
+    const token = getToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100));
     };
     xhr.onerror = () =>
       reject(new ApiError("Cannot reach the PayFlow API. Check that the backend is running.", 0, "network"));
     xhr.onload = () => {
+      if (xhr.status === 401) handleUnauthorized();
       try {
         const body = JSON.parse(xhr.responseText) as ApiEnvelope<T>;
         if (xhr.status >= 200 && xhr.status < 300 && !body.error) resolve(body.data as T);
@@ -110,7 +120,12 @@ export function uploadFile<T>(
   });
 }
 
-export const documentUrl = (invoiceId: string): string =>
-  `${API_BASE}/api/v1/invoices/${invoiceId}/document`;
-export const runEventsUrl = (runId: string): string => `${API_BASE}/api/v1/runs/${runId}/events`;
+/** Links that the browser opens directly (PDF tabs, EventSource) cannot send headers: pass the token. */
+const withToken = (url: string): string => {
+  const token = getToken();
+  return token ? `${url}?access_token=${encodeURIComponent(token)}` : url;
+};
+
+export const documentUrl = (invoiceId: string): string => withToken(`${API_BASE}/api/v1/invoices/${invoiceId}/document`);
+export const runEventsUrl = (runId: string): string => withToken(`${API_BASE}/api/v1/runs/${runId}/events`);
 

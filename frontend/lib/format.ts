@@ -16,6 +16,12 @@ export function formatMoney(amount: string | number | null | undefined, currency
   }
 }
 
+/** Server timestamps are UTC; some drivers omit the offset, so treat naive date-times as UTC. */
+export function parseServerDate(value: string): Date {
+  const naive = /T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(value);
+  return new Date(naive ? `${value}Z` : value);
+}
+
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
@@ -25,7 +31,7 @@ export function formatDate(value: string | null | undefined): string {
 
 export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
-  const date = new Date(value);
+  const date = parseServerDate(value);
   if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleString("en-IN", {
     day: "2-digit",
@@ -38,6 +44,7 @@ export function formatDateTime(value: string | null | undefined): string {
 export function formatDuration(seconds: number | null | undefined): string {
   if (seconds === null || seconds === undefined) return "—";
   if (seconds < 1) return "<1s";
+  if (seconds < 10) return `${seconds.toFixed(1)}s`;
   if (seconds < 60) return `${Math.round(seconds)}s`;
   const minutes = Math.floor(seconds / 60);
   return `${minutes}m ${Math.round(seconds % 60)}s`;

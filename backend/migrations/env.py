@@ -22,7 +22,10 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    engine = create_engine(get_settings().database_url)
+    url = get_settings().database_url
+    # Supabase transaction pooler (port 6543) cannot use server-side prepared statements.
+    connect_args = {"prepare_threshold": None} if ":6543/" in url else {}
+    engine = create_engine(url, connect_args=connect_args)
     with engine.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
         with context.begin_transaction():

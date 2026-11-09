@@ -1,6 +1,6 @@
+import logging
 from datetime import date
 from decimal import Decimal
-import logging
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, UploadFile
@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies.providers import get_llm, get_storage
 from app.core.config import Settings, get_settings
 from app.core.errors import NotFoundError
-from app.core.security import CurrentUser, get_current_user
+from app.core.security import CurrentUser, Permission, require
 from app.database.session import get_db, get_session_factory
 from app.models.enums import Stage
 from app.models.invoice import Invoice
@@ -54,7 +54,7 @@ async def upload_invoice(
     settings: Settings = Depends(get_settings),
     storage: StorageBackend = Depends(get_storage),
     llm: LLMProvider = Depends(get_llm),
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(require(Permission.INVOICES_UPLOAD)),
 ):
     # Read at most limit+1 bytes so an oversized upload is detected without buffering it all.
     data = await file.read(settings.max_upload_bytes + 1)
@@ -92,7 +92,7 @@ def list_invoices(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     search_query = q or query
     effective_min_amount = min_amount if min_amount is not None else amount_min
@@ -116,7 +116,7 @@ def list_invoices(
 
 @router.get("/{invoice_id}", response_model=ApiResponse[InvoiceDetail])
 def get_invoice(
-    invoice_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(get_current_user)
+    invoice_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(require(Permission.INVOICES_VIEW))
 ):
     detail = repo.get_invoice_detail(db, invoice_id)
     if detail is None:
@@ -129,7 +129,7 @@ def get_invoice_document(
     invoice_id: UUID,
     db: Session = Depends(get_db),
     storage: StorageBackend = Depends(get_storage),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     invoice = db.get(Invoice, invoice_id)
     if invoice is None:
@@ -154,7 +154,7 @@ def retry_invoice(
     settings: Settings = Depends(get_settings),
     storage: StorageBackend = Depends(get_storage),
     llm: LLMProvider = Depends(get_llm),
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(require(Permission.INVOICES_UPLOAD)),
 ):
     run = invoice_service.create_retry_run(db, invoice_id, user_id=user.id)
     background_tasks.add_task(start_processing, settings, storage, llm, invoice_id, run.id)

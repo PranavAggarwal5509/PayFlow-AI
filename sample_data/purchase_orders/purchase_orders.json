@@ -10,17 +10,23 @@
       {
         "description": "Hex bolts M12 (box of 100)",
         "quantity": 400,
-        "unit_price": 450
+        "unit_price": 450,
+        "hsn_sac": "73181500",
+        "gst_rate": 18
       },
       {
         "description": "Safety helmets",
         "quantity": 300,
-        "unit_price": 650
+        "unit_price": 650,
+        "hsn_sac": "65061010",
+        "gst_rate": 18
       },
       {
         "description": "Industrial gloves (pair)",
         "quantity": 1000,
-        "unit_price": 120
+        "unit_price": 120,
+        "hsn_sac": "40159030",
+        "gst_rate": 18
       }
     ],
     "total_amount": "584100.00"
@@ -36,17 +42,23 @@
       {
         "description": "Ergonomic office chair",
         "quantity": 40,
-        "unit_price": 4800
+        "unit_price": 4800,
+        "hsn_sac": "94013000",
+        "gst_rate": 18
       },
       {
         "description": "Standing desk",
         "quantity": 20,
-        "unit_price": 9500
+        "unit_price": 9500,
+        "hsn_sac": "94033010",
+        "gst_rate": 18
       },
       {
         "description": "A4 paper reams",
         "quantity": 500,
-        "unit_price": 260
+        "unit_price": 260,
+        "hsn_sac": "48025690",
+        "gst_rate": 18
       }
     ],
     "total_amount": "604160.00"
@@ -57,15 +69,17 @@
     "po_date": "2026-05-05",
     "currency": "INR",
     "status": "ACTIVE",
-    "description": "Quarterly freight services",
+    "description": "Line-haul freight Mumbai-Delhi FY26-27",
     "items": [
       {
         "description": "Freight Mumbai-Delhi (per trip)",
         "quantity": 24,
-        "unit_price": 5000
+        "unit_price": 5000,
+        "hsn_sac": "996511",
+        "gst_rate": 5
       }
     ],
-    "total_amount": "141600.00"
+    "total_amount": "126000.00"
   },
   {
     "po_number": "PO-2026-0004",
@@ -78,12 +92,16 @@
       {
         "description": "Corrugated boxes 18x12x10",
         "quantity": 2000,
-        "unit_price": 18
+        "unit_price": 18,
+        "hsn_sac": "48191010",
+        "gst_rate": 18
       },
       {
         "description": "Printed brochures",
         "quantity": 5000,
-        "unit_price": 6
+        "unit_price": 6,
+        "hsn_sac": "49011020",
+        "gst_rate": 18
       }
     ],
     "total_amount": "77880.00"
@@ -91,18 +109,27 @@
   {
     "po_number": "PO-2026-0005",
     "vendor_code": "V-1005",
-    "po_date": "2026-05-20",
+    "po_date": "2026-05-02",
     "currency": "INR",
     "status": "ACTIVE",
-    "description": "Facility housekeeping services FY26",
+    "description": "Facility housekeeping services FY26-27",
     "items": [
       {
         "description": "Monthly housekeeping service",
-        "quantity": 6,
-        "unit_price": 50000
+        "quantity": 12,
+        "unit_price": 50000,
+        "hsn_sac": "998533",
+        "gst_rate": 18
+      },
+      {
+        "description": "Deep cleaning (per visit)",
+        "quantity": 24,
+        "unit_price": 3500,
+        "hsn_sac": "998533",
+        "gst_rate": 18
       }
     ],
-    "total_amount": "354000.00"
+    "total_amount": "807120.00"
   },
   {
     "po_number": "PO-2026-0006",
@@ -110,25 +137,31 @@
     "po_date": "2026-06-01",
     "currency": "INR",
     "status": "ACTIVE",
-    "description": "Laptops and peripherals",
+    "description": "Laptop refresh and peripherals",
     "items": [
       {
         "description": "Business laptop 14in",
-        "quantity": 8,
-        "unit_price": 62000
+        "quantity": 20,
+        "unit_price": 62000,
+        "hsn_sac": "84713010",
+        "gst_rate": 18
       },
       {
         "description": "Docking station",
-        "quantity": 8,
-        "unit_price": 9500
+        "quantity": 20,
+        "unit_price": 9500,
+        "hsn_sac": "84733099",
+        "gst_rate": 18
       },
       {
         "description": "27in monitor",
         "quantity": 10,
-        "unit_price": 14000
+        "unit_price": 14000,
+        "hsn_sac": "85285200",
+        "gst_rate": 18
       }
     ],
-    "total_amount": "840160.00"
+    "total_amount": "1852600.00"
   },
   {
     "po_number": "PO-2026-0007",
@@ -141,12 +174,16 @@
       {
         "description": "Notebook A5 (pack of 12)",
         "quantity": 200,
-        "unit_price": 480
+        "unit_price": 480,
+        "hsn_sac": "48202000",
+        "gst_rate": 18
       },
       {
         "description": "Ball pens (box)",
         "quantity": 300,
-        "unit_price": 90
+        "unit_price": 90,
+        "hsn_sac": "96081019",
+        "gst_rate": 18
       }
     ],
     "total_amount": "145140.00"
@@ -154,18 +191,20 @@
   {
     "po_number": "PO-2026-0008",
     "vendor_code": "V-1008",
-    "po_date": "2026-06-15",
+    "po_date": "2026-10-15",
     "currency": "INR",
     "status": "ACTIVE",
-    "description": "Event catering - annual meet",
+    "description": "Diwali staff celebration catering",
     "items": [
       {
         "description": "Catering per head",
-        "quantity": 300,
-        "unit_price": 200
+        "quantity": 600,
+        "unit_price": 200,
+        "hsn_sac": "996334",
+        "gst_rate": 5
       }
     ],
-    "total_amount": "70800.00"
+    "total_amount": "126000.00"
   },
   {
     "po_number": "PO-2026-0009",
@@ -177,21 +216,27 @@
     "items": [
       {
         "description": "LED panel light 40W",
-        "quantity": 250,
-        "unit_price": 850
+        "quantity": 500,
+        "unit_price": 850,
+        "hsn_sac": "94051900",
+        "gst_rate": 18
       },
       {
         "description": "Copper cable 2.5mm (100m)",
         "quantity": 120,
-        "unit_price": 2400
+        "unit_price": 2400,
+        "hsn_sac": "85444999",
+        "gst_rate": 18
       },
       {
         "description": "MCB 32A",
-        "quantity": 150,
-        "unit_price": 380
+        "quantity": 300,
+        "unit_price": 380,
+        "hsn_sac": "85362030",
+        "gst_rate": 18
       }
     ],
-    "total_amount": "657850.00"
+    "total_amount": "975860.00"
   },
   {
     "po_number": "PO-2026-0010",
@@ -203,32 +248,38 @@
     "items": [
       {
         "description": "Developer hours",
-        "quantity": 1200,
-        "unit_price": 300
+        "quantity": 2400,
+        "unit_price": 1200,
+        "hsn_sac": "998314",
+        "gst_rate": 18
       }
     ],
-    "total_amount": "424800.00"
+    "total_amount": "3398400.00"
   },
   {
     "po_number": "PO-2026-0011",
     "vendor_code": "V-1011",
-    "po_date": "2026-07-10",
-    "currency": "USD",
+    "po_date": "2026-07-01",
+    "currency": "INR",
     "status": "ACTIVE",
     "description": "Cloud infrastructure services",
     "items": [
       {
-        "description": "Compute credits",
-        "quantity": 100,
-        "unit_price": 80
+        "description": "Cloud compute (per vCPU-month)",
+        "quantity": 600,
+        "unit_price": 1450,
+        "hsn_sac": "998315",
+        "gst_rate": 18
       },
       {
-        "description": "Managed database (monthly)",
-        "quantity": 6,
-        "unit_price": 650
+        "description": "Managed PostgreSQL (monthly)",
+        "quantity": 12,
+        "unit_price": 38000,
+        "hsn_sac": "998315",
+        "gst_rate": 18
       }
     ],
-    "total_amount": "11900.00"
+    "total_amount": "1564680.00"
   },
   {
     "po_number": "PO-2026-0012",
@@ -241,17 +292,23 @@
       {
         "description": "Lounge sofa 3-seater",
         "quantity": 10,
-        "unit_price": 14500
+        "unit_price": 14500,
+        "hsn_sac": "94016100",
+        "gst_rate": 18
       },
       {
         "description": "Coffee table",
         "quantity": 15,
-        "unit_price": 3200
+        "unit_price": 3200,
+        "hsn_sac": "94036000",
+        "gst_rate": 18
       },
       {
         "description": "Reception desk",
         "quantity": 2,
-        "unit_price": 18000
+        "unit_price": 18000,
+        "hsn_sac": "94033090",
+        "gst_rate": 18
       }
     ],
     "total_amount": "270220.00"
@@ -262,12 +319,14 @@
     "po_date": "2026-01-15",
     "currency": "INR",
     "status": "CLOSED",
-    "description": "FY25 safety stock (closed)",
+    "description": "FY25-26 fire safety stock (closed)",
     "items": [
       {
         "description": "Fire extinguisher 6kg",
         "quantity": 100,
-        "unit_price": 900
+        "unit_price": 900,
+        "hsn_sac": "84241000",
+        "gst_rate": 18
       }
     ],
     "total_amount": "106200.00"
@@ -283,7 +342,9 @@
       {
         "description": "Whiteboard 6x4",
         "quantity": 10,
-        "unit_price": 3500
+        "unit_price": 3500,
+        "hsn_sac": "96100000",
+        "gst_rate": 18
       }
     ],
     "total_amount": "41300.00"
@@ -299,7 +360,9 @@
       {
         "description": "Warehouse handling (per pallet)",
         "quantity": 3000,
-        "unit_price": 50
+        "unit_price": 50,
+        "hsn_sac": "996729",
+        "gst_rate": 18
       }
     ],
     "total_amount": "177000.00"
@@ -315,14 +378,118 @@
       {
         "description": "Roll-up banner",
         "quantity": 60,
-        "unit_price": 1200
+        "unit_price": 1200,
+        "hsn_sac": "49111020",
+        "gst_rate": 18
       },
       {
         "description": "Flyers A5",
         "quantity": 20000,
-        "unit_price": 2
+        "unit_price": 2,
+        "hsn_sac": "49111090",
+        "gst_rate": 18
       }
     ],
     "total_amount": "132160.00"
+  },
+  {
+    "po_number": "PO-2026-0017",
+    "vendor_code": "V-1013",
+    "po_date": "2026-06-05",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Cleaning and process chemicals",
+    "items": [
+      {
+        "description": "Isopropyl alcohol 99% (200L drum)",
+        "quantity": 40,
+        "unit_price": 21500,
+        "hsn_sac": "29051220",
+        "gst_rate": 18
+      },
+      {
+        "description": "Cleaning concentrate (50L can)",
+        "quantity": 60,
+        "unit_price": 4200,
+        "hsn_sac": "34022090",
+        "gst_rate": 18
+      }
+    ],
+    "total_amount": "1312160.00"
+  },
+  {
+    "po_number": "PO-2026-0018",
+    "vendor_code": "V-1014",
+    "po_date": "2026-06-18",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Warehouse packaging consumables",
+    "items": [
+      {
+        "description": "Stretch film roll 23 micron",
+        "quantity": 800,
+        "unit_price": 540,
+        "hsn_sac": "39201012",
+        "gst_rate": 18
+      },
+      {
+        "description": "BOPP tape 48mm (pack of 6)",
+        "quantity": 1200,
+        "unit_price": 210,
+        "hsn_sac": "39191000",
+        "gst_rate": 18
+      }
+    ],
+    "total_amount": "807120.00"
+  },
+  {
+    "po_number": "PO-2026-0019",
+    "vendor_code": "V-1015",
+    "po_date": "2026-05-01",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Manned guarding - warehouse and HQ",
+    "items": [
+      {
+        "description": "Security guard services (per guard-month)",
+        "quantity": 72,
+        "unit_price": 24000,
+        "hsn_sac": "998525",
+        "gst_rate": 18
+      },
+      {
+        "description": "Security supervisor (per month)",
+        "quantity": 12,
+        "unit_price": 32000,
+        "hsn_sac": "998525",
+        "gst_rate": 18
+      },
+      {
+        "description": "Additional guard cover (per shift)",
+        "quantity": 200,
+        "unit_price": 1500,
+        "hsn_sac": "998525",
+        "gst_rate": 18
+      }
+    ],
+    "total_amount": "2846160.00"
+  },
+  {
+    "po_number": "PO-2026-0020",
+    "vendor_code": "V-1016",
+    "po_date": "2026-07-01",
+    "currency": "INR",
+    "status": "ACTIVE",
+    "description": "Employee transport - corporate cabs",
+    "items": [
+      {
+        "description": "Corporate cab services (per day)",
+        "quantity": 400,
+        "unit_price": 3200,
+        "hsn_sac": "996601",
+        "gst_rate": 5
+      }
+    ],
+    "total_amount": "1344000.00"
   }
 ]

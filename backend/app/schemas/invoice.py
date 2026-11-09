@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.models.enums import ReviewAction
 from app.schemas.common import ORMModel
@@ -86,9 +86,40 @@ class RunSummary(ORMModel):
     decision_status: str | None = None
 
 
+class RunCheck(BaseModel):
+    validation_type: str
+    label: str
+    stage: str
+    status: str
+    impact: str
+    message: str
+    expected_value: str | None = None
+    actual_value: str | None = None
+
+
+class RunDecision(BaseModel):
+    status: str
+    reasons: list[dict]
+
+
+class RunInvoiceSnapshot(BaseModel):
+    vendor_name: str | None = None
+    vendor_matched: bool = False
+    total_amount: Decimal | None = None
+    currency: str | None = None
+    po_number: str | None = None
+    invoice_date: date | None = None
+    extraction_method: str | None = None
+    page_count: int | None = None
+    line_item_count: int = 0
+
+
 class RunDetail(RunSummary):
     stages: list[StageEventOut]
     can_retry: bool
+    checks: list[RunCheck] = []
+    decision: RunDecision | None = None
+    invoice: RunInvoiceSnapshot | None = None
 
 
 class AuditLogOut(ORMModel):
@@ -184,11 +215,23 @@ class ReviewListItem(BaseModel):
     issue_type: str | None
     uploaded_at: datetime
     review_status: str
+    review_run_id: UUID | None = None  # the processing run whose decision opened this review
+
+
+REVIEW_COMMENT_MIN = 10
 
 
 class ReviewDecisionIn(BaseModel):
     action: ReviewAction
-    comment: str = Field(min_length=3, max_length=2000)
+    comment: str = Field(max_length=2000)
+
+    @field_validator("comment")
+    @classmethod
+    def _meaningful(cls, value: str) -> str:
+        cleaned = " ".join(value.split())
+        if len(cleaned) < REVIEW_COMMENT_MIN:
+            raise ValueError(f"A reason of at least {REVIEW_COMMENT_MIN} characters is required for every review decision.")
+        return cleaned
 
 
 class ReviewDetail(BaseModel):

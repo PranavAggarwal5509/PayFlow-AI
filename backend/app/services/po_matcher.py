@@ -10,6 +10,7 @@ from rapidfuzz import fuzz
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import Settings
 from app.models.enums import CheckStatus, POStatus
 from app.models.invoice import Invoice
 from app.models.vendor_po import POAllocation, PurchaseOrder
@@ -47,32 +48,96 @@ def remaining_balance(
     return po.total_amount - consumed_amount(db, po.id, exclude_invoice_id=exclude_invoice_id)
 
 
-def match_purchase_order(db: Session, invoice: Invoice) -> list[CheckResult]:
+def match_purchase_order(
+    db: Session, invoice: Invoice, settings: Settings | None = None
+) -> list[CheckResult]:
     po = find_purchase_order(db, invoice.po_number_raw)
     invoice.purchase_order_id = po.id if po else None
 
-    if not invoice.po_number_raw:
-        return _all_skipped_after(
-            review(Check.PO_EXISTS, "The invoice does not reference a purchase order.")
-        )
     if po is None:
+        # The PO reference is missing or unknown. Try to infer it from the vendor's open POs.
+        inferred, candidates = infer_purchase_order(db, invoice)
+        if inferred is not None:
+            invoice.purchase_order_id = inferred.id
+            return [_inferred_result(invoice, inferred, settings), *_po_checks(db, invoice, inferred)]
+        if not invoice.po_number_raw:
+            message = "The invoice does not reference a purchase order."
+        else:
+            message = f"Purchase order {invoice.po_number_raw} was not found."
+        if len(candidates) > 1:
+            names = ", ".join(c.po_number for c in candidates)
+            message += f" Several open POs for this vendor could fit ({names}); a reviewer must choose."
         return _all_skipped_after(
-            review(
-                Check.PO_EXISTS,
-                f"Purchase order {invoice.po_number_raw} was not found.",
-                actual=invoice.po_number_raw,
-            )
+            review(Check.PO_EXISTS, message, actual=invoice.po_number_raw)
         )
 
-    results = [
+    return [
         passed(Check.PO_EXISTS, f"Purchase order {po.po_number} found.", actual=po.po_number),
+        *_po_checks(db, invoice, po),
+    ]
+
+
+def _po_checks(db: Session, invoice: Invoice, po: PurchaseOrder) -> list[CheckResult]:
+    return [
         _vendor_check(invoice, po),
         _status_check(po),
         _currency_check(invoice, po),
         _balance_check(db, invoice, po),
         _line_items_check(db, invoice, po),
     ]
-    return results
+
+
+def infer_purchase_order(
+    db: Session, invoice: Invoice
+) -> tuple[PurchaseOrder | None, list[PurchaseOrder]]:
+    """Implied-PO resolution: the vendor's open PO whose lines cover every invoice line.
+
+    Returns (unique match or None, all plausible candidates). Inference requires a confirmed
+    vendor, the same currency, every invoice line matching a PO line (description + price) and
+    enough remaining balance — anything weaker is left to a human.
+    """
+    if invoice.vendor_id is None or not invoice.line_items:
+        return None, []
+    open_pos = db.scalars(
+        select(PurchaseOrder)
+        .where(PurchaseOrder.vendor_id == invoice.vendor_id)
+        .where(PurchaseOrder.status == POStatus.ACTIVE.value)
+        .order_by(PurchaseOrder.po_date)
+    ).all()
+    candidates = []
+    for po in open_pos:
+        if invoice.currency and po.currency != invoice.currency:
+            continue
+        if not all(_line_matches_po(i.description, i.unit_price, po) for i in invoice.line_items):
+            continue
+        if invoice.total_amount is not None and invoice.total_amount > remaining_balance(
+            db, po, exclude_invoice_id=invoice.id
+        ):
+            continue
+        candidates.append(po)
+    return (candidates[0] if len(candidates) == 1 else None), candidates
+
+
+def _inferred_result(invoice: Invoice, po: PurchaseOrder, settings: Settings | None) -> CheckResult:
+    lines = len(invoice.line_items)
+    why = (
+        f"all {lines} invoice line(s) match its items and the remaining balance covers the total"
+    )
+    if invoice.po_number_raw:
+        message = (
+            f"PO {invoice.po_number_raw} does not exist; inferred {po.po_number} instead because {why}."
+        )
+    else:
+        message = f"No PO printed on the invoice; inferred {po.po_number} because {why}."
+    if settings is not None and settings.auto_approve_inferred_po:
+        return passed(Check.PO_EXISTS, message, actual=po.po_number)
+    return review(
+        Check.PO_EXISTS,
+        message + " Confirm the reference before payment.",
+        expected=po.po_number,
+        actual=invoice.po_number_raw or "not printed",
+        status=CheckStatus.WARNING,
+    )
 
 
 def _all_skipped_after(first: CheckResult) -> list[CheckResult]:

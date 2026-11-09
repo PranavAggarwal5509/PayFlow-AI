@@ -6,9 +6,10 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import Settings, get_settings
-from app.core.errors import NotFoundError
-from app.core.security import CurrentUser, get_current_user
+from app.core.errors import ForbiddenError, NotFoundError
+from app.core.security import CurrentUser, Permission, require
 from app.database.session import get_db
+from app.models.enums import ReviewAction
 from app.models.invoice import Invoice
 from app.models.processing import Decision, Review
 from app.repositories import invoice_repository as repo
@@ -31,7 +32,7 @@ def list_reviews(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     stmt = select(Review).join(Invoice, Invoice.id == Review.invoice_id)
     if review_status == "OPEN":
@@ -63,9 +64,17 @@ def list_reviews(
             .limit(page_size)
         ).unique()
     )
-    run_ids = [r.invoice.runs[-1].id for r in reviews if r.invoice.runs]
+    # The run that sent each invoice to review = its latest NEEDS_REVIEW decision.
+    invoice_ids = [r.invoice_id for r in reviews]
+    review_runs: dict[UUID, UUID] = {}
     issues: dict[UUID, str] = {}
-    for d in db.scalars(select(Decision).where(Decision.processing_run_id.in_(run_ids))):
+    flagged = db.scalars(
+        select(Decision)
+        .where(Decision.invoice_id.in_(invoice_ids), Decision.status == "NEEDS_REVIEW")
+        .order_by(Decision.created_at)
+    )
+    for d in flagged:  # ascending, so the latest decision wins
+        review_runs[d.invoice_id] = d.processing_run_id
         reason = next((x for x in d.reasons if x["severity"] != "INFO"), None)
         if reason:
             issues[d.invoice_id] = reason["message"]
@@ -76,6 +85,7 @@ def list_reviews(
             currency=r.invoice.currency, total_amount=r.invoice.total_amount,
             issue=issues.get(r.invoice_id), issue_type=r.issue_type,
             uploaded_at=r.invoice.uploaded_at, review_status=r.review_status,
+            review_run_id=review_runs.get(r.invoice_id) or (r.invoice.runs[-1].id if r.invoice.runs else None),
         )  # fmt: skip
         for r in reviews
     ]
@@ -83,7 +93,7 @@ def list_reviews(
 
 
 @router.get("/{review_id}", response_model=ApiResponse[ReviewDetail])
-def get_review(review_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(get_current_user)):
+def get_review(review_id: UUID, db: Session = Depends(get_db), _: CurrentUser = Depends(require(Permission.INVOICES_VIEW))):
     review = db.get(Review, review_id)
     if review is None:
         raise NotFoundError("Review not found.")
@@ -96,8 +106,9 @@ def get_review(review_id: UUID, db: Session = Depends(get_db), _: CurrentUser = 
 def decide_review(
     review_id: UUID, body: ReviewDecisionIn, db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(require(Permission.REVIEW_ACT)),
 ):  # fmt: skip
+    _check_approval_authority(db, review_id, body.action, user)
     review = review_service.apply_review_decision(
         db, review_id, body.action, body.comment.strip(), user_id=user.id, settings=settings
     )
@@ -108,7 +119,7 @@ def decide_review(
 def stats(
     days: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     from app.services.analytics_service import get_operational_metrics
 
@@ -121,7 +132,7 @@ def stats(
 def developer_analytics(
     days: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.DEVELOPER_VIEW)),
 ):
     from app.services.analytics_service import get_operational_metrics
 
@@ -133,7 +144,24 @@ def developer_analytics(
 def recent_activity(
     limit: int = Query(15, ge=1, le=50),
     db: Session = Depends(get_db),
-    _: CurrentUser = Depends(get_current_user),
+    _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     return ApiResponse(data=dashboard_service.recent_activity(db, limit))
 
+
+
+def _check_approval_authority(db: Session, review_id: UUID, action: ReviewAction, user: CurrentUser) -> None:
+    """Segregation of duties: only holders of review:approve_high_value may approve an invoice the
+    rules engine flagged as above the auto-approval limit."""
+    if action != ReviewAction.APPROVE or user.can(Permission.REVIEW_HIGH_VALUE):
+        return
+    review = db.get(Review, review_id)
+    if review is None:
+        return  # the service raises the proper 404
+    decision = db.scalar(
+        select(Decision).where(Decision.invoice_id == review.invoice_id).order_by(Decision.created_at.desc()).limit(1)
+    )
+    if decision and any(r.get("code") == "APPROVAL_LIMIT" for r in decision.reasons or []):
+        raise ForbiddenError(
+            "This invoice is above the auto-approval limit. Only a Finance Manager or Administrator can approve it."
+        )

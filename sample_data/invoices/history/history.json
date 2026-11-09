@@ -1,6 +1,6 @@
 [
   {
-    "file": "h01_acme.pdf",
+    "file": "h_acm-2026-0987.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
     "invoice_number": "ACM/2026/0987",
@@ -8,10 +8,14 @@
     "po_number": "PO-2026-0001",
     "currency": "INR",
     "total": "91450.00",
-    "layout": "classic",
-    "days_ago": 160,
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 0,
     "vendor_code": "V-1001",
-    "gstin": "27AABCA1001A1Z5",
+    "gstin": "27AABCA1001A1ZU",
+    "vendor_address": "Plot 14, MIDC Industrial Area, Andheri East, Mumbai 400093",
+    "bank_details": "Yes Bank, A/C 50200010017037, IFSC YESB0001001",
     "invoice_date": "2026-05-14",
     "due_date": "2026-06-13",
     "items": [
@@ -19,63 +23,116 @@
         "description": "Hex bolts M12 (box of 100)",
         "quantity": 100,
         "unit_price": 450,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "45000"
       },
       {
         "description": "Safety helmets",
         "quantity": 50,
         "unit_price": 650,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "32500"
       }
     ],
     "subtotal": "77500.00",
-    "tax": "13950.00"
+    "tax": "13950.00",
+    "resolve": null
   },
   {
-    "file": "h02_acme.pdf",
+    "file": "h_efs-26-27-0092.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "ACM/2026/1011",
-    "vendor": "Acme Industrial Supplies Pvt Ltd",
-    "po_number": "PO-2026-0001",
+    "invoice_number": "EFS/26-27/0092",
+    "vendor": "Evergreen Facility Services Pvt Ltd",
+    "po_number": "PO-2026-0005",
     "currency": "INR",
-    "total": "150450.00",
-    "layout": "modern",
-    "days_ago": 100,
-    "vendor_code": "V-1001",
-    "gstin": "27AABCA1001A1Z5",
-    "invoice_date": "2026-07-03",
-    "due_date": "2026-08-02",
+    "total": "63130.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 1,
+    "vendor_code": "V-1005",
+    "gstin": "33AABCE1005E1ZL",
+    "vendor_address": "12, Anna Salai, Teynampet, Chennai 600018",
+    "bank_details": "State Bank of India, A/C 50200010057185, IFSC SBIN0001005",
+    "invoice_date": "2026-05-31",
+    "due_date": "2026-06-30",
     "items": [
       {
-        "description": "Industrial gloves (pair)",
-        "quantity": 500,
-        "unit_price": 120,
-        "tax_percentage": 18
+        "description": "Monthly housekeeping service",
+        "quantity": 1,
+        "unit_price": 50000,
+        "tax_percentage": 18,
+        "total_amount": "50000"
       },
       {
-        "description": "Hex bolts M12 (box of 100)",
-        "quantity": 150,
-        "unit_price": 450,
-        "tax_percentage": 18
+        "description": "Deep cleaning (per visit)",
+        "quantity": 1,
+        "unit_price": 3500,
+        "tax_percentage": 18,
+        "total_amount": "3500"
       }
     ],
-    "subtotal": "127500.00",
-    "tax": "22950.00"
+    "subtotal": "53500.00",
+    "tax": "9630.00",
+    "resolve": null
   },
   {
-    "file": "h03_bharat.pdf",
+    "file": "h_oss-mum-26-27-041.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "BOS-8841",
+    "invoice_number": "OSS/MUM/26-27/041",
+    "vendor": "Orion Security Services Pvt Ltd",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total": "207680.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 2,
+    "vendor_code": "V-1015",
+    "gstin": "27AABCO1015O1ZH",
+    "vendor_address": "204, Satellite Gazebo, Guru Hargovindji Marg, Andheri East, Mumbai 400093",
+    "bank_details": "ICICI Bank, A/C 50200010157555, IFSC ICIC0001015",
+    "invoice_date": "2026-05-31",
+    "due_date": "2026-06-30",
+    "items": [
+      {
+        "description": "Security guard services (per guard-month)",
+        "quantity": 6,
+        "unit_price": 24000,
+        "tax_percentage": 18,
+        "total_amount": "144000"
+      },
+      {
+        "description": "Security supervisor (per month)",
+        "quantity": 1,
+        "unit_price": 32000,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      }
+    ],
+    "subtotal": "176000.00",
+    "tax": "31680.00",
+    "resolve": null
+  },
+  {
+    "file": "h_bos-26-27-0418.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "BOS/26-27/0418",
     "vendor": "Bharat Office Solutions Pvt Ltd",
     "po_number": "PO-2026-0002",
     "currency": "INR",
     "total": "56640.00",
-    "layout": "compact",
-    "days_ago": 140,
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 3,
     "vendor_code": "V-1002",
-    "gstin": "29AABCB1002B1Z3",
+    "gstin": "29AABCB1002B1ZM",
+    "vendor_address": "88, Residency Road, Shanthala Nagar, Bengaluru 560025",
+    "bank_details": "HDFC Bank, A/C 50200010027074, IFSC HDFC0001002",
     "invoice_date": "2026-06-02",
     "due_date": "2026-07-02",
     "items": [
@@ -83,103 +140,336 @@
         "description": "Ergonomic office chair",
         "quantity": 10,
         "unit_price": 4800,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "48000"
       }
     ],
     "subtotal": "48000.00",
-    "tax": "8640.00"
+    "tax": "8640.00",
+    "resolve": null
   },
   {
-    "file": "h04_cobalt.pdf",
+    "file": "h_cl-del-26-27-221.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "CL-2026-221",
+    "invoice_number": "CL/DEL/26-27/221",
     "vendor": "Cobalt Logistics LLP",
     "po_number": "PO-2026-0003",
     "currency": "INR",
-    "total": "88500.00",
-    "layout": "classic",
-    "days_ago": 120,
+    "total": "31500.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 4,
     "vendor_code": "V-1003",
-    "gstin": "07AABCC1003C1Z1",
+    "gstin": "07AAFFC1003C1ZE",
+    "vendor_address": "B-21, Okhla Industrial Area Phase II, New Delhi 110020",
+    "bank_details": "ICICI Bank, A/C 50200010037111, IFSC ICIC0001003",
     "invoice_date": "2026-06-20",
     "due_date": "2026-07-20",
     "items": [
       {
         "description": "Freight Mumbai-Delhi (per trip)",
-        "quantity": 15,
+        "quantity": 6,
         "unit_price": 5000,
-        "tax_percentage": 18
+        "tax_percentage": 5,
+        "total_amount": "30000"
       }
     ],
-    "subtotal": "75000.00",
-    "tax": "13500.00"
+    "subtotal": "30000.00",
+    "tax": "1500.00",
+    "resolve": null
   },
   {
-    "file": "h05_evergreen.pdf",
+    "file": "h_dpp-26-27-0341.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "EFS/2026/0118",
-    "vendor": "Evergreen Facility Services",
+    "invoice_number": "DPP/26-27/0341",
+    "vendor": "Deccan Print & Packaging Ltd",
+    "po_number": "PO-2026-0004",
+    "currency": "INR",
+    "total": "23364.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 5,
+    "vendor_code": "V-1004",
+    "gstin": "36AABCD1004D1ZJ",
+    "vendor_address": "Survey No. 42, Medchal Road, Kompally, Hyderabad 500067",
+    "bank_details": "Axis Bank, A/C 50200010047148, IFSC UTIB0001004",
+    "invoice_date": "2026-06-25",
+    "due_date": "2026-07-25",
+    "items": [
+      {
+        "description": "Corrugated boxes 18x12x10",
+        "quantity": 600,
+        "unit_price": 18,
+        "tax_percentage": 18,
+        "total_amount": "10800"
+      },
+      {
+        "description": "Printed brochures",
+        "quantity": 1500,
+        "unit_price": 6,
+        "tax_percentage": 18,
+        "total_amount": "9000"
+      }
+    ],
+    "subtotal": "19800.00",
+    "tax": "3564.00",
+    "resolve": null
+  },
+  {
+    "file": "h_efs-26-27-0105.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "EFS/26-27/0105",
+    "vendor": "Evergreen Facility Services Pvt Ltd",
     "po_number": "PO-2026-0005",
     "currency": "INR",
     "total": "59000.00",
-    "layout": "modern",
-    "days_ago": 80,
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 6,
     "vendor_code": "V-1005",
-    "gstin": "33AABCE1005E1Z7",
-    "invoice_date": "2026-08-05",
-    "due_date": "2026-09-04",
+    "gstin": "33AABCE1005E1ZL",
+    "vendor_address": "12, Anna Salai, Teynampet, Chennai 600018",
+    "bank_details": "State Bank of India, A/C 50200010057185, IFSC SBIN0001005",
+    "invoice_date": "2026-06-30",
+    "due_date": "2026-07-30",
     "items": [
       {
         "description": "Monthly housekeeping service",
         "quantity": 1,
         "unit_price": 50000,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "50000"
       }
     ],
     "subtotal": "50000.00",
-    "tax": "9000.00"
+    "tax": "9000.00",
+    "resolve": null
   },
   {
-    "file": "h06_evergreen.pdf",
+    "file": "h_oss-mum-26-27-057.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "EFS/2026/0131",
-    "vendor": "Evergreen Facility Services",
-    "po_number": "PO-2026-0005",
+    "invoice_number": "OSS/MUM/26-27/057",
+    "vendor": "Orion Security Services Pvt Ltd",
+    "po_number": "PO-2026-0019",
     "currency": "INR",
-    "total": "61360.00",
-    "layout": "modern",
-    "days_ago": 50,
-    "vendor_code": "V-1005",
-    "gstin": "33AABCE1005E1Z7",
-    "invoice_date": "2026-09-05",
-    "due_date": "2026-10-05",
+    "total": "214760.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 7,
+    "vendor_code": "V-1015",
+    "gstin": "27AABCO1015O1ZH",
+    "vendor_address": "204, Satellite Gazebo, Guru Hargovindji Marg, Andheri East, Mumbai 400093",
+    "bank_details": "ICICI Bank, A/C 50200010157555, IFSC ICIC0001015",
+    "invoice_date": "2026-06-30",
+    "due_date": "2026-07-30",
     "items": [
       {
-        "description": "Monthly housekeeping service",
+        "description": "Security guard services (per guard-month)",
+        "quantity": 6,
+        "unit_price": 24000,
+        "tax_percentage": 18,
+        "total_amount": "144000"
+      },
+      {
+        "description": "Security supervisor (per month)",
         "quantity": 1,
-        "unit_price": 52000,
-        "tax_percentage": 18
+        "unit_price": 32000,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      },
+      {
+        "description": "Additional guard cover (per shift)",
+        "quantity": 4,
+        "unit_price": 1500,
+        "tax_percentage": 18,
+        "total_amount": "6000"
       }
     ],
-    "subtotal": "52000.00",
-    "tax": "9360.00"
+    "subtotal": "182000.00",
+    "tax": "32760.00",
+    "resolve": null
   },
   {
-    "file": "h07_falcon.pdf",
+    "file": "h_npi-26-27-1102.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "FIT-5530",
+    "invoice_number": "NPI/26-27/1102",
+    "vendor": "Nova Packaging Industries",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total": "145140.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 8,
+    "vendor_code": "V-1014",
+    "gstin": "27AAMFN1014N1Z4",
+    "vendor_address": "Gala 3, Harihar Compound, Mankoli Naka, Bhiwandi, Thane 421302",
+    "bank_details": "HDFC Bank, A/C 50200010147518, IFSC HDFC0001014",
+    "invoice_date": "2026-07-02",
+    "due_date": "2026-08-01",
+    "items": [
+      {
+        "description": "Stretch film roll 23 micron",
+        "quantity": 150,
+        "unit_price": 540,
+        "tax_percentage": 18,
+        "total_amount": "81000"
+      },
+      {
+        "description": "BOPP tape 48mm (pack of 6)",
+        "quantity": 200,
+        "unit_price": 210,
+        "tax_percentage": 18,
+        "total_amount": "42000"
+      }
+    ],
+    "subtotal": "123000.00",
+    "tax": "22140.00",
+    "resolve": null
+  },
+  {
+    "file": "h_acm-2026-1011.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "ACM/2026/1011",
+    "vendor": "Acme Industrial Supplies Pvt Ltd",
+    "po_number": "PO-2026-0001",
+    "currency": "INR",
+    "total": "113280.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 9,
+    "vendor_code": "V-1001",
+    "gstin": "27AABCA1001A1ZU",
+    "vendor_address": "Plot 14, MIDC Industrial Area, Andheri East, Mumbai 400093",
+    "bank_details": "Yes Bank, A/C 50200010017037, IFSC YESB0001001",
+    "invoice_date": "2026-07-03",
+    "due_date": "2026-08-02",
+    "items": [
+      {
+        "description": "Industrial gloves (pair)",
+        "quantity": 500,
+        "unit_price": 120,
+        "tax_percentage": 18,
+        "total_amount": "60000"
+      },
+      {
+        "description": "Hex bolts M12 (box of 100)",
+        "quantity": 80,
+        "unit_price": 450,
+        "tax_percentage": 18,
+        "total_amount": "36000"
+      }
+    ],
+    "subtotal": "96000.00",
+    "tax": "17280.00",
+    "resolve": null
+  },
+  {
+    "file": "h_mcpl-26-27-0611.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "MCPL/26-27/0611",
+    "vendor": "Meridian Chemicals Pvt Ltd",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total": "201780.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 10,
+    "vendor_code": "V-1013",
+    "gstin": "24AABCM1013M1ZV",
+    "vendor_address": "Plot 210, GIDC Makarpura, Vadodara 390010",
+    "bank_details": "Yes Bank, A/C 50200010137481, IFSC YESB0001013",
+    "invoice_date": "2026-07-09",
+    "due_date": "2026-08-08",
+    "items": [
+      {
+        "description": "Isopropyl alcohol 99% (200L drum)",
+        "quantity": 6,
+        "unit_price": 21500,
+        "tax_percentage": 18,
+        "total_amount": "129000"
+      },
+      {
+        "description": "Cleaning concentrate (50L can)",
+        "quantity": 10,
+        "unit_price": 4200,
+        "tax_percentage": 18,
+        "total_amount": "42000"
+      }
+    ],
+    "subtotal": "171000.00",
+    "tax": "30780.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ie-26-27-0390.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "IE/26-27/0390",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "122720.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 11,
+    "vendor_code": "V-1009",
+    "gstin": "09AABCI1009I1ZV",
+    "vendor_address": "C-9, Sector 62, Noida, Gautam Buddh Nagar 201301",
+    "bank_details": "ICICI Bank, A/C 50200010097333, IFSC ICIC0001009",
+    "invoice_date": "2026-07-18",
+    "due_date": "2026-08-17",
+    "items": [
+      {
+        "description": "LED panel light 40W",
+        "quantity": 100,
+        "unit_price": 850,
+        "tax_percentage": 18,
+        "total_amount": "85000"
+      },
+      {
+        "description": "MCB 32A",
+        "quantity": 50,
+        "unit_price": 380,
+        "tax_percentage": 18,
+        "total_amount": "19000"
+      }
+    ],
+    "subtotal": "104000.00",
+    "tax": "18720.00",
+    "resolve": null
+  },
+  {
+    "file": "h_fit-26-5530.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "FIT-26-5530",
     "vendor": "Falcon IT Hardware Pvt Ltd",
     "po_number": "PO-2026-0006",
     "currency": "INR",
-    "total": "146320.00",
-    "layout": "compact",
-    "days_ago": 90,
+    "total": "168740.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 12,
     "vendor_code": "V-1006",
-    "gstin": "24AABCF1006F1Z4",
+    "gstin": "24AABCF1006F1ZG",
+    "vendor_address": "7th Floor, Shivalik Shilp, Prahlad Nagar, Ahmedabad 380015",
+    "bank_details": "Kotak Mahindra Bank, A/C 50200010067222, IFSC KKBK0001006",
     "invoice_date": "2026-07-21",
     "due_date": "2026-08-20",
     "items": [
@@ -187,109 +477,798 @@
         "description": "Business laptop 14in",
         "quantity": 2,
         "unit_price": 62000,
-        "tax_percentage": 18
-      }
-    ],
-    "subtotal": "124000.00",
-    "tax": "22320.00"
-  },
-  {
-    "file": "h08_indus.pdf",
-    "scenario": "History",
-    "expected_outcome": "APPROVED",
-    "invoice_number": "IE/26-27/0412",
-    "vendor": "Indus Electricals Pvt Ltd",
-    "po_number": "PO-2026-0009",
-    "currency": "INR",
-    "total": "122720.00",
-    "layout": "classic",
-    "days_ago": 70,
-    "vendor_code": "V-1009",
-    "gstin": "09AABCI1009I1Z8",
-    "invoice_date": "2026-08-18",
-    "due_date": "2026-09-17",
-    "items": [
-      {
-        "description": "LED panel light 40W",
-        "quantity": 100,
-        "unit_price": 850,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "124000"
       },
       {
-        "description": "MCB 32A",
-        "quantity": 50,
-        "unit_price": 380,
-        "tax_percentage": 18
+        "description": "Docking station",
+        "quantity": 2,
+        "unit_price": 9500,
+        "tax_percentage": 18,
+        "total_amount": "19000"
       }
     ],
-    "subtotal": "104000.00",
-    "tax": "18720.00"
+    "subtotal": "143000.00",
+    "tax": "25740.00",
+    "resolve": null
   },
   {
-    "file": "h09_jupiter.pdf",
+    "file": "h_efs-26-27-0118.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "JSS/0071",
+    "invoice_number": "EFS/26-27/0118",
+    "vendor": "Evergreen Facility Services Pvt Ltd",
+    "po_number": "PO-2026-0005",
+    "currency": "INR",
+    "total": "67260.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 13,
+    "vendor_code": "V-1005",
+    "gstin": "33AABCE1005E1ZL",
+    "vendor_address": "12, Anna Salai, Teynampet, Chennai 600018",
+    "bank_details": "State Bank of India, A/C 50200010057185, IFSC SBIN0001005",
+    "invoice_date": "2026-07-31",
+    "due_date": "2026-08-30",
+    "items": [
+      {
+        "description": "Monthly housekeeping service",
+        "quantity": 1,
+        "unit_price": 50000,
+        "tax_percentage": 18,
+        "total_amount": "50000"
+      },
+      {
+        "description": "Deep cleaning (per visit)",
+        "quantity": 2,
+        "unit_price": 3500,
+        "tax_percentage": 18,
+        "total_amount": "7000"
+      }
+    ],
+    "subtotal": "57000.00",
+    "tax": "10260.00",
+    "resolve": null
+  },
+  {
+    "file": "h_jss-inv-26-27-071.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "JSS/INV/26-27/071",
     "vendor": "Jupiter Software Services Pvt Ltd",
     "po_number": "PO-2026-0010",
     "currency": "INR",
-    "total": "70800.00",
-    "layout": "modern",
-    "days_ago": 45,
+    "total": "237888.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 14,
     "vendor_code": "V-1010",
-    "gstin": "27AABCJ1010J1Z6",
-    "invoice_date": "2026-09-10",
-    "due_date": "2026-10-10",
+    "gstin": "27AABCJ1010J1Z1",
+    "vendor_address": "Office 501, Pentagon Tower P2, Hinjewadi Phase 1, Pune 411057",
+    "bank_details": "Axis Bank, A/C 50200010107370, IFSC UTIB0001010",
+    "invoice_date": "2026-07-31",
+    "due_date": "2026-08-30",
     "items": [
       {
         "description": "Developer hours",
-        "quantity": 200,
-        "unit_price": 300,
-        "tax_percentage": 18
+        "quantity": 168,
+        "unit_price": 1200,
+        "tax_percentage": 18,
+        "total_amount": "201600"
       }
     ],
-    "subtotal": "60000.00",
-    "tax": "10800.00"
+    "subtotal": "201600.00",
+    "tax": "36288.00",
+    "resolve": null
   },
   {
-    "file": "h10_lotus.pdf",
+    "file": "h_kct-26-27-0211.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "LFC-3320",
+    "invoice_number": "KCT/26-27/0211",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "INR",
+    "total": "113280.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 15,
+    "vendor_code": "V-1011",
+    "gstin": "29AABCK1011K1ZT",
+    "vendor_address": "Embassy Tech Village, Block 4, Devarabisanahalli, Bengaluru 560103",
+    "bank_details": "State Bank of India, A/C 50200010117407, IFSC SBIN0001011",
+    "invoice_date": "2026-07-31",
+    "due_date": "2026-08-30",
+    "items": [
+      {
+        "description": "Cloud compute (per vCPU-month)",
+        "quantity": 40,
+        "unit_price": 1450,
+        "tax_percentage": 18,
+        "total_amount": "58000"
+      },
+      {
+        "description": "Managed PostgreSQL (monthly)",
+        "quantity": 1,
+        "unit_price": 38000,
+        "tax_percentage": 18,
+        "total_amount": "38000"
+      }
+    ],
+    "subtotal": "96000.00",
+    "tax": "17280.00",
+    "resolve": null
+  },
+  {
+    "file": "h_oss-mum-26-27-073.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "OSS/MUM/26-27/073",
+    "vendor": "Orion Security Services Pvt Ltd",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total": "225380.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 16,
+    "vendor_code": "V-1015",
+    "gstin": "27AABCO1015O1ZH",
+    "vendor_address": "204, Satellite Gazebo, Guru Hargovindji Marg, Andheri East, Mumbai 400093",
+    "bank_details": "ICICI Bank, A/C 50200010157555, IFSC ICIC0001015",
+    "invoice_date": "2026-07-31",
+    "due_date": "2026-08-30",
+    "items": [
+      {
+        "description": "Security guard services (per guard-month)",
+        "quantity": 6,
+        "unit_price": 24000,
+        "tax_percentage": 18,
+        "total_amount": "144000"
+      },
+      {
+        "description": "Security supervisor (per month)",
+        "quantity": 1,
+        "unit_price": 32000,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      },
+      {
+        "description": "Additional guard cover (per shift)",
+        "quantity": 10,
+        "unit_price": 1500,
+        "tax_percentage": 18,
+        "total_amount": "15000"
+      }
+    ],
+    "subtotal": "191000.00",
+    "tax": "34380.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ptt-26-27-0614.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "PTT/26-27/0614",
+    "vendor": "Pinnacle Travels & Tours",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total": "73920.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 17,
+    "vendor_code": "V-1016",
+    "gstin": "06AAQFP1016P1ZW",
+    "vendor_address": "SCO 41, Sector 29 Market, Gurugram 122001",
+    "bank_details": "Axis Bank, A/C 50200010167592, IFSC UTIB0001016",
+    "invoice_date": "2026-07-31",
+    "due_date": "2026-08-30",
+    "items": [
+      {
+        "description": "Corporate cab services (per day)",
+        "quantity": 22,
+        "unit_price": 3200,
+        "tax_percentage": 5,
+        "total_amount": "70400"
+      }
+    ],
+    "subtotal": "70400.00",
+    "tax": "3520.00",
+    "resolve": null
+  },
+  {
+    "file": "h_cl-del-26-27-247.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "CL/DEL/26-27/247",
+    "vendor": "Cobalt Logistics LLP",
+    "po_number": "PO-2026-0003",
+    "currency": "INR",
+    "total": "36750.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 18,
+    "vendor_code": "V-1003",
+    "gstin": "07AAFFC1003C1ZE",
+    "vendor_address": "B-21, Okhla Industrial Area Phase II, New Delhi 110020",
+    "bank_details": "ICICI Bank, A/C 50200010037111, IFSC ICIC0001003",
+    "invoice_date": "2026-08-05",
+    "due_date": "2026-09-04",
+    "items": [
+      {
+        "description": "Freight Mumbai-Delhi (per trip)",
+        "quantity": 7,
+        "unit_price": 5000,
+        "tax_percentage": 5,
+        "total_amount": "35000"
+      }
+    ],
+    "subtotal": "35000.00",
+    "tax": "1750.00",
+    "resolve": null
+  },
+  {
+    "file": "h_bos-26-27-0533.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "BOS/26-27/0533",
+    "vendor": "Bharat Office Solutions Pvt Ltd",
+    "po_number": "PO-2026-0002",
+    "currency": "INR",
+    "total": "113280.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 19,
+    "vendor_code": "V-1002",
+    "gstin": "29AABCB1002B1ZM",
+    "vendor_address": "88, Residency Road, Shanthala Nagar, Bengaluru 560025",
+    "bank_details": "HDFC Bank, A/C 50200010027074, IFSC HDFC0001002",
+    "invoice_date": "2026-08-11",
+    "due_date": "2026-09-10",
+    "items": [
+      {
+        "description": "Standing desk",
+        "quantity": 6,
+        "unit_price": 9500,
+        "tax_percentage": 18,
+        "total_amount": "57000"
+      },
+      {
+        "description": "A4 paper reams",
+        "quantity": 150,
+        "unit_price": 260,
+        "tax_percentage": 18,
+        "total_amount": "39000"
+      }
+    ],
+    "subtotal": "96000.00",
+    "tax": "17280.00",
+    "resolve": null
+  },
+  {
+    "file": "h_lfc-26-27-3320.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "LFC/26-27/3320",
     "vendor": "Lotus Furnishings Co",
     "po_number": "PO-2026-0012",
     "currency": "INR",
-    "total": "34220.00",
-    "layout": "compact",
-    "days_ago": 35,
+    "total": "49324.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 20,
     "vendor_code": "V-1012",
-    "gstin": "08AABCL1012L1Z2",
-    "invoice_date": "2026-09-22",
-    "due_date": "2026-10-22",
+    "gstin": "08AAGFL1012L1ZI",
+    "vendor_address": "G-118, Sitapura Industrial Area, Tonk Road, Jaipur 302022",
+    "bank_details": "Kotak Mahindra Bank, A/C 50200010127444, IFSC KKBK0001012",
+    "invoice_date": "2026-08-14",
+    "due_date": "2026-09-13",
     "items": [
       {
         "description": "Lounge sofa 3-seater",
         "quantity": 2,
         "unit_price": 14500,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "29000"
+      },
+      {
+        "description": "Coffee table",
+        "quantity": 4,
+        "unit_price": 3200,
+        "tax_percentage": 18,
+        "total_amount": "12800"
       }
     ],
-    "subtotal": "29000.00",
-    "tax": "5220.00"
+    "subtotal": "41800.00",
+    "tax": "7524.00",
+    "resolve": null
   },
   {
-    "file": "h11_deccan.pdf",
+    "file": "h_ie-26-27-0412.pdf",
     "scenario": "History",
     "expected_outcome": "NEEDS_REVIEW",
-    "invoice_number": "DPP-0412",
+    "invoice_number": "IE/26-27/0412",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "65640.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 21,
+    "vendor_code": "V-1009",
+    "gstin": "09AABCI1009I1ZV",
+    "vendor_address": "C-9, Sector 62, Noida, Gautam Buddh Nagar 201301",
+    "bank_details": "ICICI Bank, A/C 50200010097333, IFSC ICIC0001009",
+    "invoice_date": "2026-08-18",
+    "due_date": "2026-09-17",
+    "items": [
+      {
+        "description": "Copper cable 2.5mm (100m)",
+        "quantity": 20,
+        "unit_price": 2400,
+        "tax_percentage": 18,
+        "total_amount": "48000"
+      }
+    ],
+    "subtotal": "48000.00",
+    "tax": "8640.00",
+    "resolve": [
+      "REJECT",
+      "Grand total does not equal taxable value plus IGST (overstated by Rs 9,000). Vendor asked to re-issue a corrected invoice.",
+      "reviewer@payflow.demo"
+    ]
+  },
+  {
+    "file": "h_npi-26-27-1187.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "NPI/26-27/1187",
+    "vendor": "Nova Packaging Industries",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total": "76464.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 22,
+    "vendor_code": "V-1014",
+    "gstin": "27AAMFN1014N1Z4",
+    "vendor_address": "Gala 3, Harihar Compound, Mankoli Naka, Bhiwandi, Thane 421302",
+    "bank_details": "HDFC Bank, A/C 50200010147518, IFSC HDFC0001014",
+    "invoice_date": "2026-08-20",
+    "due_date": "2026-09-19",
+    "items": [
+      {
+        "description": "Stretch film roll 23 micron",
+        "quantity": 120,
+        "unit_price": 540,
+        "tax_percentage": 18,
+        "total_amount": "64800"
+      }
+    ],
+    "subtotal": "64800.00",
+    "tax": "11664.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ie-26-27-0419.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "IE/26-27/0419",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "56640.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 23,
+    "vendor_code": "V-1009",
+    "gstin": "09AABCI1009I1ZV",
+    "vendor_address": "C-9, Sector 62, Noida, Gautam Buddh Nagar 201301",
+    "bank_details": "ICICI Bank, A/C 50200010097333, IFSC ICIC0001009",
+    "invoice_date": "2026-08-26",
+    "due_date": "2026-09-25",
+    "items": [
+      {
+        "description": "Copper cable 2.5mm (100m)",
+        "quantity": 20,
+        "unit_price": 2400,
+        "tax_percentage": 18,
+        "total_amount": "48000"
+      }
+    ],
+    "subtotal": "48000.00",
+    "tax": "8640.00",
+    "resolve": null
+  },
+  {
+    "file": "h_dpp-26-27-0388.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "DPP/26-27/0388",
+    "vendor": "Deccan Print & Packaging Ltd",
+    "po_number": "PO-2026-0016",
+    "currency": "INR",
+    "total": "47200.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 24,
+    "vendor_code": "V-1004",
+    "gstin": "36AABCD1004D1ZJ",
+    "vendor_address": "Survey No. 42, Medchal Road, Kompally, Hyderabad 500067",
+    "bank_details": "Axis Bank, A/C 50200010047148, IFSC UTIB0001004",
+    "invoice_date": "2026-08-30",
+    "due_date": "2026-09-29",
+    "items": [
+      {
+        "description": "Roll-up banner",
+        "quantity": 20,
+        "unit_price": 1200,
+        "tax_percentage": 18,
+        "total_amount": "24000"
+      },
+      {
+        "description": "Flyers A5",
+        "quantity": 8000,
+        "unit_price": 2,
+        "tax_percentage": 18,
+        "total_amount": "16000"
+      }
+    ],
+    "subtotal": "40000.00",
+    "tax": "7200.00",
+    "resolve": null
+  },
+  {
+    "file": "h_efs-26-27-0124.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "EFS/26-27/0124",
+    "vendor": "Evergreen Facility Services Pvt Ltd",
+    "po_number": "PO-2026-0005",
+    "currency": "INR",
+    "total": "71390.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 25,
+    "vendor_code": "V-1005",
+    "gstin": "33AABCE1005E1ZL",
+    "vendor_address": "12, Anna Salai, Teynampet, Chennai 600018",
+    "bank_details": "State Bank of India, A/C 50200010057185, IFSC SBIN0001005",
+    "invoice_date": "2026-08-31",
+    "due_date": "2026-09-30",
+    "items": [
+      {
+        "description": "Monthly housekeeping service",
+        "quantity": 1,
+        "unit_price": 50000,
+        "tax_percentage": 18,
+        "total_amount": "50000"
+      },
+      {
+        "description": "Deep cleaning (per visit)",
+        "quantity": 3,
+        "unit_price": 3500,
+        "tax_percentage": 18,
+        "total_amount": "10500"
+      }
+    ],
+    "subtotal": "60500.00",
+    "tax": "10890.00",
+    "resolve": null
+  },
+  {
+    "file": "h_jss-inv-26-27-079.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "JSS/INV/26-27/079",
+    "vendor": "Jupiter Software Services Pvt Ltd",
+    "po_number": "PO-2026-0010",
+    "currency": "INR",
+    "total": "260544.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 26,
+    "vendor_code": "V-1010",
+    "gstin": "27AABCJ1010J1Z1",
+    "vendor_address": "Office 501, Pentagon Tower P2, Hinjewadi Phase 1, Pune 411057",
+    "bank_details": "Axis Bank, A/C 50200010107370, IFSC UTIB0001010",
+    "invoice_date": "2026-08-31",
+    "due_date": "2026-09-30",
+    "items": [
+      {
+        "description": "Developer hours",
+        "quantity": 184,
+        "unit_price": 1200,
+        "tax_percentage": 18,
+        "total_amount": "220800"
+      }
+    ],
+    "subtotal": "220800.00",
+    "tax": "39744.00",
+    "resolve": null
+  },
+  {
+    "file": "h_kct-26-27-0236.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "KCT/26-27/0236",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "INR",
+    "total": "120124.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 27,
+    "vendor_code": "V-1011",
+    "gstin": "29AABCK1011K1ZT",
+    "vendor_address": "Embassy Tech Village, Block 4, Devarabisanahalli, Bengaluru 560103",
+    "bank_details": "State Bank of India, A/C 50200010117407, IFSC SBIN0001011",
+    "invoice_date": "2026-08-31",
+    "due_date": "2026-09-30",
+    "items": [
+      {
+        "description": "Cloud compute (per vCPU-month)",
+        "quantity": 44,
+        "unit_price": 1450,
+        "tax_percentage": 18,
+        "total_amount": "63800"
+      },
+      {
+        "description": "Managed PostgreSQL (monthly)",
+        "quantity": 1,
+        "unit_price": 38000,
+        "tax_percentage": 18,
+        "total_amount": "38000"
+      }
+    ],
+    "subtotal": "101800.00",
+    "tax": "18324.00",
+    "resolve": null
+  },
+  {
+    "file": "h_oss-mum-26-27-088.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "OSS/MUM/26-27/088",
+    "vendor": "Orion Security Services Pvt Ltd",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total": "218300.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 28,
+    "vendor_code": "V-1015",
+    "gstin": "27AABCO1015O1ZH",
+    "vendor_address": "204, Satellite Gazebo, Guru Hargovindji Marg, Andheri East, Mumbai 400093",
+    "bank_details": "ICICI Bank, A/C 50200010157555, IFSC ICIC0001015",
+    "invoice_date": "2026-08-31",
+    "due_date": "2026-09-30",
+    "items": [
+      {
+        "description": "Security guard services (per guard-month)",
+        "quantity": 6,
+        "unit_price": 24000,
+        "tax_percentage": 18,
+        "total_amount": "144000"
+      },
+      {
+        "description": "Security supervisor (per month)",
+        "quantity": 1,
+        "unit_price": 32000,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      },
+      {
+        "description": "Additional guard cover (per shift)",
+        "quantity": 6,
+        "unit_price": 1500,
+        "tax_percentage": 18,
+        "total_amount": "9000"
+      }
+    ],
+    "subtotal": "185000.00",
+    "tax": "33300.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ptt-26-27-0702.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "PTT/26-27/0702",
+    "vendor": "Pinnacle Travels & Tours",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total": "87360.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 29,
+    "vendor_code": "V-1016",
+    "gstin": "06AAQFP1016P1ZW",
+    "vendor_address": "SCO 41, Sector 29 Market, Gurugram 122001",
+    "bank_details": "Axis Bank, A/C 50200010167592, IFSC UTIB0001016",
+    "invoice_date": "2026-08-31",
+    "due_date": "2026-09-30",
+    "items": [
+      {
+        "description": "Corporate cab services (per day)",
+        "quantity": 26,
+        "unit_price": 3200,
+        "tax_percentage": 5,
+        "total_amount": "83200"
+      }
+    ],
+    "subtotal": "83200.00",
+    "tax": "4160.00",
+    "resolve": null
+  },
+  {
+    "file": "h_fit-26-5588.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "FIT-26-5588",
+    "vendor": "Falcon IT Hardware Pvt Ltd",
+    "po_number": "PO-2026-0006",
+    "currency": "INR",
+    "total": "66080.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 30,
+    "vendor_code": "V-1006",
+    "gstin": "24AABCF1006F1ZG",
+    "vendor_address": "7th Floor, Shivalik Shilp, Prahlad Nagar, Ahmedabad 380015",
+    "bank_details": "Kotak Mahindra Bank, A/C 50200010067222, IFSC KKBK0001006",
+    "invoice_date": "2026-09-02",
+    "due_date": "2026-10-02",
+    "items": [
+      {
+        "description": "27in monitor",
+        "quantity": 4,
+        "unit_price": 14000,
+        "tax_percentage": 18,
+        "total_amount": "56000"
+      }
+    ],
+    "subtotal": "56000.00",
+    "tax": "10080.00",
+    "resolve": null
+  },
+  {
+    "file": "h_acm-2026-1029.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "ACM/2026/1029",
+    "vendor": "Acme Industrial Supplies Pvt Ltd",
+    "po_number": "PO-2026-0001",
+    "currency": "INR",
+    "total": "74340.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 31,
+    "vendor_code": "V-1001",
+    "gstin": "27AABCA1001A1ZU",
+    "vendor_address": "Plot 14, MIDC Industrial Area, Andheri East, Mumbai 400093",
+    "bank_details": "Yes Bank, A/C 50200010017037, IFSC YESB0001001",
+    "invoice_date": "2026-09-08",
+    "due_date": "2026-10-08",
+    "items": [
+      {
+        "description": "Safety helmets",
+        "quantity": 60,
+        "unit_price": 650,
+        "tax_percentage": 18,
+        "total_amount": "39000"
+      },
+      {
+        "description": "Industrial gloves (pair)",
+        "quantity": 200,
+        "unit_price": 120,
+        "tax_percentage": 18,
+        "total_amount": "24000"
+      }
+    ],
+    "subtotal": "63000.00",
+    "tax": "11340.00",
+    "resolve": null
+  },
+  {
+    "file": "h_cl-del-26-27-259.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "CL/DEL/26-27/259",
+    "vendor": "Cobalt Logistics LLP",
+    "po_number": "PO-2026-0015",
+    "currency": "INR",
+    "total": "37760.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 32,
+    "vendor_code": "V-1003",
+    "gstin": "07AAFFC1003C1ZE",
+    "vendor_address": "B-21, Okhla Industrial Area Phase II, New Delhi 110020",
+    "bank_details": "ICICI Bank, A/C 50200010037111, IFSC ICIC0001003",
+    "invoice_date": "2026-09-10",
+    "due_date": "2026-10-10",
+    "items": [
+      {
+        "description": "Warehouse handling (per pallet)",
+        "quantity": 640,
+        "unit_price": 50,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      }
+    ],
+    "subtotal": "32000.00",
+    "tax": "5760.00",
+    "resolve": null
+  },
+  {
+    "file": "h_mcpl-26-27-0688.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "MCPL/26-27/0688",
+    "vendor": "Meridian Chemicals Pvt Ltd",
+    "po_number": "PO-2026-0017",
+    "currency": "INR",
+    "total": "202960.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 33,
+    "vendor_code": "V-1013",
+    "gstin": "24AABCM1013M1ZV",
+    "vendor_address": "Plot 210, GIDC Makarpura, Vadodara 390010",
+    "bank_details": "Yes Bank, A/C 50200010137481, IFSC YESB0001013",
+    "invoice_date": "2026-09-17",
+    "due_date": "2026-10-17",
+    "items": [
+      {
+        "description": "Isopropyl alcohol 99% (200L drum)",
+        "quantity": 8,
+        "unit_price": 21500,
+        "tax_percentage": 18,
+        "total_amount": "172000"
+      }
+    ],
+    "subtotal": "172000.00",
+    "tax": "30960.00",
+    "resolve": null
+  },
+  {
+    "file": "h_dpp-26-27-0412.pdf",
+    "scenario": "History",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "DPP/26-27/0412",
     "vendor": "Deccan Print & Packaging Ltd",
     "po_number": null,
     "currency": "INR",
     "total": "21240.00",
-    "layout": "classic",
-    "days_ago": 25,
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 34,
     "vendor_code": "V-1004",
-    "gstin": "36AABCD1004D1Z9",
+    "gstin": "36AABCD1004D1ZJ",
+    "vendor_address": "Survey No. 42, Medchal Road, Kompally, Hyderabad 500067",
+    "bank_details": "Axis Bank, A/C 50200010047148, IFSC UTIB0001004",
     "invoice_date": "2026-09-28",
     "due_date": "2026-10-28",
     "items": [
@@ -297,62 +1276,549 @@
         "description": "Corrugated boxes 18x12x10",
         "quantity": 1000,
         "unit_price": 18,
-        "tax_percentage": 18
+        "tax_percentage": 18,
+        "total_amount": "18000"
       }
     ],
     "subtotal": "18000.00",
-    "tax": "3240.00"
+    "tax": "3240.00",
+    "resolve": [
+      "APPROVE",
+      "Procurement (Ravi Menon) confirmed this delivery is against PO-2026-0004; GRN 2026-1187 received in full.",
+      "reviewer@payflow.demo"
+    ]
   },
   {
-    "file": "h12_gamma.pdf",
-    "scenario": "History",
-    "expected_outcome": "REJECTED",
-    "invoice_number": "GS-7781",
-    "vendor": "Gamma Stationers",
-    "po_number": "PO-2026-0007",
-    "currency": "INR",
-    "total": "10620.00",
-    "layout": "compact",
-    "days_ago": 20,
-    "vendor_code": "V-1007",
-    "gstin": "19AABCG1007G1Z2",
-    "invoice_date": "2026-10-02",
-    "due_date": "2026-11-01",
-    "items": [
-      {
-        "description": "Ball pens (box)",
-        "quantity": 100,
-        "unit_price": 90,
-        "tax_percentage": 18
-      }
-    ],
-    "subtotal": "9000.00",
-    "tax": "1620.00"
-  },
-  {
-    "file": "h13_kestrel.pdf",
+    "file": "h_cl-del-26-27-268.pdf",
     "scenario": "History",
     "expected_outcome": "APPROVED",
-    "invoice_number": "KCT-USD-0099",
-    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
-    "po_number": "PO-2026-0011",
-    "currency": "USD",
-    "total": "1600.00",
-    "layout": "modern",
-    "days_ago": 22,
-    "vendor_code": "V-1011",
-    "gstin": "29AABCK1011K1Z4",
+    "invoice_number": "CL/DEL/26-27/268",
+    "vendor": "Cobalt Logistics LLP",
+    "po_number": "PO-2026-0003",
+    "currency": "INR",
+    "total": "26250.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 35,
+    "vendor_code": "V-1003",
+    "gstin": "07AAFFC1003C1ZE",
+    "vendor_address": "B-21, Okhla Industrial Area Phase II, New Delhi 110020",
+    "bank_details": "ICICI Bank, A/C 50200010037111, IFSC ICIC0001003",
+    "invoice_date": "2026-09-29",
+    "due_date": "2026-10-29",
+    "items": [
+      {
+        "description": "Freight Mumbai-Delhi (per trip)",
+        "quantity": 5,
+        "unit_price": 5000,
+        "tax_percentage": 5,
+        "total_amount": "25000"
+      }
+    ],
+    "subtotal": "25000.00",
+    "tax": "1250.00",
+    "resolve": null
+  },
+  {
+    "file": "h_efs-26-27-0131.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "EFS/26-27/0131",
+    "vendor": "Evergreen Facility Services Pvt Ltd",
+    "po_number": "PO-2026-0005",
+    "currency": "INR",
+    "total": "75520.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 36,
+    "vendor_code": "V-1005",
+    "gstin": "33AABCE1005E1ZL",
+    "vendor_address": "12, Anna Salai, Teynampet, Chennai 600018",
+    "bank_details": "State Bank of India, A/C 50200010057185, IFSC SBIN0001005",
     "invoice_date": "2026-09-30",
     "due_date": "2026-10-30",
     "items": [
       {
-        "description": "Compute credits",
-        "quantity": 20,
-        "unit_price": 80,
-        "tax_percentage": 0
+        "description": "Monthly housekeeping service",
+        "quantity": 1,
+        "unit_price": 50000,
+        "tax_percentage": 18,
+        "total_amount": "50000"
+      },
+      {
+        "description": "Deep cleaning (per visit)",
+        "quantity": 4,
+        "unit_price": 3500,
+        "tax_percentage": 18,
+        "total_amount": "14000"
       }
     ],
-    "subtotal": "1600.00",
-    "tax": "0.00"
+    "subtotal": "64000.00",
+    "tax": "11520.00",
+    "resolve": null
+  },
+  {
+    "file": "h_jss-inv-26-27-086.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "JSS/INV/26-27/086",
+    "vendor": "Jupiter Software Services Pvt Ltd",
+    "po_number": "PO-2026-0010",
+    "currency": "INR",
+    "total": "249216.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 37,
+    "vendor_code": "V-1010",
+    "gstin": "27AABCJ1010J1Z1",
+    "vendor_address": "Office 501, Pentagon Tower P2, Hinjewadi Phase 1, Pune 411057",
+    "bank_details": "Axis Bank, A/C 50200010107370, IFSC UTIB0001010",
+    "invoice_date": "2026-09-30",
+    "due_date": "2026-10-30",
+    "items": [
+      {
+        "description": "Developer hours",
+        "quantity": 176,
+        "unit_price": 1200,
+        "tax_percentage": 18,
+        "total_amount": "211200"
+      }
+    ],
+    "subtotal": "211200.00",
+    "tax": "38016.00",
+    "resolve": null
+  },
+  {
+    "file": "h_kct-26-27-0262.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "KCT/26-27/0262",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "INR",
+    "total": "126968.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 38,
+    "vendor_code": "V-1011",
+    "gstin": "29AABCK1011K1ZT",
+    "vendor_address": "Embassy Tech Village, Block 4, Devarabisanahalli, Bengaluru 560103",
+    "bank_details": "State Bank of India, A/C 50200010117407, IFSC SBIN0001011",
+    "invoice_date": "2026-09-30",
+    "due_date": "2026-10-30",
+    "items": [
+      {
+        "description": "Cloud compute (per vCPU-month)",
+        "quantity": 48,
+        "unit_price": 1450,
+        "tax_percentage": 18,
+        "total_amount": "69600"
+      },
+      {
+        "description": "Managed PostgreSQL (monthly)",
+        "quantity": 1,
+        "unit_price": 38000,
+        "tax_percentage": 18,
+        "total_amount": "38000"
+      }
+    ],
+    "subtotal": "107600.00",
+    "tax": "19368.00",
+    "resolve": null
+  },
+  {
+    "file": "h_oss-mum-26-27-102.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "OSS/MUM/26-27/102",
+    "vendor": "Orion Security Services Pvt Ltd",
+    "po_number": "PO-2026-0019",
+    "currency": "INR",
+    "total": "228920.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 39,
+    "vendor_code": "V-1015",
+    "gstin": "27AABCO1015O1ZH",
+    "vendor_address": "204, Satellite Gazebo, Guru Hargovindji Marg, Andheri East, Mumbai 400093",
+    "bank_details": "ICICI Bank, A/C 50200010157555, IFSC ICIC0001015",
+    "invoice_date": "2026-09-30",
+    "due_date": "2026-10-30",
+    "items": [
+      {
+        "description": "Security guard services (per guard-month)",
+        "quantity": 6,
+        "unit_price": 24000,
+        "tax_percentage": 18,
+        "total_amount": "144000"
+      },
+      {
+        "description": "Security supervisor (per month)",
+        "quantity": 1,
+        "unit_price": 32000,
+        "tax_percentage": 18,
+        "total_amount": "32000"
+      },
+      {
+        "description": "Additional guard cover (per shift)",
+        "quantity": 12,
+        "unit_price": 1500,
+        "tax_percentage": 18,
+        "total_amount": "18000"
+      }
+    ],
+    "subtotal": "194000.00",
+    "tax": "34920.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ptt-26-27-0788.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "PTT/26-27/0788",
+    "vendor": "Pinnacle Travels & Tours",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total": "80640.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 40,
+    "vendor_code": "V-1016",
+    "gstin": "06AAQFP1016P1ZW",
+    "vendor_address": "SCO 41, Sector 29 Market, Gurugram 122001",
+    "bank_details": "Axis Bank, A/C 50200010167592, IFSC UTIB0001016",
+    "invoice_date": "2026-09-30",
+    "due_date": "2026-10-30",
+    "items": [
+      {
+        "description": "Corporate cab services (per day)",
+        "quantity": 24,
+        "unit_price": 3200,
+        "tax_percentage": 5,
+        "total_amount": "76800"
+      }
+    ],
+    "subtotal": "76800.00",
+    "tax": "3840.00",
+    "resolve": null
+  },
+  {
+    "file": "h_lfc-26-27-3391.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "LFC/26-27/3391",
+    "vendor": "Lotus Furnishings Co",
+    "po_number": "PO-2026-0012",
+    "currency": "INR",
+    "total": "21240.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 41,
+    "vendor_code": "V-1012",
+    "gstin": "08AAGFL1012L1ZI",
+    "vendor_address": "G-118, Sitapura Industrial Area, Tonk Road, Jaipur 302022",
+    "bank_details": "Kotak Mahindra Bank, A/C 50200010127444, IFSC KKBK0001012",
+    "invoice_date": "2026-10-01",
+    "due_date": "2026-10-31",
+    "items": [
+      {
+        "description": "Reception desk",
+        "quantity": 1,
+        "unit_price": 18000,
+        "tax_percentage": 18,
+        "total_amount": "18000"
+      }
+    ],
+    "subtotal": "18000.00",
+    "tax": "3240.00",
+    "resolve": null
+  },
+  {
+    "file": "h_gs-2318.pdf",
+    "scenario": "History",
+    "expected_outcome": "REJECTED",
+    "invoice_number": "GS/2318",
+    "vendor": "Gamma Stationers",
+    "po_number": "PO-2026-0007",
+    "currency": "INR",
+    "total": "28320.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 42,
+    "vendor_code": "V-1007",
+    "gstin": "19AAJPG1007G1Z4",
+    "vendor_address": "45, Park Street, Kolkata 700016",
+    "bank_details": "Yes Bank, A/C 50200010077259, IFSC YESB0001007",
+    "invoice_date": "2026-10-02",
+    "due_date": "2026-11-01",
+    "items": [
+      {
+        "description": "Notebook A5 (pack of 12)",
+        "quantity": 50,
+        "unit_price": 480,
+        "tax_percentage": 18,
+        "total_amount": "24000"
+      }
+    ],
+    "subtotal": "24000.00",
+    "tax": "4320.00",
+    "resolve": null
+  },
+  {
+    "file": "h_npi-26-27-1240.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "NPI/26-27/1240",
+    "vendor": "Nova Packaging Industries",
+    "po_number": "PO-2026-0018",
+    "currency": "INR",
+    "total": "74340.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 43,
+    "vendor_code": "V-1014",
+    "gstin": "27AAMFN1014N1Z4",
+    "vendor_address": "Gala 3, Harihar Compound, Mankoli Naka, Bhiwandi, Thane 421302",
+    "bank_details": "HDFC Bank, A/C 50200010147518, IFSC HDFC0001014",
+    "invoice_date": "2026-10-05",
+    "due_date": "2026-11-04",
+    "items": [
+      {
+        "description": "BOPP tape 48mm (pack of 6)",
+        "quantity": 300,
+        "unit_price": 210,
+        "tax_percentage": 18,
+        "total_amount": "63000"
+      }
+    ],
+    "subtotal": "63000.00",
+    "tax": "11340.00",
+    "resolve": null
+  },
+  {
+    "file": "h_fit-26-5641.pdf",
+    "scenario": "History",
+    "expected_outcome": "NEEDS_REVIEW",
+    "invoice_number": "FIT-26-5641",
+    "vendor": "Falcon IT Hardware Pvt Ltd",
+    "po_number": "PO-2026-0006",
+    "currency": "INR",
+    "total": "506220.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 44,
+    "vendor_code": "V-1006",
+    "gstin": "24AABCF1006F1ZG",
+    "vendor_address": "7th Floor, Shivalik Shilp, Prahlad Nagar, Ahmedabad 380015",
+    "bank_details": "Kotak Mahindra Bank, A/C 50200010067222, IFSC KKBK0001006",
+    "invoice_date": "2026-10-06",
+    "due_date": "2026-11-05",
+    "items": [
+      {
+        "description": "Business laptop 14in",
+        "quantity": 6,
+        "unit_price": 62000,
+        "tax_percentage": 18,
+        "total_amount": "372000"
+      },
+      {
+        "description": "Docking station",
+        "quantity": 6,
+        "unit_price": 9500,
+        "tax_percentage": 18,
+        "total_amount": "57000"
+      }
+    ],
+    "subtotal": "429000.00",
+    "tax": "77220.00",
+    "resolve": [
+      "APPROVE",
+      "Approved by Finance: budgeted Q3 laptop refresh (CapEx ref CPX-2026-14), quantities match GRN 2026-1342.",
+      "finance@payflow.demo"
+    ]
+  },
+  {
+    "file": "h_cl-del-26-27-281.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "CL/DEL/26-27/281",
+    "vendor": "Cobalt Logistics LLP",
+    "po_number": "PO-2026-0015",
+    "currency": "INR",
+    "total": "41890.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 45,
+    "vendor_code": "V-1003",
+    "gstin": "07AAFFC1003C1ZE",
+    "vendor_address": "B-21, Okhla Industrial Area Phase II, New Delhi 110020",
+    "bank_details": "ICICI Bank, A/C 50200010037111, IFSC ICIC0001003",
+    "invoice_date": "2026-10-08",
+    "due_date": "2026-11-07",
+    "items": [
+      {
+        "description": "Warehouse handling (per pallet)",
+        "quantity": 710,
+        "unit_price": 50,
+        "tax_percentage": 18,
+        "total_amount": "35500"
+      }
+    ],
+    "subtotal": "35500.00",
+    "tax": "6390.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ie-26-27-0448.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "IE/26-27/0448",
+    "vendor": "Indus Electricals Pvt Ltd",
+    "po_number": "PO-2026-0009",
+    "currency": "INR",
+    "total": "107144.00",
+    "layout": "tally",
+    "description": "",
+    "edge_case_category": "",
+    "order": 46,
+    "vendor_code": "V-1009",
+    "gstin": "09AABCI1009I1ZV",
+    "vendor_address": "C-9, Sector 62, Noida, Gautam Buddh Nagar 201301",
+    "bank_details": "ICICI Bank, A/C 50200010097333, IFSC ICIC0001009",
+    "invoice_date": "2026-10-10",
+    "due_date": "2026-11-09",
+    "items": [
+      {
+        "description": "LED panel light 40W",
+        "quantity": 80,
+        "unit_price": 850,
+        "tax_percentage": 18,
+        "total_amount": "68000"
+      },
+      {
+        "description": "MCB 32A",
+        "quantity": 60,
+        "unit_price": 380,
+        "tax_percentage": 18,
+        "total_amount": "22800"
+      }
+    ],
+    "subtotal": "90800.00",
+    "tax": "16344.00",
+    "resolve": null
+  },
+  {
+    "file": "h_jss-inv-26-27-094.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "JSS/INV/26-27/094",
+    "vendor": "Jupiter Software Services Pvt Ltd",
+    "po_number": "PO-2026-0010",
+    "currency": "INR",
+    "total": "215232.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 47,
+    "vendor_code": "V-1010",
+    "gstin": "27AABCJ1010J1Z1",
+    "vendor_address": "Office 501, Pentagon Tower P2, Hinjewadi Phase 1, Pune 411057",
+    "bank_details": "Axis Bank, A/C 50200010107370, IFSC UTIB0001010",
+    "invoice_date": "2026-10-31",
+    "due_date": "2026-11-30",
+    "items": [
+      {
+        "description": "Developer hours",
+        "quantity": 152,
+        "unit_price": 1200,
+        "tax_percentage": 18,
+        "total_amount": "182400"
+      }
+    ],
+    "subtotal": "182400.00",
+    "tax": "32832.00",
+    "resolve": null
+  },
+  {
+    "file": "h_kct-26-27-0289.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "KCT/26-27/0289",
+    "vendor": "Kestrel Cloud Technologies Pvt Ltd",
+    "po_number": "PO-2026-0011",
+    "currency": "INR",
+    "total": "133812.00",
+    "layout": "corporate",
+    "description": "",
+    "edge_case_category": "",
+    "order": 48,
+    "vendor_code": "V-1011",
+    "gstin": "29AABCK1011K1ZT",
+    "vendor_address": "Embassy Tech Village, Block 4, Devarabisanahalli, Bengaluru 560103",
+    "bank_details": "State Bank of India, A/C 50200010117407, IFSC SBIN0001011",
+    "invoice_date": "2026-10-31",
+    "due_date": "2026-11-30",
+    "items": [
+      {
+        "description": "Cloud compute (per vCPU-month)",
+        "quantity": 52,
+        "unit_price": 1450,
+        "tax_percentage": 18,
+        "total_amount": "75400"
+      },
+      {
+        "description": "Managed PostgreSQL (monthly)",
+        "quantity": 1,
+        "unit_price": 38000,
+        "tax_percentage": 18,
+        "total_amount": "38000"
+      }
+    ],
+    "subtotal": "113400.00",
+    "tax": "20412.00",
+    "resolve": null
+  },
+  {
+    "file": "h_ptt-26-27-0861.pdf",
+    "scenario": "History",
+    "expected_outcome": "APPROVED",
+    "invoice_number": "PTT/26-27/0861",
+    "vendor": "Pinnacle Travels & Tours",
+    "po_number": "PO-2026-0020",
+    "currency": "INR",
+    "total": "100800.00",
+    "layout": "services",
+    "description": "",
+    "edge_case_category": "",
+    "order": 49,
+    "vendor_code": "V-1016",
+    "gstin": "06AAQFP1016P1ZW",
+    "vendor_address": "SCO 41, Sector 29 Market, Gurugram 122001",
+    "bank_details": "Axis Bank, A/C 50200010167592, IFSC UTIB0001016",
+    "invoice_date": "2026-10-31",
+    "due_date": "2026-11-30",
+    "items": [
+      {
+        "description": "Corporate cab services (per day)",
+        "quantity": 30,
+        "unit_price": 3200,
+        "tax_percentage": 5,
+        "total_amount": "96000"
+      }
+    ],
+    "subtotal": "96000.00",
+    "tax": "4800.00",
+    "resolve": null
   }
 ]

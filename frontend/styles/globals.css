@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 220 33% 98%;
+    --foreground: 224 39% 11%;
     --card: 0 0% 100%;
-    --border: 214 32% 91%;
-    --primary: 221 83% 53%;
+    --border: 220 18% 90%;
+    --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 25% 96%;
+    --muted-foreground: 220 12% 44%;
   }
   * {
     @apply border-border;
@@ -20,9 +20,286 @@
     @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: "cv11", "ss01";
   }
+  h1, h2, h3 {
+    letter-spacing: -0.015em;
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary) / 0.55);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
   /* Numeric columns line up when digits share a width. */
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 }
 
+
+@layer components {
+  .surface-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.18) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
+  }
+}
+
+@layer components {
+  .hero-band {
+    background:
+      radial-gradient(900px 320px at 12% -10%, rgb(99 102 241 / 0.45), transparent 70%),
+      radial-gradient(700px 260px at 88% -20%, rgb(139 92 246 / 0.35), transparent 70%),
+      radial-gradient(500px 200px at 60% 120%, rgb(16 185 129 / 0.12), transparent 70%),
+      linear-gradient(180deg, #070b16 0%, #0b1222 100%);
+  }
+  .hero-band::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(180deg, black 0%, transparent 95%);
+  }
+  .glass {
+    @apply border border-white/10 bg-white/[0.06] backdrop-blur-md;
+  }
+}
+
+@layer utilities {
+  /* Sparkline draws itself once (pathLength=1 normalises the dash length). */
+  .spark-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: spark-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  }
+  @keyframes spark-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out 0.6s both;
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* Staggered entrance for dashboard sections; delay is set inline via --d. */
+  .reveal {
+    animation: reveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer utilities {
+  /* Sign-in page: slow drifting colour orbs behind the brand panel. */
+  .login-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(60px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .login-orb-a {
+    width: 420px;
+    height: 420px;
+    left: -120px;
+    bottom: -140px;
+    background: radial-gradient(circle, rgb(99 102 241 / 0.7), transparent 70%);
+    animation: orb-drift 18s ease-in-out infinite alternate;
+  }
+  .login-orb-b {
+    width: 360px;
+    height: 360px;
+    right: -80px;
+    top: 20%;
+    background: radial-gradient(circle, rgb(16 185 129 / 0.35), transparent 70%);
+    animation: orb-drift 22s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes orb-drift {
+    from {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    to {
+      transform: translate3d(60px, -40px, 0) scale(1.15);
+    }
+  }
+
+  /* Form error: a short horizontal shake. */
+  .animate-shake {
+    animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(3px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+
+  /* Primary button: a light sheen sweeps across on hover. */
+  .btn-sheen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.18) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.7s ease;
+  }
+  .group:hover > .btn-sheen {
+    transform: translateX(100%);
+  }
+
+  /* Decision "stamp": lands with a little overshoot. */
+  .stamp {
+    animation: stamp 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      transform: scale(1.6) rotate(-8deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(-2deg);
+    }
+  }
+
+  /* Route change: content fades up softly (see app/template.tsx). */
+  .page-enter {
+    animation: reveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Skeletons shimmer instead of blinking. */
+  .shimmer {
+    background: linear-gradient(90deg, #eef1f6 0%, #f8fafc 40%, #eef1f6 80%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+}
+
+@layer utilities {
+  .confetti-piece {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    animation: confetti 1.3s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+  }
+  @keyframes confetti {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0deg) scale(0.6);
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--x), calc(var(--y) + 120px)) rotate(var(--r)) scale(1);
+    }
+  }
+
+  /* Drop zone: animated gradient ring while a file is dragged over it. */
+  .drop-glow {
+    position: relative;
+  }
+  .drop-glow::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 1.1rem;
+    padding: 2px;
+    background: conic-gradient(from var(--angle, 0deg), #6366f1, #10b981, #a78bfa, #6366f1);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: spin-angle 2.4s linear infinite;
+  }
+  @keyframes spin-angle {
+    to {
+      --angle: 360deg;
+    }
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer utilities {
+  /* Decision flow: dashes travel along a highlighted band to show direction of flow. */
+  .flow-dash {
+    stroke-dasharray: 2 12;
+    animation: flow-dash 0.9s linear infinite;
+  }
+  @keyframes flow-dash {
+    to {
+      stroke-dashoffset: -14;
+    }
+  }
+}
+
+@layer utilities {
+  /* Decision metro map: rails draw in, endpoints ping as invoices arrive. */
+  .rail-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: rail-draw 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes rail-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .svg-ping {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: svg-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes svg-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    80%,
+    100% {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+  .svg-pop {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: svg-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes svg-pop {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+}

@@ -78,7 +78,7 @@ export function DataTable<T>({
     <div>
       <div className={cn("overflow-x-auto transition-opacity", loading && "opacity-60")}>
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b bg-slate-50/70 text-xs uppercase tracking-wide text-slate-500">
+          <thead className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
             {table.getHeaderGroups().map((group) => (
               <tr key={group.id}>
                 {group.headers.map((header) => {
@@ -89,7 +89,7 @@ export function DataTable<T>({
                       key={header.id}
                       scope="col"
                       aria-sort={sorted ? (sorted === "asc" ? "ascending" : "descending") : undefined}
-                      className="whitespace-nowrap px-4 py-2.5 font-medium"
+                      className="whitespace-nowrap px-5 py-3 font-semibold"
                     >
                       {header.isPlaceholder ? null : sortable ? (
                         <button
@@ -115,7 +115,7 @@ export function DataTable<T>({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-slate-100">
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
@@ -130,11 +130,11 @@ export function DataTable<T>({
                 tabIndex={onRowClick ? 0 : undefined}
                 className={cn(
                   "transition-colors",
-                  onRowClick && "cursor-pointer hover:bg-slate-50 focus:bg-slate-50 focus:outline-none",
+                  onRowClick && "group cursor-pointer hover:bg-indigo-50/40 focus:bg-indigo-50/40 focus:outline-none",
                 )}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-3 align-middle">
+                  <td key={cell.id} className="px-5 py-3.5 align-middle">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

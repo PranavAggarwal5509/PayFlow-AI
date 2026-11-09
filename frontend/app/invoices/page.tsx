@@ -43,8 +43,9 @@ function InvoicesContent() {
   return (
     <>
       <PageHeader
+        eyebrow="Accounts payable"
         title="Invoices"
-        description="Every uploaded invoice with its processing status and decision."
+        description="Every invoice the pipeline has seen, with its decision and the reasons behind it."
         actions={
           <Button asChild>
             <Link href="/upload">Upload invoice</Link>

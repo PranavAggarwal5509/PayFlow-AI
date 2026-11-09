@@ -18,6 +18,7 @@ import {
 import { PdfViewer } from "@/components/invoices/pdf-viewer";
 import { InvoiceStateBadge } from "@/components/invoices/status-badges";
 import { PageHeader } from "@/components/layout/page-header";
+import { useAuth } from "@/components/auth/auth-provider";
 import { ReviewActions } from "@/components/review/review-actions";
 import { ErrorState } from "@/components/tables/table-states";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import { invoiceService } from "@/services";
 import type { FieldEvidence } from "@/types/api";
 
 export default function InvoiceDetailPage() {
+  const { can } = useAuth();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: invoice, loading, error, reload } = useAsync(() => invoiceService.get(id), [id]);
@@ -87,7 +89,7 @@ export default function InvoiceDetailPage() {
                 <Link href={`/processing/${latestRun.id}`}>View processing</Link>
               </Button>
             )}
-            {failed && (
+            {failed && can("invoices:upload") && (
               <Button size="sm" onClick={retry}>
                 <RotateCcw className="h-4 w-4" /> Retry
               </Button>

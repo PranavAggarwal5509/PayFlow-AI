@@ -10,6 +10,7 @@ class StorageBackend(Protocol):
     def save(self, data: bytes) -> str: ...
     def read(self, key: str) -> bytes: ...
     def resolve_path(self, key: str) -> Path: ...
+    def delete(self, key: str) -> None: ...
 
 
 class LocalStorage:
@@ -31,6 +32,10 @@ class LocalStorage:
 
     def read(self, key: str) -> bytes:
         return self.resolve_path(key).read_bytes()
+
+    def delete(self, key: str) -> None:
+        """Remove a stored document (missing files are ignored)."""
+        self.resolve_path(key).unlink(missing_ok=True)
 
     def iter_chunks(self, key: str, size: int = 65536) -> Iterator[bytes]:
         with self.resolve_path(key).open("rb") as handle:

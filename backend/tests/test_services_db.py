@@ -66,8 +66,8 @@ def test_unknown_vendor_needs_review(db, settings):
 
 
 def test_ambiguous_vendor_needs_review(db, settings):
-    add_vendor(db, name="Delta Traders", gstin="27AABCD1111A1Z5", code="V-A")
-    add_vendor(db, name="Delta Trader", gstin="27AABCD2222A1Z5", code="V-B")
+    add_vendor(db, name="Delta Traders", gstin="27AABCD1111A1ZO", code="V-A")
+    add_vendor(db, name="Delta Trader", gstin="27AABCD2222A1ZI", code="V-B")
     inv = new_invoice(db, vendor_name_raw="Delta Tradersz", vendor_gstin_raw=None)
     r = results_by_type(vendor_service.verify_vendor(db, inv, settings))
     assert "Multiple vendors" in r[Check.VENDOR_MATCH].message
@@ -76,7 +76,7 @@ def test_ambiguous_vendor_needs_review(db, settings):
 def test_gstin_mismatch_flagged(db, settings):
     add_vendor(db)
     inv = new_invoice(db, vendor_gstin_raw=None, vendor_name_raw="Acme Supplies Pvt Ltd")
-    inv.vendor_gstin_raw = "29AABCA9999A1Z5"
+    inv.vendor_gstin_raw = "29AABCA9999A1ZB"
     r = results_by_type(vendor_service.verify_vendor(db, inv, settings))
     assert r[Check.VENDOR_MATCH].status == CheckStatus.PASSED  # matched by name
     assert r[Check.VENDOR_GSTIN].status == CheckStatus.FAILED
@@ -109,7 +109,7 @@ def test_missing_po_number_needs_review(db):
 
 def test_po_belongs_to_other_vendor(db):
     acme = add_vendor(db)
-    other = add_vendor(db, name="Other Corp", gstin="27AABCO1111A1Z5", code="V-O")
+    other = add_vendor(db, name="Other Corp", gstin="27AABCO1111A1ZD", code="V-O")
     add_po(db, other)
     inv = new_invoice(db, vendor_id=acme.id, po_number_raw="PO-1001")
     r = results_by_type(po_matcher.match_purchase_order(db, inv))
@@ -188,7 +188,7 @@ def test_business_duplicate_same_vendor_and_number(db, settings):
 
 def test_same_number_other_vendor_is_not_duplicate(db, settings):
     a = add_vendor(db)
-    b = add_vendor(db, name="Other Corp", gstin="27AABCO1111A1Z5", code="V-O")
+    b = add_vendor(db, name="Other Corp", gstin="27AABCO1111A1ZD", code="V-O")
     new_invoice(db, vendor_id=a.id, file_hash="1", uploaded_at=utcnow() - timedelta(days=1), decision_status="APPROVED")
     inv = new_invoice(db, vendor_id=b.id, file_hash="2")
     r = results_by_type(duplicate_detector.detect_duplicates(db, inv, settings))

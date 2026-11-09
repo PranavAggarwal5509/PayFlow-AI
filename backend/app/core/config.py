@@ -47,16 +47,39 @@ class Settings(BaseSettings):
 
     vendor_fuzzy_threshold: int = 88
     duplicate_number_similarity: int = 85
+    duplicate_window_days: int = 90  # potential-duplicate look-back, by invoice date
+
+    # Delegation of authority: invoices above this INR-equivalent value always need a human approver.
+    auto_approval_limit_inr: Decimal = Decimal("400000")
+    # Indicative FX used only to compare foreign invoices against the INR approval limit.
+    fx_rates_to_inr: str = "USD:83.50,EUR:90.20,GBP:105.60,AED:22.70,SGD:62.10"
+    valid_gst_rates: str = "0,0.1,0.25,1.5,3,5,6,12,18,28,40"
+    # A PO implied from vendor + line items is suggested, never silently used for auto-approval.
+    auto_approve_inferred_po: bool = False
+    # Optional presentation pacing between pipeline stages (0 = off). Real work still runs; this
+    # only keeps each stage visible long enough to follow in a live demo.
+    stage_pacing_ms: int = Field(default=0, ge=0, le=5000)
     ocr_min_chars_per_page: int = 40
     ocr_dpi: int = 200
 
     demo_user_email: str = "reviewer@payflow.local"
     demo_user_name: str = "Demo Reviewer"
 
+    # Sign-in. AUTH_SECRET must be set to a long random value outside development.
+    auth_secret: str = "dev-only-insecure-secret-change-me"
+    auth_session_ttl_hours: int = 12
+    auth_remember_ttl_hours: int = 24 * 14
+    # Seeds one demo account per role and lists them on the sign-in page (turn off for real use).
+    enable_demo_accounts: bool = True
+    # Lets an administrator wipe live demo uploads from the UI (seeded history is never touched).
+    allow_demo_reset: bool = True
+
     @model_validator(mode="after")
     def _check_secrets(self) -> "Settings":
         if self.environment == "production" and self.llm_provider == "mock":
             raise ValueError("LLM_PROVIDER=mock is forbidden in production environment")
+        if self.environment == "production" and self.auth_secret.startswith("dev-only"):
+            raise ValueError("AUTH_SECRET must be set to a strong random value in production")
         return self
 
     @property
@@ -66,6 +89,19 @@ class Settings(BaseSettings):
     @property
     def currency_set(self) -> set[str]:
         return {c.strip().upper() for c in self.supported_currencies.split(",") if c.strip()}
+
+    @property
+    def fx_table(self) -> dict[str, Decimal]:
+        table = {"INR": Decimal("1")}
+        for pair in self.fx_rates_to_inr.split(","):
+            if ":" in pair:
+                code, rate = pair.split(":", 1)
+                table[code.strip().upper()] = Decimal(rate.strip())
+        return table
+
+    @property
+    def gst_rate_set(self) -> set[Decimal]:
+        return {Decimal(r.strip()) for r in self.valid_gst_rates.split(",") if r.strip()}
 
     def tolerance_for(self, currency: str | None) -> Decimal:
         if currency and currency.upper() == "INR":

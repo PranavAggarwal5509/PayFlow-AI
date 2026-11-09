@@ -125,6 +125,8 @@ def get_stats(db: Session) -> dict:
         "decision_distribution": _distribution(db),
         "decision_distribution_detailed": _distribution_detailed(db),
         "recent_failed_runs": _recent_failed(db),
+        "exceptions_by_control": _exceptions_by_control(db),
+        "value_at_risk": _value_at_risk(db),
     }
 
 
@@ -270,3 +272,43 @@ def recent_activity(db: Session, limit: int = 15) -> list[dict]:
         for log, inv in rows
     ]
 
+
+
+def _exceptions_by_control(db: Session) -> list[dict]:
+    """How many live invoices each control flagged (latest decision per invoice)."""
+    from app.models.processing import Decision
+
+    latest: dict = {}
+    rows = db.execute(
+        select(Decision.invoice_id, Decision.created_at, Decision.reasons)
+        .join(Invoice, Invoice.id == Decision.invoice_id)
+        .where(Invoice.source_origin == "LIVE_UPLOAD")
+    ).all()
+    for invoice_id, created_at, reasons in rows:
+        if invoice_id not in latest or created_at > latest[invoice_id][0]:
+            latest[invoice_id] = (created_at, reasons or [])
+    counts: dict[str, dict] = {}
+    for _, reasons in latest.values():
+        for code in {r["code"]: r for r in reasons if r.get("severity") in ("BLOCKING", "WARNING")}:
+            entry = counts.setdefault(code, {"code": code, "count": 0})
+            entry["count"] += 1
+    return sorted(counts.values(), key=lambda e: (-e["count"], e["code"]))
+
+
+def _value_at_risk(db: Session) -> dict:
+    """Invoice value held for review or blocked by rejection, per currency (live uploads)."""
+    out: dict[str, dict[str, Decimal]] = {"held": {}, "blocked": {}, "approved": {}}
+    buckets = {
+        DecisionStatus.NEEDS_REVIEW.value: "held",
+        DecisionStatus.REJECTED.value: "blocked",
+        DecisionStatus.APPROVED.value: "approved",
+    }
+    rows = db.execute(
+        select(Invoice.decision_status, Invoice.currency, func.coalesce(func.sum(Invoice.total_amount), 0))
+        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.currency.is_not(None))
+        .where(Invoice.decision_status.in_(list(buckets)))
+        .group_by(Invoice.decision_status, Invoice.currency)
+    ).all()
+    for status, currency, total in rows:
+        out[buckets[status]][currency] = Decimal(total)
+    return out

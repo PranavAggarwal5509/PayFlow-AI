@@ -367,10 +367,10 @@ def test_manual_reject_and_clarification(client, llm, world, db):
 
 # ------------------------------------------------------------ master data APIs
 def test_vendor_and_po_crud(client, world):
-    created = client.post("/api/v1/vendors", json={"vendor_name": "New Vendor Pvt Ltd", "gstin": "27AABCN1234A1Z5"})
+    created = client.post("/api/v1/vendors", json={"vendor_name": "New Vendor Pvt Ltd", "gstin": "27AABCN1234A1Z6"})
     assert created.status_code == 201
     vid = created.json()["data"]["id"]
-    dup = client.post("/api/v1/vendors", json={"vendor_name": "Another", "gstin": "27AABCN1234A1Z5"})
+    dup = client.post("/api/v1/vendors", json={"vendor_name": "Another", "gstin": "27AABCN1234A1Z6"})
     assert dup.status_code == 409
     patched = client.patch(f"/api/v1/vendors/{vid}", json={"status": "INACTIVE"})
     assert patched.json()["data"]["status"] == "INACTIVE"

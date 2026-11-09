@@ -10,6 +10,7 @@ from app.models.processing import (
     StageEvent,
     ValidationResult,
 )
+from app.models.user import User
 from app.models.vendor_po import POAllocation, POLineAllocation, PurchaseOrder, PurchaseOrderItem, Vendor
 
 __all__ = [
@@ -26,6 +27,7 @@ __all__ = [
     "PurchaseOrderItem",
     "Review",
     "StageEvent",
+    "User",
     "ValidationResult",
     "Vendor",
 ]

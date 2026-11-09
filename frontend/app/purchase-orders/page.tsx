@@ -121,7 +121,8 @@ export default function PurchaseOrdersPage() {
   return (
     <>
       <PageHeader
-        title="Purchase Orders"
+        eyebrow="Master data"
+        title="Purchase orders"
         description="Active and historical purchase orders used for 2-way and 3-way matching."
       />
 

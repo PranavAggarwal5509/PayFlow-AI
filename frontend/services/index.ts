@@ -71,3 +71,47 @@ export const settingsService = {
   get: (): Promise<AppSettings> => get("/settings"),
 };
 
+
+export interface RoleInfo {
+  role: string;
+  label: string;
+  summary: string;
+  permissions: string[];
+}
+
+export interface DemoAccount {
+  email: string;
+  name: string;
+  role: string;
+  password: string;
+}
+
+export const authService = {
+  login: (email: string, password: string, remember: boolean) =>
+    send<{ token: string; expires_at: number; user: import("@/lib/session").SessionUser }>("POST", "/auth/login", {
+      email,
+      password,
+      remember,
+    }),
+  me: () => get<import("@/lib/session").SessionUser>("/auth/me"),
+  logout: () => send<{ ok: boolean }>("POST", "/auth/logout"),
+  roles: () => get<{ permissions: string[]; roles: RoleInfo[]; demo_accounts: DemoAccount[] }>("/auth/roles"),
+};
+
+export interface ResetSummary {
+  invoices: number;
+  runs: number;
+  reviews: number;
+  decisions: number;
+  checks: number;
+  po_allocations: number;
+  email_drafts: number;
+  audit_entries: number;
+  files: number;
+  seeded_invoices_kept: number;
+}
+
+export const demoService = {
+  preview: () => get<ResetSummary>("/demo/reset"),
+  reset: () => send<ResetSummary>("POST", "/demo/reset"),
+};

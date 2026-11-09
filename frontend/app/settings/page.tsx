@@ -17,8 +17,10 @@ import {
   Workflow,
 } from "lucide-react";
 
+import { RoleMatrix } from "@/components/auth/role-matrix";
 import { PageHeader } from "@/components/layout/page-header";
 import { ErrorState } from "@/components/tables/table-states";
+import { formatMoney } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -73,7 +75,8 @@ export default function SettingsPage() {
   return (
     <>
       <PageHeader
-        title="Settings & Business Rules"
+        eyebrow="System"
+        title="Controls & business rules"
         description="System environment parameters, deterministic matching thresholds, and pipeline configurations."
         actions={
           <Button
@@ -204,13 +207,13 @@ export default function SettingsPage() {
                   label="Vendor Fuzzy Match Threshold"
                   value={
                     <span className="font-mono text-xs font-semibold text-slate-800">
-                      {Math.round(s.vendor_fuzzy_threshold * 100)}%
+                      {s.vendor_fuzzy_threshold}%
                     </span>
                   }
                   description="Token-sort ratio required to automatically resolve vendor"
                   badge={
-                    <Badge tone={s.vendor_fuzzy_threshold >= 0.8 ? "success" : "warning"}>
-                      {s.vendor_fuzzy_threshold}
+                    <Badge tone={s.vendor_fuzzy_threshold >= 80 ? "success" : "warning"}>
+                      Suggestion only
                     </Badge>
                   }
                 />
@@ -219,7 +222,7 @@ export default function SettingsPage() {
                   label="Duplicate Invoice Similarity"
                   value={
                     <span className="font-mono text-xs font-semibold text-slate-800">
-                      {Math.round(s.duplicate_number_similarity * 100)}%
+                      {s.duplicate_number_similarity}%
                     </span>
                   }
                   description="Threshold for potential duplicate invoice warning"
@@ -246,6 +249,96 @@ export default function SettingsPage() {
             </CardBody>
           </Card>
         </div>
+
+        {/* Enterprise payment controls */}
+        <Card>
+          <CardHeader
+            title="Payment & fraud controls"
+            description="Policies applied on top of matching — each one produces an explainable check result"
+          />
+          <CardBody>
+            <dl className="grid gap-x-8 divide-y divide-slate-100 md:grid-cols-2 md:divide-y-0">
+              <ConfigRow
+                label="Auto-approval authority limit"
+                value={
+                  <span className="font-mono text-xs font-semibold text-slate-800">
+                    {formatMoney(s.auto_approval_limit_inr, "INR")}
+                  </span>
+                }
+                description="Invoices above this INR-equivalent value always need a named finance approver"
+                badge={<Badge tone="warning">Delegation of authority</Badge>}
+              />
+              <ConfigRow
+                label="Bank account verification"
+                value={<span className="text-xs font-semibold text-emerald-700">Always on</span>}
+                description="Remittance details on the invoice must match the verified vendor master, or payment is held"
+                badge={<Badge tone="danger">Fraud</Badge>}
+              />
+              <ConfigRow
+                label="GSTIN checksum"
+                value={<span className="text-xs font-semibold text-emerald-700">GSTN mod-36</span>}
+                description="Catches typos, OCR misreads and fabricated registrations before matching"
+                badge={<Badge tone="success">Tax</Badge>}
+              />
+              <ConfigRow
+                label="Valid GST slabs"
+                value={
+                  <div className="flex flex-wrap justify-end gap-1">
+                    {(s.valid_gst_rates ?? []).map((rate) => (
+                      <span key={rate} className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">
+                        {rate}%
+                      </span>
+                    ))}
+                  </div>
+                }
+                description="Line tax rates outside notified slabs, or tax that does not match line rates, are flagged"
+                badge={<Badge tone="success">Tax</Badge>}
+              />
+              <ConfigRow
+                label="Potential-duplicate window"
+                value={<span className="font-mono text-xs font-semibold text-slate-800">{s.duplicate_window_days} days</span>}
+                description="Same vendor + same amount only counts as suspicious when invoice dates are this close"
+                badge={<Badge tone="info">Duplicates</Badge>}
+              />
+              <ConfigRow
+                label="Implied PO handling"
+                value={
+                  <span className="text-xs font-semibold text-slate-800">
+                    {s.auto_approve_inferred_po ? "Auto-accept" : "Suggest, human confirms"}
+                  </span>
+                }
+                description="Missing PO references are inferred from vendor + line items; a reviewer confirms by default"
+                badge={<Badge tone="info">Procurement</Badge>}
+              />
+              <ConfigRow
+                label="PO line price tolerance"
+                value={
+                  <span className="font-mono text-xs font-semibold text-slate-800">
+                    ± {Math.round(Number(s.po_line_price_tolerance_pct ?? 0) * 100)}%
+                  </span>
+                }
+                description="Unit price variance allowed against the PO line before a reviewer is needed"
+                badge={<Badge tone="info">Procurement</Badge>}
+              />
+              <ConfigRow
+                label="Reference FX (approval limit only)"
+                value={
+                  <div className="flex flex-wrap justify-end gap-1">
+                    {Object.entries(s.fx_rates_to_inr ?? {}).map(([code, rate]) => (
+                      <span key={code} className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700">
+                        {code} {rate}
+                      </span>
+                    ))}
+                  </div>
+                }
+                description="Foreign invoices are converted only to compare against the INR authority limit"
+                badge={<Badge tone="neutral">FX</Badge>}
+              />
+            </dl>
+          </CardBody>
+        </Card>
+
+        <RoleMatrix />
 
         {/* Current Authenticated User Session */}
         {s.user && (

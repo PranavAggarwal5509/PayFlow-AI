@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Can } from "@/components/auth/auth-provider";
 import { VendorDialog } from "@/components/vendors/vendor-dialog";
 import { useAsync } from "@/hooks/use-async";
 import { formatDate, formatMoney, titleCase } from "@/lib/format";
@@ -38,9 +39,11 @@ export default function VendorDetailPage() {
         title={v.vendor_name}
         description={`${v.vendor_code} · added ${formatDate(v.created_at)}`}
         actions={
-          <Button variant="outline" onClick={() => setEditing(true)}>
-            <Pencil className="h-4 w-4" /> Edit vendor
-          </Button>
+          <Can permission="masterdata:edit">
+            <Button variant="outline" onClick={() => setEditing(true)}>
+              <Pencil className="h-4 w-4" /> Edit vendor
+            </Button>
+          </Can>
         }
       />
       <div className="grid gap-4 lg:grid-cols-3">

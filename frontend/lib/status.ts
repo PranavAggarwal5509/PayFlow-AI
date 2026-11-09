@@ -76,7 +76,7 @@ export const ISSUE_LABELS: Record<string, string> = {
   VENDOR_MATCH: "Vendor not confirmed",
   VENDOR_STATUS: "Vendor status",
   VENDOR_GSTIN: "GSTIN issue",
-  PO_EXISTS: "Missing PO",
+  PO_EXISTS: "PO missing / inferred",
   PO_VENDOR: "PO vendor mismatch",
   PO_STATUS: "PO not active",
   PO_CURRENCY: "Currency mismatch",
@@ -85,6 +85,9 @@ export const ISSUE_LABELS: Record<string, string> = {
   DUP_FILE: "Exact duplicate",
   DUP_BUSINESS: "Duplicate invoice number",
   DUP_POTENTIAL: "Potential duplicate",
+  VENDOR_BANK: "Bank details changed",
+  TAX_RATES: "GST rate issue",
+  APPROVAL_LIMIT: "Above approval limit",
 };
 
 export const toneClasses: Record<Tone, string> = {

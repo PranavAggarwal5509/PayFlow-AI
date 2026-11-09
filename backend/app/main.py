@@ -1,7 +1,7 @@
-from contextlib import asynccontextmanager
 import logging
 import uuid
 from collections.abc import Awaitable, Callable
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from sqlalchemy import text
 
-from app.api.routes import invoices, master_data, reviews, runs, system
+from app.api.routes import auth, demo, invoices, master_data, reviews, runs, system
 from app.core.config import get_settings
 from app.core.errors import PayFlowError, TransientError
 from app.core.logging import configure_logging, request_id_var
@@ -31,6 +31,17 @@ async def lifespan(app: FastAPI):
                 logger.info("Startup recovery check: no interrupted runs found")
     except Exception as exc:
         logger.error("Startup recovery error (non-fatal, continuing startup): %s", exc)
+    try:
+        settings = get_settings()
+        if settings.enable_demo_accounts:
+            from app.services.user_service import ensure_demo_accounts
+
+            with get_session_factory()() as db:
+                created = ensure_demo_accounts(db)
+                if created:
+                    logger.info("Seeded %d demo user account(s)", created)
+    except Exception as exc:
+        logger.error("Demo account seeding failed (non-fatal): %s", exc)
     yield
     # Shutdown phase (if any cleanups needed)
 
@@ -107,7 +118,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     for router in (
-        invoices.router, runs.router, reviews.dashboard, reviews.router,
+        auth.router, demo.router, invoices.router, runs.router, reviews.dashboard, reviews.router,
         master_data.vendors, master_data.purchase_orders, system.router,
     ):  # fmt: skip
         app.include_router(router, prefix="/api/v1")

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.models.enums import POStatus, VendorStatus
 from app.schemas.common import ORMModel
-from app.utils.normalize import normalize_gstin
+from app.utils.normalize import normalize_account_number, normalize_gstin
 
 
 class VendorBase(BaseModel):
@@ -16,11 +16,23 @@ class VendorBase(BaseModel):
     email: str | None = None
     phone: str | None = None
     status: VendorStatus = VendorStatus.ACTIVE
+    bank_account_number: str | None = Field(default=None, max_length=34)
+    bank_ifsc: str | None = Field(default=None, max_length=11)
 
     @field_validator("gstin")
     @classmethod
     def _clean_gstin(cls, value: str | None) -> str | None:
         return normalize_gstin(value)
+
+    @field_validator("bank_account_number")
+    @classmethod
+    def _clean_account(cls, value: str | None) -> str | None:
+        return normalize_account_number(value)
+
+    @field_validator("bank_ifsc")
+    @classmethod
+    def _clean_ifsc(cls, value: str | None) -> str | None:
+        return value.strip().upper() or None if value else None
 
 
 class VendorCreate(VendorBase):
@@ -34,11 +46,23 @@ class VendorUpdate(BaseModel):
     email: str | None = None
     phone: str | None = None
     status: VendorStatus | None = None
+    bank_account_number: str | None = Field(default=None, max_length=34)
+    bank_ifsc: str | None = Field(default=None, max_length=11)
 
     @field_validator("gstin")
     @classmethod
     def _clean_gstin(cls, value: str | None) -> str | None:
         return normalize_gstin(value)
+
+    @field_validator("bank_account_number")
+    @classmethod
+    def _clean_account(cls, value: str | None) -> str | None:
+        return normalize_account_number(value)
+
+    @field_validator("bank_ifsc")
+    @classmethod
+    def _clean_ifsc(cls, value: str | None) -> str | None:
+        return value.strip().upper() or None if value else None
 
 
 class VendorOut(ORMModel):
@@ -49,6 +73,8 @@ class VendorOut(ORMModel):
     address: str | None
     email: str | None
     phone: str | None
+    bank_account_number: str | None = None
+    bank_ifsc: str | None = None
     status: str
     is_demo: bool
     created_at: datetime

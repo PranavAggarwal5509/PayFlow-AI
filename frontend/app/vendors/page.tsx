@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Select } from "@/components/ui/input";
+import { useAuth } from "@/components/auth/auth-provider";
 import { VendorDialog } from "@/components/vendors/vendor-dialog";
 import { useAsync } from "@/hooks/use-async";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -22,6 +23,8 @@ import type { Vendor } from "@/types/api";
 const vendorTone = (status: string) => (status === "ACTIVE" ? "success" : status === "INACTIVE" ? "danger" : "warning");
 
 export default function VendorsPage() {
+  const { can } = useAuth();
+  const canEdit = can("masterdata:edit");
   const router = useRouter();
   const list = useListState({ q: "", status: "" }, [{ id: "vendor_name", desc: false }]);
   const query = useDebounce(list.filters.q);
@@ -55,7 +58,8 @@ export default function VendorsPage() {
         id: "actions",
         header: "",
         enableSorting: false,
-        cell: ({ row }) => (
+        cell: ({ row }) =>
+          canEdit && (
           <Button
             variant="ghost"
             size="icon"
@@ -70,18 +74,21 @@ export default function VendorsPage() {
         ),
       },
     ],
-    [],
+    [canEdit],
   );
 
   return (
     <>
       <PageHeader
+        eyebrow="Master data"
         title="Vendors"
         description="The vendor register used for verification."
         actions={
-          <Button onClick={() => setDialog({ open: true, vendor: null })}>
-            <Plus className="h-4 w-4" /> Add vendor
-          </Button>
+          canEdit ? (
+            <Button onClick={() => setDialog({ open: true, vendor: null })}>
+              <Plus className="h-4 w-4" /> Add vendor
+            </Button>
+          ) : undefined
         }
       />
       <Card>
@@ -115,7 +122,7 @@ export default function VendorsPage() {
           filtered={list.active}
           onRowClick={(row) => router.push(`/vendors/${row.id}`)}
           emptyTitle="No vendors yet"
-          emptyAction={<Button size="sm" onClick={() => setDialog({ open: true, vendor: null })}>Add vendor</Button>}
+          emptyAction={canEdit ? <Button size="sm" onClick={() => setDialog({ open: true, vendor: null })}>Add vendor</Button> : undefined}
         />
       </Card>
       <VendorDialog open={dialog.open} vendor={dialog.vendor} onOpenChange={(open) => setDialog((d) => ({ ...d, open }))} onSaved={vendors.reload} />

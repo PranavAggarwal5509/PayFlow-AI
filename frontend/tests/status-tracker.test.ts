@@ -54,6 +54,9 @@ describe("buildTracker (SSE Tracker Utilities)", () => {
     error_message: null,
     decision_status: null,
     can_retry: false,
+    checks: [],
+    decision: null,
+    invoice: null,
     stages: [
       {
         stage: "UPLOAD_RECEIVED",

@@ -27,6 +27,8 @@ def create_vendor(db: Session, data: VendorCreate, *, user_id: str) -> Vendor:
         address=data.address,
         email=data.email,
         phone=data.phone,
+        bank_account_number=data.bank_account_number,
+        bank_ifsc=data.bank_ifsc,
         status=data.status.value,
     )
     db.add(vendor)
