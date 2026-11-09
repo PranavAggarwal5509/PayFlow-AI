@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -29,25 +29,29 @@ import { useAsync } from "@/hooks/use-async";
 import { ApiError } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { invoiceService } from "@/services";
-import type { FieldEvidence } from "@/types/api";
+import { evidenceFor, type EvidenceItem } from "@/lib/evidence";
 
 export default function InvoiceDetailPage() {
   const { can } = useAuth();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: invoice, loading, error, reload } = useAsync(() => invoiceService.get(id), [id]);
-  const [activeEvidence, setActiveEvidence] = useState<FieldEvidence | null>(null);
-  const [activeLabel, setActiveLabel] = useState<string | null>(null);
+  const [active, setActive] = useState<EvidenceItem[]>([]);
+  const activeKeys = new Set(active.map((a) => a.key));
+  const show = (items: EvidenceItem[]) => setActive(items);
+  const clear = () => setActive([]);
 
-  const handleSelectEvidence = (label: string, ev: FieldEvidence) => {
-    setActiveLabel(label);
-    setActiveEvidence(ev);
-  };
-
-  const handleClearEvidence = () => {
-    setActiveLabel(null);
-    setActiveEvidence(null);
-  };
+  // Deep link: /invoices/<id>?evidence=VENDOR_BANK (a check) or ?evidence=total_amount (a field).
+  const [requested, setRequested] = useState<string | null>(null);
+  useEffect(() => {
+    setRequested(new URLSearchParams(window.location.search).get("evidence"));
+  }, []);
+  useEffect(() => {
+    if (requested && invoice?.visual_evidence) {
+      setActive(evidenceFor(invoice.visual_evidence, requested));
+      setRequested(null);
+    }
+  }, [requested, invoice]);
 
   if (error) return <ErrorState message={error} onRetry={reload} />;
   if (loading || !invoice)
@@ -104,9 +108,9 @@ export default function InvoiceDetailPage() {
             invoiceId={invoice.id}
             pageCount={invoice.page_count}
             visualEvidence={invoice.visual_evidence}
-            activeEvidence={activeEvidence}
-            activeFieldLabel={activeLabel}
-            onClearEvidence={handleClearEvidence}
+            active={active}
+            onSelect={show}
+            onClear={clear}
           />
         </div>
 
@@ -119,7 +123,7 @@ export default function InvoiceDetailPage() {
               </CardBody>
             </Card>
           )}
-          <DecisionPanel decision={invoice.decision} />
+          <DecisionPanel decision={invoice.decision} visualEvidence={invoice.visual_evidence} onShow={show} />
 
           {reviewOpen && invoice.review && (
             <Card>
@@ -152,14 +156,14 @@ export default function InvoiceDetailPage() {
               <TabsTrigger value="history">History</TabsTrigger>
             </TabsList>
             <TabsContent value="details" className="mt-4 space-y-4">
-              <InvoiceInfoCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
-              <VendorCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
+              <InvoiceInfoCard invoice={invoice} activeKeys={activeKeys} onShow={show} />
+              <VendorCard invoice={invoice} activeKeys={activeKeys} onShow={show} />
               <PurchaseOrderCard invoice={invoice} />
-              <LineItemsCard invoice={invoice} />
-              <FinancialSummaryCard invoice={invoice} onSelectEvidence={handleSelectEvidence} />
+              <LineItemsCard invoice={invoice} activeKeys={activeKeys} onShow={show} />
+              <FinancialSummaryCard invoice={invoice} activeKeys={activeKeys} onShow={show} />
             </TabsContent>
             <TabsContent value="validations" className="mt-4">
-              <ValidationList validations={invoice.validations} />
+              <ValidationList validations={invoice.validations} visualEvidence={invoice.visual_evidence} onShow={show} />
             </TabsContent>
             <TabsContent value="history" className="mt-4">
               <HistoryCard invoice={invoice} />

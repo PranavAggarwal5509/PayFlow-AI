@@ -46,6 +46,8 @@ from app.models import (  # noqa: E402
 from app.models.enums import ReviewAction, Stage, StageStatus  # noqa: E402
 from app.schemas.extraction import ExtractedInvoice, ExtractedLineItem  # noqa: E402
 from app.services import pdf_extractor, pipeline, review_service, run_service  # noqa: E402
+from app.services.document_layout import extract_pdf_layout  # noqa: E402
+from app.services.evidence_service import build_invoice_visual_evidence  # noqa: E402
 from app.services.invoice_service import create_invoice_from_upload  # noqa: E402
 from app.services.user_service import ensure_demo_accounts  # noqa: E402
 from app.utils.normalize import normalize_vendor_name  # noqa: E402
@@ -146,6 +148,8 @@ def seed_history(db, storage) -> int:
             line_items=[ExtractedLineItem(**i) for i in row["items"]],
         )  # fmt: skip
         pipeline.apply_extraction(db, invoice, extracted)
+        # Click-to-highlight evidence: where each extracted value is printed on the PDF.
+        invoice.visual_evidence = build_invoice_visual_evidence(invoice.extracted_data, extract_pdf_layout(pdf))
         db.commit()
 
         ctx = pipeline.PipelineContext(db, settings, storage, llm=None)  # type: ignore[arg-type]

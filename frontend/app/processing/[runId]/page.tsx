@@ -5,6 +5,7 @@ import {
   Ban,
   CheckCircle2,
   ClipboardCheck,
+  Eye,
   FileText,
   Info,
   RotateCcw,
@@ -27,6 +28,7 @@ import { useRunEvents } from "@/hooks/use-run-events";
 import { ApiError } from "@/lib/api";
 import { formatDate, formatDuration, formatMoney, parseServerDate } from "@/lib/format";
 import { ISSUE_LABELS } from "@/lib/status";
+import { checkHasEvidence } from "@/lib/evidence";
 import { cn } from "@/lib/utils";
 import { invoiceService } from "@/services";
 import type { DecisionReason, RunDetail } from "@/types/api";
@@ -311,7 +313,7 @@ function DecisionPanel({ run }: { run: RunDetail }) {
       {(blocking.length > 0 || warnings.length > 0) && (
         <ul className="mt-4 space-y-2">
           {[...blocking, ...warnings].map((reason) => (
-            <ReasonItem key={`${reason.code}-${reason.message}`} reason={reason} />
+            <ReasonItem key={`${reason.code}-${reason.message}`} reason={reason} invoiceId={run.invoice_id} />
           ))}
         </ul>
       )}
@@ -323,7 +325,7 @@ function DecisionPanel({ run }: { run: RunDetail }) {
   );
 }
 
-function ReasonItem({ reason }: { reason: DecisionReason }) {
+function ReasonItem({ reason, invoiceId }: { reason: DecisionReason; invoiceId: string }) {
   const blocking = reason.severity === "BLOCKING";
   return (
     <li className="rounded-lg bg-white/80 p-3 ring-1 ring-inset ring-slate-200/80">
@@ -337,6 +339,15 @@ function ReasonItem({ reason }: { reason: DecisionReason }) {
           {blocking ? "Blocking" : "Warning"}
         </span>
         <span className="text-[12.5px] font-semibold text-slate-800">{ISSUE_LABELS[reason.code] ?? reason.code}</span>
+        {checkHasEvidence(reason.code) && (
+          <Link
+            href={`/invoices/${invoiceId}?evidence=${reason.code}`}
+            className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200 hover:bg-indigo-50"
+            title="Open the invoice with these values highlighted on the PDF"
+          >
+            <Eye className="h-3 w-3" /> Show in PDF
+          </Link>
+        )}
       </div>
       <p className="mt-1 text-[12.5px] leading-relaxed text-slate-600">{reason.message}</p>
     </li>

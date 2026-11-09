@@ -303,3 +303,21 @@
     }
   }
 }
+
+@layer utilities {
+  /* Click-to-highlight PDF evidence: a marker-style fill with a soft pulsing ring. */
+  .evidence-highlight {
+    z-index: 20;
+    background: rgb(250 204 21 / 0.28);
+    border: 2px solid rgb(79 70 229);
+    animation: evidence-pulse 1.6s ease-out 3;
+  }
+  @keyframes evidence-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(79 70 229 / 0.45);
+    }
+    100% {
+      box-shadow: 0 0 0 10px rgb(79 70 229 / 0);
+    }
+  }
+}

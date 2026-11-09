@@ -169,3 +169,58 @@ def test_build_invoice_visual_evidence_comprehensive(sample_pdf_bytes):
     line_ev = evidence["line_items"][0]
     assert line_ev["description"]["evidence_status"] == "VERIFIED"
 
+
+
+def _gst_invoice_pdf() -> bytes:
+    """A small Tally-style GST invoice: dates printed day-first, amounts with Indian grouping."""
+    import pymupdf
+
+    doc = pymupdf.open()
+    page = doc.new_page(width=595, height=842)
+    rows = [
+        (40, 60, "Invoice No.  ACM/2026/1042"), (330, 60, "Dated 30-Oct-2026"),
+        (40, 80, "Payment Due Date : 29-Nov-2026"),
+        (40, 120, "Hex bolts M12 (box of 100)"), (300, 120, "100"), (380, 120, "450.00"), (480, 120, "45,000.00"),
+        (40, 140, "Safety helmets"), (300, 140, "80"), (380, 140, "650.00"), (480, 140, "52,000.00"),
+        (300, 170, "CGST @ 9%"), (480, 170, "8,730.00"),
+        (300, 185, "SGST @ 9%"), (480, 185, "8,730.00"),
+        (300, 210, "Total"), (470, 210, "1,14,460.00"),
+        (40, 260, "A/c No. : 50200010017037"), (40, 275, "IFS Code : YESB0001001"),
+    ]  # fmt: skip
+    for x, y, text in rows:
+        page.insert_text((x, y), text, fontsize=9)
+    data = doc.tobytes()
+    doc.close()
+    return data
+
+
+def test_gst_invoice_evidence_dates_numbers_lines_bank_and_split_tax():
+    layout = extract_pdf_layout(_gst_invoice_pdf())
+    extracted = {
+        "invoice_number": "ACM/2026/1042", "invoice_date": "2026-10-30", "due_date": "2026-11-29",
+        "subtotal": "97000.00", "tax_amount": "17460.00", "total_amount": "114460.00",
+        "bank_account_details": "Yes Bank, A/C 50200010017037, IFSC YESB0001001",
+        "line_items": [
+            {"description": "Hex bolts M12 (box of 100)", "quantity": "100", "unit_price": "450", "total_amount": "45000"},
+            {"description": "Safety helmets", "quantity": "80", "unit_price": "650", "total_amount": "52000"},
+        ],
+    }  # fmt: skip
+    ev = build_invoice_visual_evidence(extracted, layout)
+
+    # ISO dates are found in their printed day-first form.
+    assert ev["invoice_date"]["text"] == "30-Oct-2026"
+    assert ev["due_date"]["text"] == "29-Nov-2026"
+    # Amounts compare as numbers: 1,14,460.00 == 114460, and 450.00 is never confused with 45,000.
+    assert ev["total_amount"]["text"] == "1,14,460.00"
+    line0 = ev["line_items"][0]
+    assert line0["unit_price"]["text"] == "450.00"
+    assert line0["total_amount"]["text"] == "45,000.00"
+    assert line0["row"]["evidence_status"] == "VERIFIED"
+    # Cells are anchored to their own row (both lines have similar numbers elsewhere).
+    assert ev["line_items"][1]["quantity"]["text"] == "80"
+    # Only CGST + SGST are printed, so the tax evidence covers both halves.
+    assert ev["tax_amount"]["text"].startswith("CGST 8,730.00")
+    # Remittance details.
+    assert ev["bank_account_number"]["text"] == "50200010017037"
+    assert ev["bank_ifsc"]["text"] == "YESB0001001"
+    assert ev["bank_account_details"]["evidence_status"] == "VERIFIED"

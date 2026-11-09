@@ -1,10 +1,32 @@
-import { CheckCircle2, CircleDashed, OctagonAlert, TriangleAlert } from "lucide-react";
+import { CheckCircle2, CircleDashed, Eye, OctagonAlert, TriangleAlert } from "lucide-react";
 
 import { CheckBadge } from "@/components/invoices/status-badges";
 import { Card, CardBody } from "@/components/ui/card";
+import { evidenceFor, type EvidenceItem } from "@/lib/evidence";
 import { DECISION_META } from "@/lib/status";
 import { cn } from "@/lib/utils";
-import type { Decision, ValidationResult } from "@/types/api";
+import type { Decision, ValidationResult, VisualEvidence } from "@/types/api";
+
+interface ShowProps {
+  visualEvidence?: VisualEvidence | null;
+  onShow?: (items: EvidenceItem[]) => void;
+}
+
+/** "Show in PDF" for a check: highlights every printed value the control looked at. */
+export function ShowInPdf({ code, visualEvidence, onShow }: ShowProps & { code: string }) {
+  const items = evidenceFor(visualEvidence, code);
+  if (!onShow || items.length === 0) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => onShow(items)}
+      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] font-semibold text-indigo-600 ring-1 ring-inset ring-indigo-200 transition-colors hover:bg-indigo-50"
+      title={`Highlight ${items.map((i) => i.label.toLowerCase()).join(", ")} on the PDF`}
+    >
+      <Eye className="h-3 w-3" /> Show in PDF
+    </button>
+  );
+}
 
 const BANNER = {
   APPROVED: {
@@ -33,7 +55,7 @@ const BANNER = {
   },
 } as const;
 
-export function DecisionPanel({ decision }: { decision: Decision | null }) {
+export function DecisionPanel({ decision, visualEvidence, onShow }: ShowProps & { decision: Decision | null }) {
   if (!decision) return null;
   const style = BANNER[decision.status];
   const problems = decision.reasons.filter((r) => r.severity !== "INFO");
@@ -54,14 +76,17 @@ export function DecisionPanel({ decision }: { decision: Decision | null }) {
         <ul className="mt-4 space-y-2">
           {problems.map((reason, i) => (
             <li key={`${reason.code}-${i}`} className="rounded-lg bg-white/80 p-3 ring-1 ring-inset ring-slate-200/80">
-              <span
-                className={cn(
-                  "rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide",
-                  reason.severity === "BLOCKING" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-800",
-                )}
-              >
-                {reason.severity === "BLOCKING" ? "Blocking" : "Warning"}
-              </span>
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={cn(
+                    "rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide",
+                    reason.severity === "BLOCKING" ? "bg-rose-100 text-rose-700" : "bg-amber-100 text-amber-800",
+                  )}
+                >
+                  {reason.severity === "BLOCKING" ? "Blocking" : "Warning"}
+                </span>
+                <ShowInPdf code={reason.code} visualEvidence={visualEvidence} onShow={onShow} />
+              </div>
               <p className="mt-1.5 text-[13px] leading-relaxed text-slate-700">{reason.message}</p>
             </li>
           ))}
@@ -104,7 +129,7 @@ const GROUPS: { title: string; prefixes: string[] }[] = [
   { title: "Duplicate detection", prefixes: ["DUP_FILE", "DUP_BUSINESS", "DUP_POTENTIAL"] },
 ];
 
-export function ValidationList({ validations }: { validations: ValidationResult[] }) {
+export function ValidationList({ validations, visualEvidence, onShow }: ShowProps & { validations: ValidationResult[] }) {
   if (validations.length === 0)
     return <p className="p-5 text-sm text-muted-foreground">No validation results yet.</p>;
   return (
@@ -124,7 +149,10 @@ export function ValidationList({ validations }: { validations: ValidationResult[
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-medium">{v.label}</p>
-                      <CheckBadge status={v.status} />
+                      <div className="flex items-center gap-2">
+                        <ShowInPdf code={v.validation_type} visualEvidence={visualEvidence} onShow={onShow} />
+                        <CheckBadge status={v.status} />
+                      </div>
                     </div>
                     <p className="mt-0.5 text-[13px] text-slate-600">{v.message}</p>
                     {(v.expected_value || v.actual_value) && (

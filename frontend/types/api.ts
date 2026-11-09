@@ -253,6 +253,8 @@ export interface FieldEvidence {
   text?: string;
   page_width?: number;
   page_height?: number;
+  /** How many places on the document carry this value. */
+  match_count?: number;
 }
 
 export interface LineItemEvidence {
@@ -261,6 +263,8 @@ export interface LineItemEvidence {
   quantity?: FieldEvidence;
   unit_price?: FieldEvidence;
   total_amount?: FieldEvidence;
+  /** Box around the whole printed row. */
+  row?: FieldEvidence;
 }
 
 export type VisualEvidence = Record<string, FieldEvidence | LineItemEvidence[] | unknown>;
