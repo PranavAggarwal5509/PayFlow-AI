@@ -22,7 +22,7 @@ export interface InvoiceFilterValues extends Record<string, string> {
 
 export const EMPTY_INVOICE_FILTERS: InvoiceFilterValues = {
   q: "",
-  source_origin: "LIVE_UPLOAD",
+  source_origin: "ALL",
   decision_status: "",
   processing_status: "",
   vendor_id: "",
@@ -105,9 +105,9 @@ export function InvoiceFilters({
           aria-label="Dataset"
           className="w-auto"
         >
-          <option value="LIVE_UPLOAD">Live uploads</option>
-          <option value="SEED_HISTORY">History</option>
           <option value="ALL">All invoices</option>
+          <option value="LIVE_UPLOAD">Live uploads</option>
+          <option value="SEED_HISTORY">Seeded history</option>
         </Select>
 
         <button

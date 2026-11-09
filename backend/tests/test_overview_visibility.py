@@ -78,10 +78,10 @@ def test_invoices_source_filtering(client: TestClient, db: Session):
         db.add(Invoice(vendor_id=v.id, invoice_number=f"HIST-{i}", total_amount=Decimal("100"), source_origin="SEED_HISTORY", original_file_name=f"h_{i}.pdf", stored_file_path=f"stored_h_{i}.pdf", file_hash=f"hh_{i}"))
     db.commit()
 
-    # Default should return live uploads
+    # Default returns every invoice (seeded history + live uploads)
     res_def = client.get("/api/v1/invoices?page_size=100")
     assert res_def.status_code == 200
-    assert res_def.json()["meta"]["total"] == 15
+    assert res_def.json()["meta"]["total"] == 90
 
     # Explicit live
     res_live = client.get("/api/v1/invoices?source_origin=LIVE_UPLOAD&page_size=100")
@@ -110,3 +110,25 @@ def test_developer_analytics_endpoint(client: TestClient, db: Session):
     assert "technical_success_formula" in data["reliability"]
     assert "failed_before_extraction" in data["reliability"]
     assert "tokens_available" in data["ai_usage"]
+
+
+def test_dashboard_stats_default_to_all_invoices_and_filter_by_source(client: TestClient, db: Session):
+    v = Vendor(vendor_code="V-TEST-DASH", vendor_name="Dash Vendor", normalized_name="dash vendor", is_demo=True)
+    db.add(v)
+    db.flush()
+    for i in range(3):
+        db.add(Invoice(vendor_id=v.id, invoice_number=f"L-{i}", total_amount=Decimal("100"), source_origin="LIVE_UPLOAD",
+                       decision_status="APPROVED", original_file_name=f"l_{i}.pdf", stored_file_path=f"sl_{i}.pdf", file_hash=f"dl_{i}"))
+    for i in range(5):
+        db.add(Invoice(vendor_id=v.id, invoice_number=f"H-{i}", total_amount=Decimal("100"), source_origin="SEED_HISTORY",
+                       decision_status="REJECTED", original_file_name=f"h_{i}.pdf", stored_file_path=f"sh_{i}.pdf", file_hash=f"dh_{i}"))
+    db.commit()
+
+    def kpis(query=""):
+        data = client.get(f"/api/v1/dashboard/stats{query}").json()["data"]
+        return data["source_origin"], data["kpis"]["total"]["value"], data["kpis"]["approved"]["value"], data["kpis"]["rejected"]["value"]
+
+    assert kpis() == ("ALL", 8, 3, 5)
+    assert kpis("?source_origin=LIVE_UPLOAD") == ("LIVE_UPLOAD", 3, 3, 0)
+    assert kpis("?source_origin=SEED_HISTORY") == ("SEED_HISTORY", 5, 0, 5)
+    assert kpis("?source_origin=nonsense")[0] == "ALL"

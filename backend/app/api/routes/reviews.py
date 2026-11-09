@@ -118,12 +118,13 @@ def decide_review(
 @dashboard.get("/stats")
 def stats(
     days: int = Query(30, ge=1, le=365),
+    source_origin: str = Query("ALL", description="ALL (default), LIVE_UPLOAD or SEED_HISTORY"),
     db: Session = Depends(get_db),
     _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
     from app.services.analytics_service import get_operational_metrics
 
-    base_stats = dashboard_service.get_stats(db)
+    base_stats = dashboard_service.get_stats(db, dashboard_service.normalize_origin(source_origin))
     base_stats["analytics"] = get_operational_metrics(db, days=days)
     return ApiResponse(data=base_stats)
 
@@ -143,10 +144,12 @@ def developer_analytics(
 @dashboard.get("/recent-activity")
 def recent_activity(
     limit: int = Query(15, ge=1, le=50),
+    source_origin: str = Query("ALL", description="ALL (default), LIVE_UPLOAD or SEED_HISTORY"),
     db: Session = Depends(get_db),
     _: CurrentUser = Depends(require(Permission.INVOICES_VIEW)),
 ):
-    return ApiResponse(data=dashboard_service.recent_activity(db, limit))
+    origin = dashboard_service.normalize_origin(source_origin)
+    return ApiResponse(data=dashboard_service.recent_activity(db, limit, origin))
 
 
 

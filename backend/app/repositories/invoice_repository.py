@@ -49,7 +49,7 @@ class InvoiceFilters:
     min_amount: Decimal | None = None
     max_amount: Decimal | None = None
     po_number: str | None = None
-    source_origin: str | None = "LIVE_UPLOAD"
+    source_origin: str | None = "ALL"
 
 
 def apply_filters(stmt: Select, f: InvoiceFilters) -> Select:

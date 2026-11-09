@@ -105,11 +105,17 @@ export function DecisionFlow({
   counts,
   values,
   loading,
+  origin = "ALL",
+  scopeLabel = "All invoices",
 }: {
   counts: FlowCounts | null;
   values?: FlowValues | null;
   loading: boolean;
+  /** Dataset shown: ALL, LIVE_UPLOAD or SEED_HISTORY (drives the drill-down links). */
+  origin?: string;
+  scopeLabel?: string;
 }) {
+  const outcomes = OUTCOMES.map((o) => ({ ...o, href: o.href.replace("source_origin=LIVE_UPLOAD", `source_origin=${origin}`) }));
   const reduced = usePrefersReducedMotion();
   const uid = useId().replace(/:/g, "");
   const [metric, setMetric] = useState<Metric>("count");
@@ -127,7 +133,7 @@ export function DecisionFlow({
 
   const totalCount = Math.max(c.total, c.approved + c.review + c.rejected + c.failed);
   const readCount = c.approved + c.review + c.rejected;
-  const totalMetric = OUTCOMES.reduce((s, o) => s + metricValues[o.key], 0);
+  const totalMetric = outcomes.reduce((s, o) => s + metricValues[o.key], 0);
   const share = (key: OutcomeKey) => (totalMetric ? Math.round((metricValues[key] / totalMetric) * 100) : 0);
   const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
 
@@ -143,7 +149,7 @@ export function DecisionFlow({
   if (totalCount === 0) {
     return (
       <Card className="p-6">
-        <Header metric={effectiveMetric} onMetric={setMetric} canValue={false} />
+        <Header metric={effectiveMetric} onMetric={setMetric} canValue={false} scopeLabel={scopeLabel} />
         <div className="mt-6 flex h-[240px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 text-center">
           <GitBranch className="h-7 w-7 text-slate-300" />
           <p className="mt-2 text-[14px] font-medium text-slate-700">No invoices processed yet</p>
@@ -157,7 +163,7 @@ export function DecisionFlow({
   }
 
   // Particles: density proportional to the outcome mix, evenly phased so the stream never bunches.
-  const particles = OUTCOMES.flatMap((o, oi) => {
+  const particles = outcomes.flatMap((o, oi) => {
     const v = metricValues[o.key];
     if (!v || !totalMetric) return [];
     const n = Math.max(1, Math.round((v / totalMetric) * 12));
@@ -169,7 +175,7 @@ export function DecisionFlow({
     }));
   });
 
-  const exceptions = OUTCOMES.filter((o) => o.key !== "approved").sort((a, b) => c[b.key] - c[a.key]);
+  const exceptions = outcomes.filter((o) => o.key !== "approved").sort((a, b) => c[b.key] - c[a.key]);
   const worst = exceptions[0];
   const touchless = pct(c.approved, totalCount);
   const readRate = pct(readCount, totalCount);
@@ -183,7 +189,7 @@ export function DecisionFlow({
 
   return (
     <Card className="overflow-hidden p-6">
-      <Header metric={effectiveMetric} onMetric={setMetric} canValue={hasValue} />
+      <Header metric={effectiveMetric} onMetric={setMetric} canValue={hasValue} scopeLabel={scopeLabel} />
 
       {/* ---------- Desktop / tablet: metro map ---------- */}
       <div className="mt-4 hidden md:block">
@@ -214,7 +220,7 @@ export function DecisionFlow({
           <rect x="0" y="0" width={END_X + 4} height={H} fill={`url(#${uid}-dots)`} opacity={0.8} />
 
           {/* Branch lines: a soft track underneath, the coloured line on top */}
-          {OUTCOMES.map((o, i) => {
+          {outcomes.map((o, i) => {
             const live = c[o.key] > 0;
             return (
               <g key={o.key} opacity={dim(o.key) ? 0.18 : 1} style={{ transition: "opacity 200ms ease" }}>
@@ -273,7 +279,7 @@ export function DecisionFlow({
           <Chip x={(ST.controls + ST.junction) / 2 + 4} label={`${touchless}% touchless`} tone="emerald" />
 
           {/* Terminals + outcome cards */}
-          {OUTCOMES.map((o, i) => {
+          {outcomes.map((o, i) => {
             const y = LANE_Y[o.key];
             const live = c[o.key] > 0;
             return (
@@ -301,7 +307,7 @@ export function DecisionFlow({
       {/* ---------- Outcome mix bar (all sizes) ---------- */}
       <div className="mt-4">
         <div className="flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-slate-100">
-          {OUTCOMES.map((o) =>
+          {outcomes.map((o) =>
             metricValues[o.key] > 0 ? (
               <div
                 key={o.key}
@@ -313,7 +319,7 @@ export function DecisionFlow({
           )}
         </div>
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-slate-500">
-          {OUTCOMES.map((o) => (
+          {outcomes.map((o) => (
             <span key={o.key} className="inline-flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full" style={{ background: o.color }} />
               {o.label} <span className="tabular font-semibold text-slate-800">{share(o.key)}%</span>
@@ -325,7 +331,7 @@ export function DecisionFlow({
 
       {/* ---------- Mobile: outcome list ---------- */}
       <ul className="mt-4 space-y-2 md:hidden">
-        {OUTCOMES.map((o) => (
+        {outcomes.map((o) => (
           <li key={o.key} className="h-[58px]">
             <OutcomeCard
               meta={o}
@@ -371,7 +377,17 @@ export function DecisionFlow({
 
 /* ------------------------------------------------------------------ pieces */
 
-function Header({ metric, onMetric, canValue }: { metric: Metric; onMetric: (m: Metric) => void; canValue: boolean }) {
+function Header({
+  metric,
+  onMetric,
+  canValue,
+  scopeLabel,
+}: {
+  metric: Metric;
+  onMetric: (m: Metric) => void;
+  canValue: boolean;
+  scopeLabel: string;
+}) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
@@ -406,7 +422,7 @@ function Header({ metric, onMetric, canValue }: { metric: Metric; onMetric: (m: 
           ))}
         </div>
         <span className="hidden items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-[11.5px] font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-100 sm:inline-flex">
-          <GitBranch className="h-3.5 w-3.5" /> Last 30 days
+          <GitBranch className="h-3.5 w-3.5" /> {scopeLabel}
         </span>
       </div>
     </div>

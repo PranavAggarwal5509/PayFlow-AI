@@ -34,10 +34,12 @@ export const runService = {
 };
 
 export const dashboardService = {
-  stats: (days = 30): Promise<DashboardStats> => get("/dashboard/stats", { days }),
+  stats: (days = 30, source_origin = "ALL"): Promise<DashboardStats> =>
+    get("/dashboard/stats", { days, source_origin }),
   developerAnalytics: (days = 30): Promise<OperationalMetrics> =>
     get("/dashboard/developer-analytics", { days }),
-  activity: (limit = 8): Promise<ActivityItem[]> => get("/dashboard/recent-activity", { limit }),
+  activity: (limit = 8, source_origin = "ALL"): Promise<ActivityItem[]> =>
+    get("/dashboard/recent-activity", { limit, source_origin }),
 };
 
 export interface VendorInput {

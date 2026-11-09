@@ -23,8 +23,17 @@ def _count_origin(db: Session, origin: str | None, *conditions) -> int:
     return db.scalar(stmt) or 0
 
 
-def _count(db: Session, *conditions) -> int:
-    return _count_origin(db, "LIVE_UPLOAD", *conditions)
+ORIGINS = ("LIVE_UPLOAD", "SEED_HISTORY")
+
+
+def normalize_origin(value: str | None) -> str | None:
+    """'ALL' / empty -> None (every invoice); otherwise one of ORIGINS."""
+    upper = (value or "").strip().upper()
+    return upper if upper in ORIGINS else None
+
+
+def _scope(origin: str | None) -> tuple:
+    return (Invoice.source_origin == origin,) if origin else ()
 
 
 def _delta(current: int, previous: int) -> float | None:
@@ -33,15 +42,16 @@ def _delta(current: int, previous: int) -> float | None:
     return round((current - previous) / previous * 100, 1)
 
 
-def get_stats(db: Session) -> dict:
+def get_stats(db: Session, origin: str | None = None) -> dict:
+    """Overview metrics for one dataset: None = all invoices, or LIVE_UPLOAD / SEED_HISTORY."""
     now = utcnow()
     cur_start = now - timedelta(days=PERIOD_DAYS)
     prev_start = now - timedelta(days=PERIOD_DAYS * 2)
 
     def period_counts(*conditions) -> tuple[int, int]:
-        current = _count(db, Invoice.uploaded_at >= cur_start, *conditions)
-        previous = _count(
-            db, Invoice.uploaded_at >= prev_start, Invoice.uploaded_at < cur_start, *conditions
+        current = _count_origin(db, origin, Invoice.uploaded_at >= cur_start, *conditions)
+        previous = _count_origin(
+            db, origin, Invoice.uploaded_at >= prev_start, Invoice.uploaded_at < cur_start, *conditions
         )
         return current, previous
 
@@ -60,7 +70,7 @@ def get_stats(db: Session) -> dict:
     }.items():
         cur, prev = period_counts(*conditions)
         kpis[key] = {
-            "value": _count(db, *conditions),
+            "value": _count_origin(db, origin, *conditions),
             "change_percent": _delta(cur, prev),
             "last_30_days": cur,
         }
@@ -72,17 +82,20 @@ def get_stats(db: Session) -> dict:
         currency: Decimal(total)
         for currency, total in db.execute(
             select(Invoice.currency, func.coalesce(func.sum(Invoice.total_amount), 0))
-            .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.currency.is_not(None))
+            .where(*_scope(origin), Invoice.currency.is_not(None))
             .group_by(Invoice.currency)
         )
     }
 
     pending_reviews = (
         db.scalar(
-            select(func.count(Review.id)).where(
+            select(func.count(Review.id))
+            .join(Invoice, Invoice.id == Review.invoice_id)
+            .where(
+                *_scope(origin),
                 Review.review_status.in_(
                     [ReviewStatus.PENDING.value, ReviewStatus.CLARIFICATION_REQUESTED.value]
-                )
+                ),
             )
         )
         or 0
@@ -114,26 +127,28 @@ def get_stats(db: Session) -> dict:
     }
 
     return {
+        "source_origin": origin or "ALL",
         "kpis": kpis,
         "portfolio": portfolio,
         "approval_rate": approval_rate,
         "pending_reviews": pending_reviews,
         "total_value_by_currency": value_by_currency,
-        "average_processing_seconds": _average_processing_seconds(db),
-        "monthly_volume": _monthly(db),
-        "daily_volume": _daily(db, now - timedelta(days=PERIOD_DAYS - 1)),
-        "decision_distribution": _distribution(db),
+        "average_processing_seconds": _average_processing_seconds(db, origin),
+        "monthly_volume": _monthly(db, origin),
+        "daily_volume": _daily(db, now - timedelta(days=PERIOD_DAYS - 1), origin),
+        "decision_distribution": _distribution(db, origin),
         "decision_distribution_detailed": _distribution_detailed(db),
         "recent_failed_runs": _recent_failed(db),
-        "exceptions_by_control": _exceptions_by_control(db),
-        "value_at_risk": _value_at_risk(db),
+        "exceptions_by_control": _exceptions_by_control(db, origin),
+        "value_at_risk": _value_at_risk(db, origin),
     }
 
 
-def _average_processing_seconds(db: Session) -> float | None:
+def _average_processing_seconds(db: Session, origin: str | None = None) -> float | None:
     rows = db.execute(
         select(ProcessingRun.started_at, ProcessingRun.completed_at)
-        .where(ProcessingRun.status == RunStatus.COMPLETED.value)
+        .join(Invoice, Invoice.id == ProcessingRun.invoice_id)
+        .where(ProcessingRun.status == RunStatus.COMPLETED.value, *_scope(origin))
         .order_by(ProcessingRun.completed_at.desc())
         .limit(200)
     ).all()
@@ -141,14 +156,14 @@ def _average_processing_seconds(db: Session) -> float | None:
     return round(sum(durations) / len(durations), 1) if durations else None
 
 
-def _monthly(db: Session) -> list[dict]:
+def _monthly(db: Session, origin: str | None = None) -> list[dict]:
     year, month = extract("year", Invoice.uploaded_at), extract("month", Invoice.uploaded_at)
     rows = db.execute(
         select(
             year.label("y"), month.label("m"), func.count(Invoice.id),
             func.coalesce(func.sum(Invoice.total_amount), 0),
         )  # fmt: skip
-        .where(Invoice.source_origin == "LIVE_UPLOAD")
+        .where(*_scope(origin))
         .group_by("y", "m")
         .order_by("y", "m")
     ).all()
@@ -158,35 +173,35 @@ def _monthly(db: Session) -> list[dict]:
     ]
 
 
-def _daily(db: Session, since) -> list[dict]:
+def _daily(db: Session, since, origin: str | None = None) -> list[dict]:
     year = extract("year", Invoice.uploaded_at)
     month = extract("month", Invoice.uploaded_at)
     day = extract("day", Invoice.uploaded_at)
     rows = db.execute(
         select(year.label("y"), month.label("m"), day.label("d"), func.count(Invoice.id))
-        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.uploaded_at >= since)
+        .where(*_scope(origin), Invoice.uploaded_at >= since)
         .group_by("y", "m", "d")
         .order_by("y", "m", "d")
     ).all()
     return [{"date": f"{int(y):04d}-{int(m):02d}-{int(d):02d}", "count": c} for y, m, d, c in rows]
 
 
-def _distribution(db: Session) -> list[dict]:
+def _distribution(db: Session, origin: str | None = None) -> list[dict]:
     rows = db.execute(
         select(Invoice.decision_status, func.count(Invoice.id))
-        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.decision_status.is_not(None))
+        .where(*_scope(origin), Invoice.decision_status.is_not(None))
         .group_by(Invoice.decision_status)
     ).all()
     out = [{"status": status, "count": count} for status, count in rows]
     # For invoices that failed technical processing before a decision was reached
     failed_undecided = db.scalar(
         select(func.count(Invoice.id)).where(
-            Invoice.source_origin == "LIVE_UPLOAD",
+            *_scope(origin),
             Invoice.processing_status == ProcessingStatus.FAILED.value,
             Invoice.decision_status.is_(None),
         )
     ) or 0
-    processing = _count(db, Invoice.processing_status == ProcessingStatus.PROCESSING.value)
+    processing = _count_origin(db, origin, Invoice.processing_status == ProcessingStatus.PROCESSING.value)
     if failed_undecided:
         out.append({"status": "PROCESSING_FAILED", "count": failed_undecided})
     if processing:
@@ -252,13 +267,13 @@ def _recent_failed(db: Session, limit: int = 5) -> list[dict]:
     ]
 
 
-def recent_activity(db: Session, limit: int = 15) -> list[dict]:
+def recent_activity(db: Session, limit: int = 15, origin: str | None = None) -> list[dict]:
     interesting = ("INVOICE_UPLOADED", "DECISION", "REVIEW_APPROVE", "REVIEW_REJECT",
                    "REVIEW_REQUEST_CLARIFICATION", "RUN_FAILED", "RUN_RETRY")  # fmt: skip
     rows = db.execute(
         select(AuditLog, Invoice)
         .join(Invoice, Invoice.id == AuditLog.invoice_id)
-        .where(AuditLog.action.in_(interesting))
+        .where(AuditLog.action.in_(interesting), *_scope(origin))
         .order_by(AuditLog.created_at.desc())
         .limit(limit)
     ).all()
@@ -274,15 +289,15 @@ def recent_activity(db: Session, limit: int = 15) -> list[dict]:
 
 
 
-def _exceptions_by_control(db: Session) -> list[dict]:
-    """How many live invoices each control flagged (latest decision per invoice)."""
+def _exceptions_by_control(db: Session, origin: str | None = None) -> list[dict]:
+    """How many invoices each control flagged (latest decision per invoice)."""
     from app.models.processing import Decision
 
     latest: dict = {}
     rows = db.execute(
         select(Decision.invoice_id, Decision.created_at, Decision.reasons)
         .join(Invoice, Invoice.id == Decision.invoice_id)
-        .where(Invoice.source_origin == "LIVE_UPLOAD")
+        .where(*_scope(origin))
     ).all()
     for invoice_id, created_at, reasons in rows:
         if invoice_id not in latest or created_at > latest[invoice_id][0]:
@@ -295,8 +310,8 @@ def _exceptions_by_control(db: Session) -> list[dict]:
     return sorted(counts.values(), key=lambda e: (-e["count"], e["code"]))
 
 
-def _value_at_risk(db: Session) -> dict:
-    """Invoice value held for review or blocked by rejection, per currency (live uploads)."""
+def _value_at_risk(db: Session, origin: str | None = None) -> dict:
+    """Invoice value approved, held for review or blocked by rejection, per currency."""
     out: dict[str, dict[str, Decimal]] = {"held": {}, "blocked": {}, "approved": {}}
     buckets = {
         DecisionStatus.NEEDS_REVIEW.value: "held",
@@ -305,7 +320,7 @@ def _value_at_risk(db: Session) -> dict:
     }
     rows = db.execute(
         select(Invoice.decision_status, Invoice.currency, func.coalesce(func.sum(Invoice.total_amount), 0))
-        .where(Invoice.source_origin == "LIVE_UPLOAD", Invoice.currency.is_not(None))
+        .where(*_scope(origin), Invoice.currency.is_not(None))
         .where(Invoice.decision_status.in_(list(buckets)))
         .group_by(Invoice.decision_status, Invoice.currency)
     ).all()

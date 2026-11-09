@@ -35,6 +35,14 @@ import { dashboardService, invoiceService } from "@/services";
 
 const REFRESH_MS = 15000;
 
+/** Which invoices the overview summarises. Live uploads are the demo runs; history is the seed. */
+const SOURCES = [
+  { key: "ALL", label: "All invoices" },
+  { key: "LIVE_UPLOAD", label: "Live uploads" },
+  { key: "SEED_HISTORY", label: "Seeded history" },
+] as const;
+type Source = (typeof SOURCES)[number]["key"];
+
 const REVIEW_ACTION_LABEL: Record<string, string> = {
   REVIEW_APPROVE: "approved",
   REVIEW_REJECT: "rejected",
@@ -64,9 +72,28 @@ function dailySeries(rows: { date: string; count: number }[], days = 14): number
 }
 
 export default function DashboardPage() {
-  const stats = useAsync(() => dashboardService.stats(30), []);
-  const recent = useAsync(() => invoiceService.list({ page_size: 6, sort_by: "uploaded_at", sort_dir: "desc" }), []);
-  const activity = useAsync(() => dashboardService.activity(30), []);
+  const [source, setSource] = useState<Source>("ALL");
+  // Remember the choice in the URL (?source=LIVE_UPLOAD) so it survives refreshes and can be shared.
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("source");
+    if (SOURCES.some((s) => s.key === fromUrl)) setSource(fromUrl as Source);
+  }, []);
+  const chooseSource = (next: Source) => {
+    setSource(next);
+    const url = new URL(window.location.href);
+    if (next === "ALL") url.searchParams.delete("source");
+    else url.searchParams.set("source", next);
+    window.history.replaceState(null, "", url.toString());
+  };
+  const sourceLabel = SOURCES.find((s) => s.key === source)?.label ?? "All invoices";
+  const listHref = (extra = "") => `/invoices?source_origin=${source}${extra}`;
+
+  const stats = useAsync(() => dashboardService.stats(30, source), [source]);
+  const recent = useAsync(
+    () => invoiceService.list({ page_size: 6, sort_by: "uploaded_at", sort_dir: "desc", source_origin: source }),
+    [source],
+  );
+  const activity = useAsync(() => dashboardService.activity(30, source), [source]);
   const { user, can } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
@@ -131,6 +158,23 @@ export default function DashboardPage() {
               </span>
               Live · {ago === null ? "connecting" : ago < 5 ? "just updated" : `updated ${ago}s ago`}
             </span>
+            <div role="radiogroup" aria-label="Dataset" className="glass inline-flex rounded-full p-0.5">
+              {SOURCES.map((s) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={source === s.key}
+                  onClick={() => chooseSource(s.key)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-[11.5px] font-semibold transition-colors",
+                    source === s.key ? "bg-white text-navy-900 shadow-sm" : "text-slate-300 hover:text-white",
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
           <h1 className="mt-3 text-[32px] font-semibold leading-[1.1] tracking-tight text-white sm:text-[40px]">
             {clockText?.greet ?? "Welcome back"}, {firstName}.
@@ -143,7 +187,8 @@ export default function DashboardPage() {
               <>
                 <span className="tabular font-semibold text-amber-300">{Math.round(pending)}</span> invoice
                 {data.pending_reviews === 1 ? "" : "s"} waiting for a reviewer ·{" "}
-                <span className="tabular font-semibold text-white">{total}</span> processed in the last 30 days
+                <span className="tabular font-semibold text-white">{total}</span>{" "}
+                {source === "ALL" ? "invoices processed in total" : source === "LIVE_UPLOAD" ? "live uploads processed" : "seeded history invoices"}
               </>
             ) : (
               "Loading your accounts-payable workload…"
@@ -209,7 +254,7 @@ export default function DashboardPage() {
           kpi={data?.kpis.total}
           icon={<FileText className="h-[18px] w-[18px]" />}
           loading={firstLoad}
-          href="/invoices?source_origin=LIVE_UPLOAD"
+          href={listHref()}
           caption="in the last 30 days"
           spark={spark}
         />
@@ -222,7 +267,7 @@ export default function DashboardPage() {
           icon={<CheckCircle2 className="h-[18px] w-[18px]" />}
           loading={firstLoad}
           total={total}
-          href="/invoices?source_origin=LIVE_UPLOAD&decision_status=APPROVED"
+          href={listHref("&decision_status=APPROVED")}
           caption="cleared with zero touches"
         />
         <KpiCard
@@ -246,7 +291,7 @@ export default function DashboardPage() {
           icon={<XCircle className="h-[18px] w-[18px]" />}
           loading={firstLoad}
           total={total}
-          href="/invoices?source_origin=LIVE_UPLOAD&decision_status=REJECTED"
+          href={listHref("&decision_status=REJECTED")}
           caption="stopped by a hard rule"
         />
       </section>
@@ -254,6 +299,8 @@ export default function DashboardPage() {
       {/* ---------- Decision flow (full width) ---------- */}
       <section className="reveal" style={delay(420)}>
           <DecisionFlow
+            origin={source}
+            scopeLabel={sourceLabel}
             loading={firstLoad}
             counts={
               data

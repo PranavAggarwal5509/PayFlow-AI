@@ -86,7 +86,7 @@ def list_invoices(
     amount_min: Decimal | None = None,
     amount_max: Decimal | None = None,
     po_number: str | None = None,
-    source_origin: str | None = "LIVE_UPLOAD",
+    source_origin: str | None = "ALL",
     sort_by: str = "uploaded_at",
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
     page: int = Query(1, ge=1),
